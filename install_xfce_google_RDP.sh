@@ -17,12 +17,14 @@ sudo dpkg -i chrome-remote-desktop_current_amd64.deb
 # Check and fix this one via https://remotedesktop.google.com/headless
 #DISPLAY= /opt/google/chrome-remote-desktop/start-host --code="4/0AfgeXvsfP11b9rVHZFeMR9daeFSA0ZbQ2kYmzcXxtrbFwnDEQXUzfr1E7dEZy1NS-IeK2g" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$(hostname)
 echo Go to  https://remotedesktop.google.com/access/session/49e2ce50-33e2-4ed7-b528-6400000311f7 now and download command
-
+#Use this to check if it is running OK:
+#service "chrome-remote-desktop@$USER" status
 #install teamviewer 
 cd Download 
 wget https://download.teamviewer.com/download/linux/teamviewer-host_amd64.deb
 sudo dpkg -i teamviewer-host_amd64.deb
 apt --fix-broken install
-bash ~/demonize_system_snap.sh 
+# For snap etc, mostly does not work:
+#bash ~/demonize_system_snap.sh 
 sudo teamviewer daemon start   
-teamviewer setup
+sudo teamviewer setup
