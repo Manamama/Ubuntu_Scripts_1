@@ -1,4 +1,4 @@
-# Version 2.1.2, offline above
+# Version 2.2.1, GitLab Space Opulent Space Barnacle
 sudo DEBIAN_FRONTEND=noninteractive apt install -y xfce4 desktop-base
 sudo bash -c 'echo "exec /etc/X11/Xsession /usr/bin/xfce4-session" > /etc/chrome-remote-desktop-session'
 sudo aptitude install -y xscreensaver
