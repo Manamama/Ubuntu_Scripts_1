@@ -13,10 +13,15 @@ sudo apt install firefox-esr -y
 cd  ~/Download
 #Install Google remote desktop
 if [[ ! -f "chrome-remote-desktop_current_amd64.deb" ]] ;
+then
 #cd Download
 wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb
+#else
+#echo "Chrome remote already exists"
 fi
 sudo dpkg -i chrome-remote-desktop_current_amd64.deb 
+sudo apt --fix-broken install -y
+
 # Check and fix this one via https://remotedesktop.google.com/headless
 #DISPLAY= /opt/google/chrome-remote-desktop/start-host --code="4/0AfgeXvsfP11b9rVHZFeMR9daeFSA0ZbQ2kYmzcXxtrbFwnDEQXUzfr1E7dEZy1NS-IeK2g" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$(hostname)
 echo Go to  https://remotedesktop.google.com/access/session/49e2ce50-33e2-4ed7-b528-6400000311f7 now and download command
@@ -25,17 +30,20 @@ echo Go to  https://remotedesktop.google.com/access/session/49e2ce50-33e2-4ed7-b
 #install teamviewer 
 cd ~/Download 
 if [[ ! -f "teamviewer-host_amd64.deb" ]] ;
+then
 wget https://download.teamviewer.com/download/linux/teamviewer-host_amd64.deb
+#else 
+#echo "Teamviewer already exists"
 fi
 sudo dpkg -i teamviewer-host_amd64.deb
-apt --fix-broken install
-<<<<<<< HEAD
+sudo apt --fix-broken install -y
+
+#Install once again, to make sure
 sudo aptitude install teamviewer-host -y
 
-bash ~/demonize_system_snap.sh 
-=======
-# For snap etc, mostly does not work:
+
+# For snap etc, mostly does not work anyway:
 #bash ~/demonize_system_snap.sh 
->>>>>>> 919856b81b5332daa7f565bb4bbecac6db0838e6
+
 sudo teamviewer daemon start   
 sudo teamviewer setup
