@@ -10,6 +10,7 @@ sudo apt install firefox-esr -y
 
 #sudo apt install chromium - y
 
+cd  ~/Download
 #Install Google remote desktop
 if [[ ! -f "chrome-remote-desktop_current_amd64.deb" ]] ;
 #cd Download
@@ -22,7 +23,7 @@ echo Go to  https://remotedesktop.google.com/access/session/49e2ce50-33e2-4ed7-b
 #Use this to check if it is running OK:
 #service "chrome-remote-desktop@$USER" status
 #install teamviewer 
-#cd Download 
+cd ~/Download 
 if [[ ! -f "teamviewer-host_amd64.deb" ]] ;
 wget https://download.teamviewer.com/download/linux/teamviewer-host_amd64.deb
 fi
