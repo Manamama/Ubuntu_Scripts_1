@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Version 2.2.1, GitLab Space Opulent Space Barnacle
+=======
+# Version 2.3.1, online github
+>>>>>>> 1141bace5f3405b5e7ad7ece8005f1970f1fac96
 sudo DEBIAN_FRONTEND=noninteractive apt install -y xfce4 desktop-base
 sudo bash -c 'echo "exec /etc/X11/Xsession /usr/bin/xfce4-session" > /etc/chrome-remote-desktop-session'
 sudo aptitude install -y xscreensaver
@@ -27,7 +31,9 @@ sudo apt --fix-broken install -y
 #DISPLAY= /opt/google/chrome-remote-desktop/start-host --code="4/0AfgeXvsfP11b9rVHZFeMR9daeFSA0ZbQ2kYmzcXxtrbFwnDEQXUzfr1E7dEZy1NS-IeK2g" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$(hostname)
 echo Go to  https://remotedesktop.google.com/access/session/49e2ce50-33e2-4ed7-b528-6400000311f7 now and download command
 #Use this to check if it is running OK:
-#service "chrome-remote-desktop@$USER" status
+#sudo service "chrome-remote-desktop@$USER" status
+#Use this if does not restart:
+sudo service "chrome-remote-desktop" start
 #install teamviewer 
 cd ~/Download 
 if [[ ! -f "teamviewer-host_amd64.deb" ]] ;
