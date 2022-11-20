@@ -23,10 +23,9 @@ pip install git+https://github.com/openai/whisper.git
 
 
 #For remote desktop access via google chrome https://remotedesktop.google.com/access/session/9a560954-e470-46ad-9d05-ef683f4b527b
-sudo dpkg -i Download/chrome-remote-desktop_current_amd64.deb 
-##sudo apt install -f
-#Or use Ubuntu desktop script: bash ubuntu_server_install_ver_1.sh
-
+#sudo dpkg -i Download/chrome-remote-desktop_current_amd64.deb 
+#sudo apt install -f
+# Install google chrome browser:
 #sudo dpkg -i Download/google-chrome-stable_current_amd64.deb
 
 
