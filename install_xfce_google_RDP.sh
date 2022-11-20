@@ -1,8 +1,5 @@
-<<<<<<< HEAD
-# Version 2.2.1, GitLab Space Opulent Space Barnacle
-=======
-# Version 2.3.1, online github
->>>>>>> 1141bace5f3405b5e7ad7ece8005f1970f1fac96
+
+# Version 2.4.1, GitLab Space Opulent Space Barnacle
 sudo DEBIAN_FRONTEND=noninteractive apt install -y xfce4 desktop-base
 sudo bash -c 'echo "exec /etc/X11/Xsession /usr/bin/xfce4-session" > /etc/chrome-remote-desktop-session'
 sudo aptitude install -y xscreensaver
@@ -52,5 +49,5 @@ sudo aptitude install teamviewer-host -y
 # For snap etc, mostly does not work anyway:
 #bash ~/demonize_system_snap.sh 
 
-sudo teamviewer daemon start   
-sudo teamviewer setup
+#sudo teamviewer daemon start   
+#sudo teamviewer setup
