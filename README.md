@@ -1,2 +1,2 @@
 # Ubuntu_Scripts_1
-Semi-private scripts, mostly for remote bash jobs in GitHub, Google, Microsoft etc. shells. 
+Semi-private scripts, mostly for remote bash jobs in GitHub, Google, Microsoft etc. Remote Desktop shells. 
