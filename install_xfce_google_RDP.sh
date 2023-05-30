@@ -36,6 +36,9 @@ sudo dpkg -i ~/Downloads/teamviewer-host_amd64.deb
 
 # Fix any broken dependencies using apt
 sudo apt-get --fix-broken install -y
+# Start teamviewer daemon
+sudo teamviewer --daemon start
+# service --status-all, to check if it is running
 
 # Install the Xrdp package for remote desktop support
 sudo apt-get install -y xrdp
