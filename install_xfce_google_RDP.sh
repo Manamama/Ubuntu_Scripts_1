@@ -1,5 +1,5 @@
 
-# Version 2.5.1, ChatGPT reordered
+# Version 2.5.2, ChatGPT reordered
 # Update the package lists
 sudo apt-get update
 
@@ -56,4 +56,4 @@ sudo service xrdp restart
 sudo service chrome-remote-desktop restart
 
 # Print a message instructing the user to visit a specific URL to set up Chrome Remote Desktop
-echo "Go to https://remotedesktop.google.com/access/session/49e2ce50-33e2-4ed7-b528-6400000311f7 now and download the command."
+echo "Go to https://remotedesktop.google.com/access now and download and paste here the activation command."
