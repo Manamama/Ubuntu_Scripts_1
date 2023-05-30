@@ -1,79 +1,59 @@
 
-# Version 2.4.1, GitLab Space Opulent Space Barnacle
-sudo DEBIAN_FRONTEND=noninteractive apt install -y xfce4 desktop-base
-sudo bash -c 'echo "exec /etc/X11/Xsession /usr/bin/xfce4-session" > /etc/chrome-remote-desktop-session'
-sudo aptitude install -y xscreensaver
-sudo apt install dbus-x11 -y
-sudo apt-get install gconf-service -y
+# Version 2.5.1, ChatGPT reordered
+# Update the package lists
 sudo apt-get update
-#sudo add-apt-repository ppa:saiarcot895/chromium-beta
-#sudo apt-get install chromium-browser -y
-sudo apt install firefox-esr -y
 
-#sudo apt install chromium - y
+# Install the Xfce desktop environment and related packages
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xfce4 desktop-base
 
-cd  ~/Download
-#Install Google remote desktop
-if [[ ! -f "chrome-remote-desktop_current_amd64.deb" ]] ;
-then
-#cd Download
-wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb
-#else
-#echo "Chrome remote already exists"
+# Install the xscreensaver, dbus-x11, and task-xfce-desktop packages
+sudo apt-get install -y xscreensaver dbus-x11 task-xfce-desktop
+
+# Install the Firefox ESR browser
+sudo apt-get install -y firefox-esr
+
+# Download the Chrome Remote Desktop package if it doesn't already exist
+if [[ ! -f "~/Downloads/chrome-remote-desktop_current_amd64.deb" ]]; then
+    wget -P ~/Downloads https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb
 fi
-sudo dpkg -i chrome-remote-desktop_current_amd64.deb 
-sudo apt --fix-broken install -y
 
-# Check and fix this one via https://remotedesktop.google.com/headless
-#DISPLAY= /opt/google/chrome-remote-desktop/start-host --code="4/0AfgeXvsfP11b9rVHZFeMR9daeFSA0ZbQ2kYmzcXxtrbFwnDEQXUzfr1E7dEZy1NS-IeK2g" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$(hostname)
-echo Go to  https://remotedesktop.google.com/access/session/49e2ce50-33e2-4ed7-b528-6400000311f7 now and download command
-#Use this to check if it is running OK:
-#sudo service "chrome-remote-desktop@$USER" status
-#Use this if does not restart:
-sudo service "chrome-remote-desktop" start
-#install teamviewer 
-cd ~/Download 
-if [[ ! -f "teamviewer-host_amd64.deb" ]] ;
-then
-wget https://download.teamviewer.com/download/linux/teamviewer-host_amd64.deb
-#else 
-#echo "Teamviewer already exists"
-fi
-sudo dpkg -i teamviewer-host_amd64.deb
-sudo apt --fix-broken install -y
+# Install the Chrome Remote Desktop package using dpkg
+sudo dpkg -i ~/Downloads/chrome-remote-desktop_current_amd64.deb
 
-#Install once again, to make sure
-sudo aptitude install teamviewer-host -y
-
-
-# For snap etc, mostly does not work anyway:
-#bash ~/demonize_system_snap.sh 
-
-#sudo teamviewer daemon start   
-#sudo teamviewer setup
-
-
-#This below works:
-
-sudo apt-get -y install xrdp
-sudo systemctl enable xrdp
-sudo adduser xrdp ssl-cert
-echo xfce4-session >~/.xsession
-
-sudo service xrdp restart
-
-
-sudo DEBIAN_FRONTEND=noninteractive apt install -y xfce4 desktop-base
-#sudo bash -c 'echo "exec /etc/X11/Xsession /usr/bin/xfce4-session" > /etc/chrome-remote-desktop-session'
-sudo apt install -y xscreensaver
-sudo apt install -y task-xfce-desktop
-
+# Add the current user to the chrome-remote-desktop group
 sudo usermod -a -G chrome-remote-desktop $USER
 
-sudo service xrdp stop
-sudo apt-get install dbus-x11
-sudo service xrdp start
+# Fix any broken dependencies using apt
+sudo apt-get --fix-broken install -y
+
+# Download the TeamViewer package if it doesn't already exist
+if [[ ! -f "~/Downloads/teamviewer-host_amd64.deb" ]]; then
+    wget -P ~/Downloads https://download.teamviewer.com/download/linux/teamviewer-host_amd64.deb
+fi
+
+# Install the TeamViewer package using dpkg
+sudo dpkg -i ~/Downloads/teamviewer-host_amd64.deb
+
+# Fix any broken dependencies using apt
+sudo apt-get --fix-broken install -y
+
+# Install the Xrdp package for remote desktop support
+sudo apt-get install -y xrdp
+
+# Enable the Xrdp service to start on boot
+sudo systemctl enable xrdp
+
+# Add the user xrdp to the ssl-cert group
+sudo adduser xrdp ssl-cert
+
+# Set the default Xsession to xfce4-session for Xrdp
+echo xfce4-session > ~/.xsession
+
+# Restart the Xrdp service
+sudo service xrdp restart
+
+# Restart the Chrome Remote Desktop service
 sudo service chrome-remote-desktop restart
-echo go to https://remotedesktop.google.com/headless
 
-
+# Print a message instructing the user to visit a specific URL to set up Chrome Remote Desktop
+echo "Go to https://remotedesktop.google.com/access/session/49e2ce50-33e2-4ed7-b528-6400000311f7 now and download the command."
