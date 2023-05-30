@@ -51,3 +51,29 @@ sudo aptitude install teamviewer-host -y
 
 #sudo teamviewer daemon start   
 #sudo teamviewer setup
+
+
+#This below works:
+
+sudo apt-get -y install xrdp
+sudo systemctl enable xrdp
+sudo adduser xrdp ssl-cert
+echo xfce4-session >~/.xsession
+
+sudo service xrdp restart
+
+
+sudo DEBIAN_FRONTEND=noninteractive apt install -y xfce4 desktop-base
+#sudo bash -c 'echo "exec /etc/X11/Xsession /usr/bin/xfce4-session" > /etc/chrome-remote-desktop-session'
+sudo apt install -y xscreensaver
+sudo apt install -y task-xfce-desktop
+
+sudo usermod -a -G chrome-remote-desktop $USER
+
+sudo service xrdp stop
+sudo apt-get install dbus-x11
+sudo service xrdp start
+sudo service chrome-remote-desktop restart
+echo go to https://remotedesktop.google.com/headless
+
+
