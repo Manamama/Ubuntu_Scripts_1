@@ -1,9 +1,14 @@
 import requests
 import html
 import webbrowser
+import sys
+from datetime import date
+
+# Get the username from the command-line arguments
+username = sys.argv[1]
 
 # Get the RSS feed of the Wikipedia user's contributions
-url = "https://en.wikipedia.org/w/api.php?action=feedcontributions&user=Piotrus"
+url = f"https://en.wikipedia.org/w/api.php?action=feedcontributions&user={username}"
 response = requests.get(url)
 
 # Store the response content in a variable
@@ -17,7 +22,7 @@ html_content = f'''
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Wikipedia Contributions of ...</title>
+    <title>Wikipedia Contributions of {username}</title>
 </head>
 <body>
 {content}
@@ -26,7 +31,7 @@ html_content = f'''
 '''
 
 # Define the output file path
-output_file = 'output_final_for_chrome.html'
+output_file = f'{username}_enwiki_contributions_as_of_{date.today()}.html'
 
 # Write the content to an HTML file
 with open(output_file, 'w') as f:
