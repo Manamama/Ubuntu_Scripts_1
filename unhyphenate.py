@@ -1,4 +1,5 @@
-#Ver 1.1
+#Ver 1.2
+# See: https://github.com/pd3f/dehyphen/issues/7 for why it is needed and what for. 
 
 import sys
 from dehyphen import FlairScorer, text_to_format
