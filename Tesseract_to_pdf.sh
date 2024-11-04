@@ -1,6 +1,7 @@
 
+
 function tesseract_to_txt() {
-    echo Ver. 2.2.1
+    echo Ver. 2.2.3
     date
     SECONDS=0
     tesseract --list-langs
@@ -8,14 +9,15 @@ function tesseract_to_txt() {
     echo
 
     input_path="$1"
+        args="$2 $3 $4 $5"  # Capture the language argument
     temp_dir=$(mktemp -d)  # Create a temporary directory for interim .txt files
     echo "Temporary directory created at: $temp_dir"
 
     # Subfunction to process a single image file
     process_single_image() {
         local img_path="$1"
-        echo "Processing image: $img_path via tesseract to : "$temp_dir/$(basename "$img_path").txt" ..."
-        tesseract "$img_path" "$temp_dir/$(basename "$img_path")" 
+         echo "Processing image: $img_path via tesseract to : $temp_dir/$(basename "$img_path").txt with arguments: $args ..."
+        tesseract "$img_path" "$temp_dir/$(basename "$img_path")" $args
         #ll "$temp_dir/$(basename "$img_path").txt"
  
 
@@ -56,6 +58,7 @@ function tesseract_to_txt() {
         echo "Output folder: $output_dir"
 
         process_single_image "$input_path"
+        cp "$temp_dir/$(basename "$img_path").txt" output_dir
 
     else
         echo "Error: Input path is neither a file nor a directory."
