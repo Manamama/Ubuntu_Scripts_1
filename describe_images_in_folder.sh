@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Recursive directory traversal and HTML generation - Ver. 2.6"
+echo "Recursive directory traversal and HTML generation - Ver. 2.7"
 
 # Check if directory argument is provided
 if [ -z "$1" ]; then
@@ -8,6 +8,14 @@ if [ -z "$1" ]; then
 fi
 
 DIR="$1"
+
+
+# Function to sanitize filenames for HTML
+sanitize_filename() {
+    local filename="$1"
+    # Use printf to escape special characters for HTML
+    printf '%s\n' "$filename" | sed 's/ /%20/g; s/:/%3A/g; s/&/%26/g; s/+/%2B/g; s/?/%3F/g; s/#/%23/g; s/%/%25/g'
+}
  
 
 function traverse() {
@@ -62,11 +70,15 @@ function traverse() {
 
             echo ""  # Just an empty line for clarity in terminal output
             
-            # Add thumbnail and description to HTML
-            echo "<div class='container'>" >> "$html_file"
-            echo "<div class='thumbnail'><img src='$image' alt='$(basename "$image")'></div>" >> "$html_file"
-            echo "<div class='description'><strong>$(basename "$image")</strong><br>$description</div>" >> "$html_file"
-            echo "</div>" >> "$html_file"
+        # Use printf to encode filename directly within echo, so-called "percent encoding" for e.g. `don't ... ` filenames:
+        safe_filename=$(printf '%s\n' "$(basename "$image")" | sed 's/ /%20/g; s/:/%3A/g; s/&/%26/g; s/+/%2B/g; s/?/%3F/g; s/#/%23/g; s/'\''/%27/g')
+
+        # Add thumbnail and description to HTML using encoded filename
+        echo "<div class='container'>" >> "$html_file"
+        echo "<div class='thumbnail'><img src='$safe_filename' alt='$(basename "$image")'></div>" >> "$html_file"
+        echo "<div class='description'><strong>$(basename "$image")</strong><br>$description</div>" >> "$html_file"
+        echo "</div>" >> "$html_file"
+
 
         fi
     done
