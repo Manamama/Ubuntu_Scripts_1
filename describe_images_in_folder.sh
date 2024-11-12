@@ -59,7 +59,7 @@ function traverse() {
                 exiftool -overwrite_original -Description="$description" "$image"  
                 echo -e "New description for \033[34m$image\033[0m is: \033[33m$description\033[0m"  # New description in yellow
                 
-                # Pronounce new description (ensure this works correctly)
+                # Pronounce new description (ensure this works correctly - it is a concurrent process, it may create a backlog in stack and OOM the OS - the racing condition)
                 (tts --text "$description") & 
                 mpv tts_output.wav 
 
@@ -75,7 +75,7 @@ function traverse() {
 
         # Add thumbnail and description to HTML using encoded filename
         echo "<div class='container'>" >> "$html_file"
-        echo "<div class='thumbnail'><img src='$safe_filename' alt='$(basename "$image")'></div>" >> "$html_file"
+echo "<div class='thumbnail'><a href='$safe_filename' target='_blank'><img src='$safe_filename' alt='$(basename "$image")'></a></div>" >> "$html_file"
         echo "<div class='description'><strong>$(basename "$image")</strong><br>$description</div>" >> "$html_file"
         echo "</div>" >> "$html_file"
 
