@@ -1,5 +1,25 @@
 #!/bin/bash
 
+# Required Tools and Dependencies:
+#
+# This script requires the following tools to be installed on your system:
+#
+# 1. **Bash**: The script is written in Bash, so a compatible shell is required.
+#
+# 2. **ImageMagick**: Specifically, the `convert` command from ImageMagick is used to convert images to PDF format.
+#    - Installation (Ubuntu/Debian): `sudo apt-get install imagemagick`
+#
+# 3. **ExifTool**: This tool is used to read metadata from the input file.
+#    - Installation (Ubuntu/Debian): `sudo apt-get install exiftool`
+#
+# 4. **Docling**: This is the main tool used for processing PDFs and generating Markdown output.
+#    - Ensure that Docling is installed and accessible in your PATH.
+#
+# 5. **ttok**: This command is used to tokenize the text output from the Markdown file. Ensure it is installed and available.
+#    - Installation may vary; check the documentation for `ttok` for installation instructions.
+#
+# Note: Make sure all tools are properly configured and accessible in your system's PATH before running the script.
+
 
 
 # Function to convert image to PDF and save in temp directory
@@ -48,7 +68,7 @@ process_pdf_with_docling() {
     echo
 
     # Call docling with the PDF file and any additional options
-    docling -v --output "$output_dir" "$pdf_file" "$@"
+    docling -v --output "$output_dir" "$pdf_file" "$@" || { echo "Error processing PDF with docling"; exit 1; }
         
     echo
     echo "Head of the converted file:"
@@ -76,16 +96,11 @@ if [[ ! -f "$input_file" ]]; then
 fi
 
 echo
-exiftool "$input_file"
+exiftool "$input_file" || { echo "Error running exiftool"; exit 1; }
 # Construct the expected Markdown filename based on the original input file's name without leading slash
 md_file="$(dirname "$input_file")/$(basename "${input_file%.*}").md"
 
 
-# Check if input file is provided
-if [[ -z "$input_file" ]]; then
-
-    exit 1
-fi
 
 #Does not make much sense, if PDF etc:
 #print_word_count "$input_file"
