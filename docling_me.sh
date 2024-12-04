@@ -1,15 +1,5 @@
 #!/bin/bash
 
-# Main script logic starts here
-input_file="$1"
-echo
-exiftool "$input_file"
-# Construct the expected Markdown filename based on the original input file's name without leading slash
-md_file="$(dirname "$input_file")/$(basename "${input_file%.*}").md"
-
-echo
-    echo "Doing OCR with docling, ver. 2.1.2. Syntax 'docling_me filename [options]', must be in that order.  Use '--ocr-lang xx'  to change the recognition language. Use 'docling --help' to learn more. "
-
 
 
 # Function to convert image to PDF and save in temp directory
@@ -59,15 +49,32 @@ print_word_count() {
     echo "Words: $word_count"
     echo "Characters: $char_count"
     echo "Sentences: $sentence_count"
-    echo "Tokens:  $(cat "$md_file" | ttok)"
 }
+
+
+# Main script logic starts here
+
+input_file="$1"
+
+
+echo
+echo "OCR via docling via PDF, ver. 2.1.3."
+echo "Usage: '$0 <input-file> [options]' , it must be in that order."
+echo "Use: '--ocr-lang xx'  to change the recognition language. Use 'docling --help' to learn more. "
+
+echo
+exiftool "$input_file"
+# Construct the expected Markdown filename based on the original input file's name without leading slash
+md_file="$(dirname "$input_file")/$(basename "${input_file%.*}").md"
 
 
 # Check if input file is provided
 if [[ -z "$input_file" ]]; then
-    echo "Usage: $0 <input-file>"
+
     exit 1
 fi
+
+print_word_count $input_file
 
 # Set output_dir based on the original input file's path
 output_dir="$(dirname "$input_file")"
@@ -87,3 +94,4 @@ shift  # This will allow us to pass only the additional arguments
 
 # Call docling to process the PDF and generate Markdown output in the specified output directory
 time process_pdf_with_docling "$processed_file" "$@"
+echo "Tokens:  $(cat "$md_file" | ttok)"
