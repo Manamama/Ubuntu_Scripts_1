@@ -25,7 +25,9 @@
 # Function to convert image to PDF and save in temp directory
 convert_image_to_pdf() {
     local input_file="$1"
-    local pdf_file="${TMPDIR:-/tmp}/${input_file##*/}.pdf"  # Create PDF filename from input in temp directory
+    
+    local pdf_file="${TMPDIR:-/tmp}/$(basename "${input_file%.*}.pdf")"  # Create PDF filename from input in temp directory    
+    #Bad: local pdf_file="${TMPDIR:-/tmp}/${input_file##*/}.pdf"  # Create PDF filename from input in temp directory
     #Info: "We are creating temporary PDF file: ${pdf_file}"
     convert "$input_file" "$pdf_file" || { echo "Error converting image to PDF"; exit 1; }
     echo "$pdf_file"
@@ -85,7 +87,7 @@ input_file="$1"
 
 
 echo
-echo "OCR via docling via PDF, ver. 2.1.4."
+echo "OCR via docling via PDF, ver. 2.1.6"
 echo "Usage: '$0 <input-file> [options]' , it must be in that order."
 echo "Use: '--ocr-lang xx'  to change the recognition language. Use 'docling --help' to learn more. "
 
