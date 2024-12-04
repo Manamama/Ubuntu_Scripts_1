@@ -13,11 +13,35 @@ convert_image_to_pdf() {
 }
 
 
+# Function to print word count
+print_word_count() {
+    echo
+    local in_file="$1"
+    echo "Statistics:"
+
+    # Count words and characters
+    word_count=$(wc -w < "$in_file")  # Count words
+    char_count=$(wc -c < "$in_file")  # Count characters
+
+    # Count sentences using awk
+sentence_count=$(awk 'BEGIN {RS="[.!?]"; count=0} {count+=NF} END {print count}' "$in_file")
+
+
+    # Output the results
+    echo "Words: $word_count"
+    echo "Characters: $char_count"
+    echo "Sentences: $sentence_count"
+    
+    echo "Tokens:  $(cat "$md_file" | ttok)"
+    echo
+}
+
+
 # Function to process PDF with docling
 process_pdf_with_docling() {
     local pdf_file="$1"  # First argument is the PDF file
     shift                 # Shift to remove the PDF file from $@, leaving only additional arguments
-
+    echo
     echo "Processing PDF: $pdf_file"
     echo "Using these additional arguments: $@"  # Log additional arguments for clarity
 
@@ -30,25 +54,6 @@ process_pdf_with_docling() {
     head "$md_file"
     echo
     print_word_count "$md_file"
-}
-
-# Function to print word count
-print_word_count() {
-    echo
-    local md_file="$1"
-    echo "Statistics:"
-
-    # Count words and characters
-    word_count=$(wc -w < "$md_file")  # Count words
-    char_count=$(wc -c < "$md_file")  # Count characters
-
-    # Count sentences using awk
-    sentence_count=$(awk 'BEGIN {RS="[.!?]"; count=0} {count+=NF} END {print count}' "$md_file")
-
-    # Output the results
-    echo "Words: $word_count"
-    echo "Characters: $char_count"
-    echo "Sentences: $sentence_count"
 }
 
 
@@ -74,7 +79,9 @@ if [[ -z "$input_file" ]]; then
     exit 1
 fi
 
-print_word_count $input_file
+#Does not make much sense, if PDF etc:
+#print_word_count "$input_file"
+
 
 # Set output_dir based on the original input file's path
 output_dir="$(dirname "$input_file")"
@@ -94,4 +101,3 @@ shift  # This will allow us to pass only the additional arguments
 
 # Call docling to process the PDF and generate Markdown output in the specified output directory
 time process_pdf_with_docling "$processed_file" "$@"
-echo "Tokens:  $(cat "$md_file" | ttok)"
