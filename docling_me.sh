@@ -4,9 +4,11 @@
 input_file="$1"
 echo
 exiftool "$input_file"
+# Construct the expected Markdown filename based on the original input file's name without leading slash
+md_file="$(dirname "$input_file")/$(basename "${input_file%.*}").md"
 
 echo
-    echo "Doing OCR with docling, ver. 2.1.1. Syntax 'docling_me filename [options]', must be in that order.  Use '--ocr-lang xx'  to change the recognition language. Use 'docling --help' to learn more. "
+    echo "Doing OCR with docling, ver. 2.1.2. Syntax 'docling_me filename [options]', must be in that order.  Use '--ocr-lang xx'  to change the recognition language. Use 'docling --help' to learn more. "
 
 
 
@@ -30,7 +32,14 @@ process_pdf_with_docling() {
     echo "Using these additional arguments: $@"  # Log additional arguments for clarity
 
     # Call docling with the PDF file and any additional options
-    time docling -v --output "$output_dir" "$pdf_file" "$@"
+    docling -v --output "$output_dir" "$pdf_file" "$@"
+        
+    echo
+    echo "Head of the converted file:"
+    echo
+    head "$md_file"
+    echo
+    print_word_count "$md_file"
 }
 
 # Function to print word count
@@ -50,6 +59,7 @@ print_word_count() {
     echo "Words: $word_count"
     echo "Characters: $char_count"
     echo "Sentences: $sentence_count"
+    echo "Tokens:  $(cat "$md_file" | ttok)"
 }
 
 
@@ -76,14 +86,4 @@ shift  # This will allow us to pass only the additional arguments
 #Or you can use: process_pdf_with_docling "$processed_file" "${@:2}"
 
 # Call docling to process the PDF and generate Markdown output in the specified output directory
-process_pdf_with_docling "$processed_file" "$@"
-
-# Construct the expected Markdown filename based on the original input file's name without leading slash
-md_file="$(dirname "$input_file")/$(basename "${input_file%.*}").md"
-
-
-echo "Head of the converted file:"
-echo
-head "$md_file"
-echo
-print_word_count "$md_file"
+time process_pdf_with_docling "$processed_file" "$@"
