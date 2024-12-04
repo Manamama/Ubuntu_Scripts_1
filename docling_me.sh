@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Main script logic starts here
+input_file="$1"
 echo
 exiftool "$input_file"
 echo
@@ -49,8 +51,6 @@ print_word_count() {
     echo "Sentences: $sentence_count"
 }
 
-# Main script logic starts here
-input_file="$1"
 
 # Check if input file is provided
 if [[ -z "$input_file" ]]; then
