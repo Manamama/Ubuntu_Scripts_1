@@ -77,9 +77,9 @@ shift  # This will allow us to pass only the additional arguments
 # Call docling to process the PDF and generate Markdown output in the specified output directory
 process_pdf_with_docling "$processed_file" "$@"
 
-
 # Construct the expected Markdown filename based on the original input file's name without leading slash
-md_file="$(dirname "$1")/$(basename "${1%.*}").md"
+md_file="$(dirname "$original_input_file")/$(basename "${original_input_file%.*}").md"
+
 
 echo "Head of the converted file:"
 echo
