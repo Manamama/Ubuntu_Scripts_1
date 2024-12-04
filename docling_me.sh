@@ -4,6 +4,7 @@
 input_file="$1"
 echo
 exiftool "$input_file"
+
 echo
     echo "Doing OCR with docling, ver. 2.1.1. Syntax 'docling_me filename [options]', must be in that order.  Use '--ocr-lang xx'  to change the recognition language. Use 'docling --help' to learn more. "
 
@@ -78,7 +79,7 @@ shift  # This will allow us to pass only the additional arguments
 process_pdf_with_docling "$processed_file" "$@"
 
 # Construct the expected Markdown filename based on the original input file's name without leading slash
-md_file="$(dirname "$original_input_file")/$(basename "${original_input_file%.*}").md"
+md_file="$(dirname "$input_file")/$(basename "${input_file%.*}").md"
 
 
 echo "Head of the converted file:"
