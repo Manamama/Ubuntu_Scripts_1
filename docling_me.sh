@@ -1,5 +1,11 @@
 #!/bin/bash
 
+echo
+exiftool "$input_file"
+echo
+    echo "Doing OCR with docling, ver. 2.1.1. Syntax 'docling_me filename [options]', must be in that order.  Use '--ocr-lang xx'  to change the recognition language. Use 'docling --help' to learn more. "
+
+
 
 # Function to convert image to PDF and save in temp directory
 convert_image_to_pdf() {
@@ -56,10 +62,6 @@ fi
 output_dir="$(dirname "$input_file")"
 
 # Determine if the input is an image or a PDF, and process accordingly
-echo
-exiftool "$input_file"
-echo
-    echo "Doing OCR with docling, ver. 2.1.0. Syntax 'docling_me filename [options]', must be in that order.  Use '--ocr-lang xx'  to change the recognition language. Use 'docling --help' to learn more. "
 
 if [[ "$input_file" =~ \.(jpg|jpeg|png|gif)$ ]]; then
     echo "We need to convert source media to a PDF to overcome a docling language bug..."
@@ -77,8 +79,8 @@ process_pdf_with_docling "$processed_file" "$@"
 
 
 # Construct the expected Markdown filename based on the original input file's name without leading slash
-md_file="${input_file}.md"  # Change extension based on input
-print 
+md_file="$(dirname "$1")/$(basename "${1%.*}").md"
+
 echo "Head of the converted file:"
 echo
 head "$md_file"
