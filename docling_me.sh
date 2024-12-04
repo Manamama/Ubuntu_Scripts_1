@@ -7,7 +7,7 @@ convert_image_to_pdf() {
     local input_file="$1"
     local pdf_file="${TMPDIR:-/tmp}/${input_file##*/}.pdf"  # Create PDF filename from input in temp directory
     #Info: "We are creating temporary PDF file: ${pdf_file}"
-    convert "$input_file" "$pdf_file"
+    convert "$input_file" "$pdf_file" || { echo "Error converting image to PDF"; exit 1; }
     echo "$pdf_file"
     
 }
@@ -32,8 +32,9 @@ sentence_count=$(awk 'BEGIN {RS="[.!?]"; count=0} {count+=NF} END {print count}'
     echo "Characters: $char_count"
     echo "Sentences: $sentence_count"
     
-    echo "Tokens:  $(cat "$md_file" | ttok)"
-    echo
+    echo "Tokens: $(ttok < "$md_file")"
+
+    #echo
 }
 
 
@@ -44,6 +45,7 @@ process_pdf_with_docling() {
     echo
     echo "Processing PDF: $pdf_file"
     echo "Using these additional arguments: $@"  # Log additional arguments for clarity
+    echo
 
     # Call docling with the PDF file and any additional options
     docling -v --output "$output_dir" "$pdf_file" "$@"
@@ -63,9 +65,15 @@ input_file="$1"
 
 
 echo
-echo "OCR via docling via PDF, ver. 2.1.3."
+echo "OCR via docling via PDF, ver. 2.1.4."
 echo "Usage: '$0 <input-file> [options]' , it must be in that order."
 echo "Use: '--ocr-lang xx'  to change the recognition language. Use 'docling --help' to learn more. "
+
+
+if [[ ! -f "$input_file" ]]; then
+    echo "Error: File '$input_file' does not exist."
+    exit 1
+fi
 
 echo
 exiftool "$input_file"
