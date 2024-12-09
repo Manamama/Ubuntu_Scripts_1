@@ -1,5 +1,6 @@
 #!/bin/bash
-# Update: not needed! Docling has been updated due to my reports, see https://github.com/DS4SD/docling/issues/208
+# Update: not needed! Docling has been updated due to my reports, see https://github.com/DS4SD/docling/issues/208.
+# Updated to: https://github.com/Manamama/Ubuntu_Scripts_1/blob/main/docling_me.2.2.sh
 # Required Tools and Dependencies:
 #
 # This script requires the following tools to be installed on your system:
