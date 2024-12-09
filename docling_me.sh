@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# Update: not needed! Docling has been updated due to my reports, see https://github.com/DS4SD/docling/issues/208
 # Required Tools and Dependencies:
 #
 # This script requires the following tools to be installed on your system:
