@@ -14,7 +14,7 @@
 # 4. **ttok**: This command is used to tokenize the text output from the Markdown file. Ensure it is installed and available.
 #    - Installation may vary; usually `pip install ttok`.
 #
-: `
+: '
 Try:
 from llama_index.core import SimpleDirectoryReader
 from llama_index.readers.docling import DoclingReader
@@ -42,7 +42,7 @@ try:
 except Exception as e:
     print(f"Error loading data: {e}")
     
-   ` 
+'
 
 
 
@@ -51,7 +51,7 @@ except Exception as e:
 print_word_count() {
     echo
     local in_file="$1"
-    echo "Statistics:"
+    #echo ""
 
     # Count words and characters
     word_count=$(wc -w < "$in_file")  # Count words
@@ -77,14 +77,16 @@ process_input_with_docling() {
 
 
     # Call docling with the PDF file and any additional options
-    #See discussion: https://github.com/DS4SD/docling/discussions/245
-    docling -v --output "$output_dir" --pdf-backend dlparse_v2 --table-mode accurate -v --ocr "$@" || { echo "Error processing it with docling"; exit 1; }
+    # See discussion: https://github.com/DS4SD/docling/discussions/245
+    # Experiment with: --ocr
+    docling --output "$output_dir" --pdf-backend dlparse_v2 --table-mode accurate   "$@" || { echo "Error processing it with docling"; exit 1; }
         
     echo
     echo "Head of the converted file:"
-    echo
+    echo -e "\033[94m"
     head "$md_file"
-    echo
+    echo -e "\033[0m"  # Reset color to default
+    echo "Target document statistics:"
     print_word_count "$md_file"
 }
 
@@ -95,9 +97,13 @@ input_file="$1"
 
 
 echo
-echo "OCR via docling via PDF, ver. 2.2.2"
-echo "Usage: '$0 <input-file> or <input-folder> or <input-URL> [options]' , it must be in that order."
-echo "Use: '--ocr-lang' for the recognition languages. It is mostly two letter code 'xx' for EasyOCR, but see also https://www.jaided.ai/easyocr/; or  three letter one 'xxx' for Tesseract. The '--ocr' option (the bitmap content will be processed using OCR) and '-v' is by default, they need to be switched off, as needed.   Use 'docling --help' or visit: https://ds4sd.github.io/docling/cli/ to learn more. "
+echo "OCR via docling via PDF, ver. 2.2.3"
+echo "Usage: '$0 <input-file> | <input-folder> | <input-URL> [options]'."
+echo "Options:"
+echo "  --ocr                     Process also the bitmap content using OCR."
+echo "  --no-ocr                 Skip OCR processing for faster performance."
+echo "  --ocr-lang <lang-code>   Specify recognition languages (a two-letter code for EasyOCR, but see https://www.jaided.ai/easyocr/ for more; or a three-letter code for Tesseract)."
+echo "The default added options are: '--output $output_dir --pdf-backend dlparse_v2 --table-mode accurate  '.  Use 'docling --help' or visit: https://ds4sd.github.io/docling/cli/ to learn more. "
 
 
 if [[ ! -f "$input_file" ]]; then
@@ -106,6 +112,7 @@ if [[ ! -f "$input_file" ]]; then
 fi
 
 echo
+echo "Source document statistics:"
 exiftool "$input_file" || { echo "Error running exiftool"; exit 1; }
 # Construct the expected Markdown filename based on the original input file's name without leading slash
 md_file="$(dirname "$input_file")/$(basename "${input_file%.*}").md"
