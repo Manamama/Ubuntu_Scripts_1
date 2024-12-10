@@ -1,0 +1,53 @@
+# OS specs, ver. 2.1 :
+
+Operating System
+Name: Android 11 aarch64, Linux, 4.14.186+ (Termux)
+Kernel: 4.14.186+
+Shell: /data/data/com.termux/files/usr/bin/bash
+
+Compiler
+GCC Version: 14.1.0, from ndk-sysroot/tur-packages, (26b-3)
+clang and clang++ version: 19.1.5
+
+Thread model: posix
+InstalledDir: /data/data/com.termux/files/usr/bin
+
+g++ (symbolic link to clang++)
+Make version: GNU Make 4.4.1
+Built for aarch64-unknown-linux-android
+llvm-config: 19.1.5
+Abseil C++ library: 20240116.2 for the AArch64
+
+Python Environment
+Python Version: 3.12.8
+pip Version: 24.3.1
+Cython Version: 3.0.11
+setuptools Version: 75.6.0
+PyTorch Version: 2.1.2 *
+numpy Version: 1.26.4 *
+tensorflow Version: 2.17.0
+XNNPACK available: True
+
+Environment Variables
+PREFIX is: /data/data/com.termux/files/usr
+PATH: /data/data/com.termux/files/home/.opam/default/bin:/data/data/com.termux/files/usr/google-cloud-sdk/bin:/data/data/com.termux/files/usr/bin:/system/bin/:/product/bin:/apex/com.android.runtime/bin:/apex/com.android.art/bin:/system_ext/bin:/system/bin:/system/xbin:/odm/bin:/vendor/bin:/vendor/xbin:/data/data/com.termux/files/home/.local/bin:/data/data/com.termux/files/home/.local/bin
+
+LD_LIBRARY_PATH: /data/data/com.termux/files/home/.local/lib
+CFLAGS: {empty}
+LDFLAGS: -lpython3.12 -llog -lm
+CPPFLAGS: {empty}
+C_INCLUDE_PATH : /data/data/com.termux/files/usr/include/flang/Evaluate/:/data/data/com.termux/files/usr/include/
+ANDROID_NDK: /storage/7B27-F244/Installs/Android_ndk_sdk/android-ndk-r26b
+ANDROID_SDK: {empty}
+Hardware
+Central Processing Unit: MT6785V/CD (8)
+Memory: 3933MiB / 5638MiB
+CPU(s) scaling MHz: 57%
+CPU max MHz: 2000.0000
+CPU min MHz: 500.0000
+BogoMIPS: 26.00
+Flags: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp
+Model name: Cortex-A76
+
+
+Note: Termux allows prooted Debian, which has the same hardware device.
