@@ -99,6 +99,7 @@ input_file="$1"
 
 echo
 echo "OCR via docling via PDF, ver. 2.2.3"
+echo "Newer, but private, version is here: https://github.com/Manamama/ai_scripts_1_private/blob/main/docling_me.sh "
 echo "Usage: '$0 <input-file> | <input-folder> | <input-URL> [options]'."
 echo "Most useful options:"
 echo "  --ocr                    Process also the bitmap content using OCR."
