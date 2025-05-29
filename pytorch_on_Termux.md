@@ -1,5 +1,7 @@
 Internal tips how to compile Pytorch from scratch on Termux. 
 
+Version 1.2
+
 1. git clone --recursive https://github.com/pytorch/pytorch
 2. git submodule update --init --recursive
 3. If playing up, go to `cd third_party` and: 
