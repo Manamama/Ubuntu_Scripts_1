@@ -2,8 +2,10 @@ Internal tips how to compile Pytorch from scratch on Termux.
 
 Version 1.2
 
-1. git clone --recursive https://github.com/pytorch/pytorch
-2. git submodule update --init --recursive
+Why needed? To use whisperx for example, which needs recondite library files, ex. distributed PyTorch. 
+
+1. `git clone --recursive https://github.com/pytorch/pytorch`
+2. `git submodule update --init --recursive`
 3. If playing up, go to `cd third_party` and: 
 A. git clone https://github.com/mreineck/pocketfft
 B. git clone https://github.com/Maratyszcza/psimd.git
@@ -11,7 +13,7 @@ B. git clone https://github.com/Maratyszcza/psimd.git
 Then: 
 `sed -i 's/#if (__cplusplus >= 201703L) && (!defined(__MINGW32__)) && (!defined(_MSC_VER))/#if (__cplusplus >= 201703L) && (!defined(__MINGW32__)) && (!defined(_MSC_VER)) && (!defined(__ANDROID__))/g' /data/data/com.termux/files/home/downloads/pytorch/third_party/pocketfft/pocketfft_hdronly.h`
 
-Use `make -j4` , modest. 
+Use `make -j4` , modest parallelism. 
 
 Check if no errors:
 
