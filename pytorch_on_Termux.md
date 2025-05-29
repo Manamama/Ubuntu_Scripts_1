@@ -7,7 +7,11 @@ A. git clone https://github.com/mreineck/pocketfft
 B. git clone https://github.com/Maratyszcza/psimd.git
 
 Then: 
+`sed -i 's/#if (__cplusplus >= 201703L) && (!defined(__MINGW32__)) && (!defined(_MSC_VER))/#if (__cplusplus >= 201703L) && (!defined(__MINGW32__)) && (!defined(_MSC_VER)) && (!defined(__ANDROID__))/g' /data/data/com.termux/files/home/downloads/pytorch/third_party/pocketfft/pocketfft_hdronly.h`
 
+Use `make -j4` , modest. 
+
+Check if no errors:
 
 -- Brace yourself, we are building NNPACK
 CMake Deprecation Warning at third_party/NNPACK/CMakeLists.txt:1 (CMAKE_MINIMUM_REQUIRED):
@@ -353,11 +357,3 @@ And embracing:
    ```bash
    ldd build/lib/libtorch_cpu.so | grep not
    ```
-
-   To make sure nothing links against system libs unexpectedly.
-4. **Save the full `CMakeCache.txt`**: So if you reconfigure, you don’t lose current settings.
-
-Ready to proceed with compilation. Want a `make` command suggestion tailored to your core count and RAM?
-
-
-
