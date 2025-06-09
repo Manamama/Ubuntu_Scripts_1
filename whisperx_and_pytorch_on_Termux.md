@@ -34,9 +34,14 @@ except ImportError:\
 ```
 ulimit -s
 ulimit -n
-echo IncreasingL... 
-ulimit -s 64000
-ulimit -n 16384
+echo Increasing them... 
+ulimit -s 65536
+sudo ulimit -n 16384
+
+echo
+
+ulimit -s
+ulimit -n
 ```
 
 
