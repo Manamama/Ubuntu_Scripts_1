@@ -9,7 +9,7 @@ Why needed? To use whisperx for example, which needs recondite library files, ex
 * apt install whisperx
 
 
-
+* Remove distributed: 
 ```
 sed -i '/import torch.distributed.tensor/c\
 try:\
@@ -18,9 +18,20 @@ except ImportError:\
     pass' /data/data/com.termux/files/usr/lib/python3.12/site-packages/transformers/modeling_utils.py
 ```
 
-#Has to contain spaces
+and 
+```
+sed -i '/import torch\.distributed\.tensor/c\
+try:\
+    import torch.distributed.tensor\
+except ImportError:\
+    pass' /data/data/com.termux/files/usr/lib/python3.12/site-packages/transformers/model_debugging_utils.py
+```
+#It must  contain spaces
 
+* Remove too specific: ` Wav2Vec2ForCTC, Wav2Vec2Processor` imports: 
 `sed -i 's|from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor|from transformers import *|' /data/data/com.termux/files/usr/lib/python3.12/site-packages/whisperx/alignment.py`
+
+
 
 
 1. `git clone --recursive https://github.com/pytorch/pytorch`
