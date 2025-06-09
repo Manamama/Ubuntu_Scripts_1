@@ -10,13 +10,14 @@ Why needed? To use whisperx for example, which needs recondite library files, ex
 
 
 
-sed -i '/import torch.distributed.tensor/c\
+`sed -i '/import torch.distributed.tensor/c\
 try:\
     import torch.distributed.tensor\
 except ImportError:\
-    pass' /data/data/com.termux/files/usr/lib/python3.12/site-packages/transformers/modeling_utils.py
+    pass' /data/data/com.termux/files/usr/lib/python3.12/site-packages/transformers/modeling_utils.py`
 
 
+`sed -i 's|from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor|from transformers import *|' /data/data/com.termux/files/usr/lib/python3.12/site-packages/whisperx/alignment.py`
 
 
 1. `git clone --recursive https://github.com/pytorch/pytorch`
