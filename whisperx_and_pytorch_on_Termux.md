@@ -1,8 +1,23 @@
-Internal tips how to compile Pytorch from scratch on Termux. 
+Internal tips how to compile Whisperx and maybe Pytorch from scratch on Termux. 
 
-Version 1.2
+Version 2.1
 
 Why needed? To use whisperx for example, which needs recondite library files, ex. distributed PyTorch. 
+
+* apt install python-onxxruntime
+* apt install python-torch
+* apt install whisperx
+
+
+
+sed -i '/import torch.distributed.tensor/c\
+try:\
+    import torch.distributed.tensor\
+except ImportError:\
+    pass' /data/data/com.termux/files/usr/lib/python3.12/site-packages/transformers/modeling_utils.py
+
+
+
 
 1. `git clone --recursive https://github.com/pytorch/pytorch`
 2. `git submodule update --init --recursive`
