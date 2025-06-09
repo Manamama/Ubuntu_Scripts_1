@@ -1,15 +1,14 @@
-Internal tips how to compile Whisperx and maybe Pytorch from scratch on Termux. 
+## Internal tips how to compile Whisperx and maybe Pytorch from scratch on Termux. 
+Version 2.2
 
-Version 2.1
-
-Why needed? To use whisperx for example, which needs recondite library files, ex. distributed PyTorch. 
+Why the below is needed? To use `whisperx` for example, which needs recondite library files, ex. distributed PyTorch. 
 
 * apt install python-onxxruntime
 * apt install python-torch
 * apt install whisperx
 
 
-* Remove distributed: 
+* Remove distributed Pytorch mentions: 
 ```
 sed -i '/import torch.distributed.tensor/c\
 try:\
@@ -26,13 +25,17 @@ try:\
 except ImportError:\
     pass' /data/data/com.termux/files/usr/lib/python3.12/site-packages/transformers/model_debugging_utils.py
 ```
-#It must  contain spaces
+#The code must contain spaces
 
 * Remove too specific: ` Wav2Vec2ForCTC, Wav2Vec2Processor` imports: 
 `sed -i 's|from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor|from transformers import *|' /data/data/com.termux/files/usr/lib/python3.12/site-packages/whisperx/alignment.py`
 
+* Run `whisperx --compute_type float32 ` ...  
+# all other compute types crash via segmentation fault. 
 
 
+
+## Draft notws if you tried to install Pytorch from scratch on Termux: 
 
 1. `git clone --recursive https://github.com/pytorch/pytorch`
 2. `git submodule update --init --recursive`
@@ -43,10 +46,10 @@ B. git clone https://github.com/Maratyszcza/psimd.git
 Then: 
 `sed -i 's/#if (__cplusplus >= 201703L) && (!defined(__MINGW32__)) && (!defined(_MSC_VER))/#if (__cplusplus >= 201703L) && (!defined(__MINGW32__)) && (!defined(_MSC_VER)) && (!defined(__ANDROID__))/g' /data/data/com.termux/files/home/downloads/pytorch/third_party/pocketfft/pocketfft_hdronly.h`
 
-Use `make -j4` , modest parallelism. 
+Use `make -j4` , at the modest parallelism. 
 
 Check if no errors:
-
+```
 -- Brace yourself, we are building NNPACK
 CMake Deprecation Warning at third_party/NNPACK/CMakeLists.txt:1 (CMAKE_MINIMUM_REQUIRED):
   Compatibility with CMake < 3.10 will be removed from a future version of
@@ -273,13 +276,10 @@ CMake Warning at CMakeLists.txt:1276 (message):
 -- Build files have been written to: /data/data/com.termux/files/home/downloads/pytorch/build
 ~/.../pytorch/build $ 
 
-
+```
 
 What it means, pacem ChatGPT AD 2025: 
-Excellent — you’ve reached a clean `cmake` config checkpoint with **PyTorch 2.8.0** on **Termux/Android**, targeting `arm64`. Let’s now break down the key events and implications in the output, especially with an eye toward performance, correctness, and tradeoffs:
-
----
-
+ 
 ## 🔧 Major Build Characteristics
 
 ### ✅ Mobile-Oriented
