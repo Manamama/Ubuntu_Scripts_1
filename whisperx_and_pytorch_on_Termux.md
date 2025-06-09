@@ -30,6 +30,16 @@ except ImportError:\
 * Remove too specific: ` Wav2Vec2ForCTC, Wav2Vec2Processor` imports: 
 `sed -i 's|from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor|from transformers import *|' /data/data/com.termux/files/usr/lib/python3.12/site-packages/whisperx/alignment.py`
 
+* Increase memory : 
+```
+ulimit -s
+ulimit -n
+echo IncreasingL... 
+ulimit -s 64000
+ulimit -n 16384
+```
+
+
 * Run `whisperx --compute_type float32 ` ...  
 # all other compute types crash via segmentation fault. 
 
