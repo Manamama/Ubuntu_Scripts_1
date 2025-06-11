@@ -44,6 +44,7 @@ PDFIUM_PLATFORM='prepared!linux_arm64:6462' python3 -m pip install --user --no-b
 python3 -m pypdfium2 -v
 ```
 
+* Try just `pip install -U docling -v`. If that fails: `pip install -U docling-parse --no-build-isolation --no-deps -v` etc. Expect some errors. Then: 
 * See: https://github.com/docling-project/docling-parse/issues/122#issuecomment-2960123587: `patchelf --add-needed libpython3.12.so.1.0 /data/data/com.termux/files/usr/lib/python3.12/site-packages/docling_parse/pdf_parsers.cpython-312.so`
 
 Nota bene: you must run docling with the `--ocr-engine tesseract` switch so as to avoid the out of memory errors when trying the default `easyocr` engine. 
