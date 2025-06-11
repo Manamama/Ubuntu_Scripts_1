@@ -1,4 +1,4 @@
-## Internal tips how to compile Whisperx, Docling and maybe Pytorch from scratch on Termux. 
+## Internal tips how to compile Whisperx, Docling and Pytorch from scratch on Termux. 
 Version 2.3
 
 Why the below patches are needed? To use `whisperx` for example, which needs recondite library files, ex. distributed PyTorch, so tweaks are needed. Also some modules ran twice faster in pure Termux vs. in prooted OSes. 
