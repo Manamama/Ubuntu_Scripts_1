@@ -9,6 +9,8 @@ apt install whisperx
 apt install libspatialindex
 apt install libresolv-wrapper
 apt install python-onnxruntime
+apt install python-scipy
+apt install python-torch
 #Trick via the link
 ln -s /data/data/com.termux/files/usr/lib/libresolv_wrapper.so /data/data/com.termux/files/usr/lib/libresolv.so
 #Test if resolves:
