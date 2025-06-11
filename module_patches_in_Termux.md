@@ -2,11 +2,13 @@
 Version 2.3
 
 Why the below is needed? To use `whisperx` for example, which needs recondite library files, ex. distributed PyTorch. 
-
-* apt install python-onxxruntime
-* apt install python-torch
-* apt install whisperx
-* apt install libspatialindex
+```
+apt install python-onxxruntime
+apt install python-torch
+apt install whisperx
+apt install libspatialindex
+apt install libresolv-wrapper
+```
 
 
 #Docling:
