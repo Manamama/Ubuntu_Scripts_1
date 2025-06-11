@@ -47,6 +47,8 @@ python3 -m pypdfium2 -v
 
 * See: https://github.com/docling-project/docling-parse/issues/122#issuecomment-2960123587: `patchelf --add-needed libpython3.12.so.1.0 /data/data/com.termux/files/usr/lib/python3.12/site-packages/docling_parse/pdf_parsers.cpython-312.so`
 
+Nota bene: you must run docling with the `--ocr-engine tesseract` switch so as to avoid the out of memory errors when trying the default `easyocr` engine. 
+
 
 # Whisperx: 
 * Remove distributed Pytorch mentions: 
