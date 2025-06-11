@@ -8,11 +8,43 @@ apt install python-torch
 apt install whisperx
 apt install libspatialindex
 apt install libresolv-wrapper
+apt install python-onnxruntime
+#Trick via the link
+ln -s /data/data/com.termux/files/usr/lib/libresolv_wrapper.so /data/data/com.termux/files/usr/lib/libresolv.so
+#Test if resolves:
+ldd /data/data/com.termux/files/usr/lib/libresolv.so
 ```
 
 
 #Docling:
+* See https://github.com/pypdfium2-team/pypdfium2/issues/332#issuecomment-2546357309:
+```
+git clone https://github.com/pypdfium2-team/pypdfium2
+cd pypdfium2
+wget "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F6462/pdfium-android-arm64.tgz"
+tar -zxvf "pdfium-android-arm64.tgz" --strip-components=1 -C src/pypdfium2_raw/ "lib/libpdfium.so"
+rm "pdfium-android-arm64.tgz"
+cp autorelease/bindings.py src/pypdfium2_raw/bindings.py
+
+cat >"src/pypdfium2_raw/version.json" <<END
+{
+  "major": 126,
+  "minor": 0,
+  "build": 6462,
+  "patch": 0,
+  "n_commits": 0,
+  "hash": null,
+  "origin": "pdfium-binaries",
+  "flags": []
+}
+END
+
+PDFIUM_PLATFORM='prepared!linux_arm64:6462' python3 -m pip install --user --no-build-isolation -v .
+python3 -m pypdfium2 -v
+```
+
 * See: https://github.com/docling-project/docling-parse/issues/122#issuecomment-2960123587: `patchelf --add-needed libpython3.12.so.1.0 /data/data/com.termux/files/usr/lib/python3.12/site-packages/docling_parse/pdf_parsers.cpython-312.so`
+
 
 #Whisperx: 
 * Remove distributed Pytorch mentions: 
