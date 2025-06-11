@@ -1,13 +1,18 @@
-## Internal tips how to compile Whisperx and maybe Pytorch from scratch on Termux. 
-Version 2.2
+## Internal tips how to compile Whisperx, Docling and maybe Pytorch from scratch on Termux. 
+Version 2.3
 
 Why the below is needed? To use `whisperx` for example, which needs recondite library files, ex. distributed PyTorch. 
 
 * apt install python-onxxruntime
 * apt install python-torch
 * apt install whisperx
+* apt install libspatialindex
 
 
+#Docling:
+* See: https://github.com/docling-project/docling-parse/issues/122#issuecomment-2960123587: `patchelf --add-needed libpython3.12.so.1.0 /data/data/com.termux/files/usr/lib/python3.12/site-packages/docling_parse/pdf_parsers.cpython-312.so`
+
+#Whisperx: 
 * Remove distributed Pytorch mentions: 
 ```
 sed -i '/import torch.distributed.tensor/c\
