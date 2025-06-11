@@ -18,7 +18,7 @@ ldd /data/data/com.termux/files/usr/lib/libresolv.so
 ```
 
 
-#Docling:
+# Docling:
 * See https://github.com/pypdfium2-team/pypdfium2/issues/332#issuecomment-2546357309:
 ```
 git clone https://github.com/pypdfium2-team/pypdfium2
@@ -48,7 +48,7 @@ python3 -m pypdfium2 -v
 * See: https://github.com/docling-project/docling-parse/issues/122#issuecomment-2960123587: `patchelf --add-needed libpython3.12.so.1.0 /data/data/com.termux/files/usr/lib/python3.12/site-packages/docling_parse/pdf_parsers.cpython-312.so`
 
 
-#Whisperx: 
+# Whisperx: 
 * Remove distributed Pytorch mentions: 
 ```
 sed -i '/import torch.distributed.tensor/c\
@@ -66,7 +66,7 @@ try:\
 except ImportError:\
     pass' /data/data/com.termux/files/usr/lib/python3.12/site-packages/transformers/model_debugging_utils.py
 ```
-#The code must contain spaces
+Nota bene: The code must contain spaces
 
 * Remove too specific: ` Wav2Vec2ForCTC, Wav2Vec2Processor` imports: 
 `sed -i 's|from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor|from transformers import *|' /data/data/com.termux/files/usr/lib/python3.12/site-packages/whisperx/alignment.py`
@@ -87,7 +87,7 @@ ulimit -n
 
 
 * Run `whisperx --compute_type float32 ` ...  
-# all other compute types crash via segmentation fault. 
+Nota bene: all other compute_type options do crash via segmentation fault. 
 
 
 
