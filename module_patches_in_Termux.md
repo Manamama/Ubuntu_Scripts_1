@@ -91,7 +91,7 @@ ulimit -n
 
 
 
-## Draft notws if you tried to install Pytorch from scratch on Termux: 
+## Draft notes how to install Pytorch from scratch in Termux: 
 
 1. `git clone --recursive https://github.com/pytorch/pytorch`
 2. `git submodule update --init --recursive`
