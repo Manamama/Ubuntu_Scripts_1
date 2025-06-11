@@ -8,7 +8,6 @@ apt install python-torch
 apt install whisperx
 apt install libspatialindex
 apt install libresolv-wrapper
-apt install python-onnxruntime
 apt install python-scipy
 apt install python-torch
 #Trick via the link
