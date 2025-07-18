@@ -1,4 +1,4 @@
-# See
+# See https://github.com/OHF-Voice/piper1-gpl/issues/7 and https://gist.github.com/Manamama/5a76b442feeb35a96b42343d06dcee6c/edit
 # This one is for Ubuntu, but could be made universal finally pacem some DIR and modularization principle
 
 
