@@ -5,6 +5,11 @@
 
 piperme () 
 {
+    # --- Dependency Checks ---
+    command -v piper >/dev/null || { echo "Error: 'piper' executable not found in PATH. Please install Piper TTS."; return 1; }
+    command -v aplay >/dev/null || { echo "Error: 'aplay' executable not found in PATH. Please install alsa-utils."; return 1; }
+    command -v sox >/dev/null || { echo "Warning: 'sox' (for play) not found. Playback might not work as expected."; }
+
     echo "piperme: Using piper TTS to voice text via sox. Version 2.1.4 (debugging pipe section)";
     local voice_model_dir="$HOME/.cache/piper";
     local lang="en";
@@ -85,11 +90,7 @@ piperme ()
         echo "Error: 'piper' executable not found in PATH. Please ensure Piper TTS is installed and in your system's PATH." 1>&2;
         return 1;
     fi;
-    local piper_cmd="$piper_executable -m \"$model_file\" --output-raw";
-echo We are debugging here:
-    echo "Partial command: $piper_cmd"
     local piper_cmd_full="$stdin_cmd | $piper_cmd | aplay -f S16_LE -r 22050 -c 1";
-echo "Final command: $piper_cmd_full"
     # Execute the command
     time eval "$piper_cmd_full"
 }

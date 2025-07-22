@@ -1,87 +1,20 @@
 #!/bin/bash
+# docling_processor.sh
+# Version 2.5.5
+# Author: Gemini AI Agent
+# Description: Processes PDFs, images, and URLs using Docling for OCR and Markdown conversion, with optional sound alerts and colored output.
 
-: '
-Required Tools and Dependencies:
+source "$(dirname "$0")"/config.sh
 
-This script requires the following tools to be installed on your system:
-
-
-#. **Bash**: The script is written in Bash, so a compatible shell is required.
-
-#. **ExifTool**: This tool is used to read metadata from the input file.
-#   - Installation (Ubuntu/Debian): `sudo apt-get install exiftool`
-
-#. **Pdfcpu**: This tool is used to read metadata (the page count is of most interest) from the input file, but also may be used for the PDF file extraction etc.
-   - Installation, see : https://github.com/pdfcpu/pdfcpu
-   
-#. **xdg-utils** :  for the `open` command, install via: `sudo apt install xdg-utils`  and then alias it to `open`  
-
-
-#. **Docling**: This is the main tool used for processing PDFs and JPGs and generating Markdown output. Make sure you have a docling n post 2.10.0! And use --force-reinstall to make sure that the subcomponents, eg. easyocr, pytorch, are the right ones. Especially the "Could not initialize NNPACK!" is due to easyocr being used on another machine. Use the pytorch install from Github then and "USE_NNPACK=0 python setup.py install" or export USE_NNPACK=0
-#   - Installation: `pip install docling` 
-
-
-#. **Tesseract** - version 5.*, e.g. via snap install tesseract or compiling from Github source or adding the ppa:alex-p/tesseract-ocr5 repo, plus 'pip install tesserocr' plus Tesseract languages after e.g. listing these via "apt-cache search tesseract-ocr" . Especially these are good: 'apt install tesseract-ocr-script*', better than the base ones somehow (e.g. the "universal script Fraktur"), see also `deu_latf` is `frk` nowadays: https://github.com/tesseract-ocr/tessdoc/blob/main/Data-Files-in-tessdata_best.md. Tesseract is more faithful with strings, worse with table recreation and with numbers. 
-
-#. **Easyocr** - installed with 'docling' itself. It is better with tables and numbers, but very bad with faithullness: it eats up many words and strints, as silent errors. 
-
-#. **qpdf**: Needed for fixing of some PDFs with wrong data structures.
-
-#. **ttok**: This command is used to tokenize the text output from the Markdown file for counting.
-#   - Installation may vary; usually `pip install ttok`.
-
-#Make sure that the `typer` Python module matches the one required by docling: use simple `pip install -U docling` to make them match. Otherwise you may see: `ERROR:docling.datamodel.document:Input document ... does not match any allowed format.`
-
-
-
-
-'
-
-#
-: '
-Try:
-from llama_index.core import SimpleDirectoryReader
-from llama_index.readers.docling import DoclingReader
-
-# Create an instance of DoclingReader
-reader = DoclingReader()
-
-# Set up SimpleDirectoryReader with the file extractor for PDFs
-dir_reader = SimpleDirectoryReader(
-    input_dir="...",  # Your specified folder
-    file_extractor={".pdf": reader},  # Use DoclingReader for PDF extraction
-)
-
-But: 
- You can also use Docling directly from your command line to convert individual files —be it local or by URL— or whole directories.
- 
-
-# Load data and handle errors
-try:
-    docs = dir_reader.load_data()
-    if docs:
-        print(docs.metadata)  # Print metadata of the first document
-    else:
-        print("No documents were loaded.")
-except Exception as e:
-    print(f"\033[96mError loading data: {e}\033[0m")
-    
-    ....
-  
-    
-'
-
-#Tips:
-
-#Careful if done with folders in ntfs mounts! Use backup always.  
-
-# rename -n 's/.*(Strona \d+\.jpg)/$1/' * 
-
-# rename -n 's/.*Strona ([0-9])\.jpg/Strona 00$1\.jpg/'  *
-# rename -n 's/.*Strona ([0-9][0-9])\.jpg/Strona 0$1\.jpg/' *
-# convert "$output_dir_autolevel"/"${base_name}"_autolevel.jpg -auto-level -sharpen 0x1 "$output_dir_autolevel_sharpen"/"${base_name}"_autolevel_sharpen.jpg
-
-
+# --- Dependency Checks ---
+command -v exiftool >/dev/null || { echo "Error: exiftool is not installed. Please install it."; exit 1; }
+command -v pdfcpu >/dev/null || { echo "Error: pdfcpu is not installed. Please install it."; exit 1; }
+command -v qpdf >/dev/null || { echo "Error: qpdf is not installed. Please install it."; exit 1; }
+command -v docling >/dev/null || { echo "Error: docling is not installed. Please install it."; exit 1; }
+command -v ttok >/dev/null || { echo "Error: ttok is not installed. Please install it."; exit 1; }
+command -v play >/dev/null || { echo "Error: play (sox) is not installed. Please install it."; exit 1; }
+command -v lolcat >/dev/null || { echo "Error: lolcat is not installed. Please install it."; exit 1; }
+command -v xdg-open >/dev/null || { echo "Error: xdg-open is not installed. Please install it."; exit 1; }
 
 # Function to print word count
 print_word_count() {
@@ -96,19 +29,14 @@ print_word_count() {
     char_count=$(wc -c < "$in_file")  # Count characters
 
     # Count sentences using awk
-sentence_count=$(awk 'BEGIN {RS="[.!?]"; count=0} {count+=NF} END {print count}' "$in_file")
-
+    sentence_count=$(awk 'BEGIN {RS="[.!?]"; count=0} {count+=NF} END {print count}' "$in_file")
 
     # Output the results
     echo "Words: $word_count"
     echo "Characters: $char_count"
     echo "Sentences: $sentence_count"
-
-    echo "Tokens: $(ttok < "$in_file")"
-
-    #echo
+    echo "Tokens: $(ttok < "$in_file" | lolcat) || echo "Warning: ttok failed to count tokens or lolcat failed.""
 }
-
 
 # Function to process PDF with docling
 process_input_with_docling() {
@@ -179,7 +107,7 @@ input_path="$1"
 
 
 echo 
-echo "OCR via docling, streamlined, n 2.5.3 | author ManamaMa"
+echo "OCR via docling, streamlined, n 2.5.4 | author ManamaMa"
 echo -e "Usage: \033[94m$(basename $0) <input-file> | <input-folder> | <input-URL> [options] \033[0m"
 echo "Most useful options:"
 echo "  --no-ocr                 
@@ -237,7 +165,7 @@ if [[ -f "$input_path" ]]; then
         
     echo -n -e "\033[94m"
 
-    exiftool "$input_path" || { echo "\033[96mError running exiftool\033[0m"; exit 1; }
+    exiftool "$input_path" || { echo "\033[96mError running exiftool for $input_path. Exiting.\033[0m"; exit 1; }
     
      echo -e "\033[0m"  # Reset color to default
    
@@ -257,14 +185,13 @@ if [[ -f "$input_path" ]]; then
         pdfcpu info "$input_path" > /dev/null 2>&1
         if [ $? -ne 0 ]; then
         output_path=$input_path"_fixed.pdf"
-        #Or: input_path+="_fixed.pdf"
-            echo "Error in source file. Converting that file to remove the structural PDF errors, via:"
+            echo "Error: PDF corruption detected in $input_path. Attempting to fix via qpdf..."
             echo -n -e "\033[94m" # Blue
             echo "qpdf --empty --normalize-content=y --recompress-flate --compress-streams=y --object-streams=generate --decode-level=all --pages \"$input_path\" 1-z -- \"$output_path\""
             echo -n -e "\033[0m" # Normal
 
             # Run qpdf to fix the PDF
-            qpdf --empty --normalize-content=y --recompress-flate --compress-streams=y --object-streams=generate --decode-level=all --pages "$input_path" 1-z -- "$output_path"
+            qpdf --empty --normalize-content=y --recompress-flate --compress-streams=y --object-streams=generate --decode-level=all --pages "$input_path" 1-z -- "$output_path" || { echo "Error: qpdf failed to fix PDF for $input_path. Exiting."; exit 1; }
             
             # Update input path to the new cleaned file
             input_path="$output_path"
@@ -339,7 +266,7 @@ if [[ -f "$input_path" ]]; then
 
 
     # Call docling to process the PDF and generate Markdown output in the specified output directory
-    time process_input_with_docling "$@"
+    time process_input_with_docling "$@" || { echo "Error: docling failed to process $input_path. Exiting."; exit 1; }
 
     md_file_fixed="$(dirname "$input_path")/$(basename "${input_path%.*}")_Unicode_characters_fixed.md"
     
@@ -353,7 +280,7 @@ if [[ -f "$input_path" ]]; then
     echo -n -e "\033[0m" # Normal
     
     #We change: `\c` to `*c` and then `/uni` to `\u` and print it out to a file
-    printf '%b\n' "$(sed 's/\\c/*c/g'  "$md_file" | sed 's/\/uni/\\u/g' )" > "$md_file_fixed" 
+    printf '%b\n' "$(sed 's/\\c/*c/g'  "$md_file" | sed 's/\/uni/\\u/g' )" > "$md_file_fixed" || { echo "Error: Failed to fix Unicode characters for $md_file. Exiting."; exit 1; } 
     
     #printf '%b\n' "$(sed 's/\/uni/\\u/g'  "$md_file")" > "$md_file_fixed" 
     
@@ -370,7 +297,7 @@ if [[ -f "$input_path" ]]; then
     fi
 
     
-    open "$md_file"
+    open "$md_file" &>/dev/null || echo "Warning: Could not open $md_file for display."
     #xdg-open "$md_file"  
     #Or, opening the fixed n:
     #xdg-open "$md_file_fixed"
@@ -386,7 +313,7 @@ elif [[ -d "$input_path" ]]; then
 
     echo -e "The first argument: \033[94m$input_path\033[0m is \033[96ma directory\033[0m. We are creating a subfolder in it: \033[96m$output_dir\033[00m to store the results."
     
-    mkdir -p  "$output_dir"
+    mkdir -p  "$output_dir" || { echo "Error: Failed to create directory $output_dir. Exiting."; exit 1; }
     
     # Count the number of files in the directory
     file_count=$(find "$input_path" -type f -print | wc -l)
@@ -395,17 +322,17 @@ elif [[ -d "$input_path" ]]; then
     # Call docling to process the PDF and generate Markdown output in the specified output directory
     time process_input_with_docling "$@"
     md_file="$input_path/docling_OCR_results_merged.txt"
-    cat "$output_dir"/*.md >> "$md_file"
+    cat "$output_dir"/*.md >> "$md_file" || { echo "Error: Failed to merge markdown files into $md_file. Exiting."; exit 1; }
     echo -e "Finished. The resulting folder: \033[94m$output_dir\033[00m, and the collated file: \033[94m$md_file\033[00m " 
     echo -e "Opening: $md_file ..."
 
-    open "$md_file"
+    open "$md_file" &>/dev/null || echo "Warning: Could not open $md_file for display."
     
 else
     echo  -e "The first argument: \033[96m$input_path does not exist or is neither a file nor a directory, it may be an URL.\033[0m We are passing it on to docling as is... \033[0m"
     
 # Call docling to process the PDF and generate Markdown output in the specified output directory
-time process_input_with_docling "$@"
+time process_input_with_docling "$@" || { echo "Error: docling failed to process $input_path. Exiting."; exit 1; }
 
 fi
 
@@ -419,6 +346,8 @@ fi
 # sed -i ':a;N;$!ba;s/\/uni00AD\n\n//g' $md_file
 #The four hexagonal coding characters found after the string: '/uni' changed to the Unicode '\u' format that is used in Python, Java, 'cat -e' etc: 
 # sed -e 's/\/uni \([0-9a-f]\{4\}\)/\\u\1/g' $md_file "
+
+play "$SOUND_ALERT_PATH" || true # Play sound alert, ignore if 'play' not found
 
 # timestamp:
 echo -n -e "\033[94m" # Blue
