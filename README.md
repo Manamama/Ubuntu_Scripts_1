@@ -2,10 +2,6 @@
 
 A collection of semi-private scripts for various system administration, development, and utility tasks, primarily targeting Ubuntu and Termux environments.
 
-# Ubuntu_Scripts_1
-
-A collection of semi-private scripts for various system administration, development, and utility tasks, primarily targeting Ubuntu and Termux environments.
-
 ## Scripts Overview
 
 *   `image_html_generator.sh`: Recursively traverses directories, generates image descriptions using LLMs, embeds them into EXIF data, and creates HTML and PDF reports.
