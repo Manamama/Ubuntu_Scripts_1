@@ -4,7 +4,7 @@
 #
 # A smart viewer script that visualizes PlantUML (.puml) files and graph
 # descriptions from JSON stream files (.json), such as those produced by
-# a Model-Context-Protocol (MCP) memory store.
+# a Model-Context-Protocol (MCP) memory store: https://github.com/modelcontextprotocol/servers
 #
 # If given a .puml file, it generates a PNG and opens it.
 # If given a .json file, it first converts it to .puml format and then proceeds.
@@ -20,7 +20,7 @@
 # 4. Update the desktop database with `update-desktop-database ~/.local/share/applications/`.
 #
 
-#ver. 1.1
+#ver. 1.2, href added
 
 set -euo pipefail
 
