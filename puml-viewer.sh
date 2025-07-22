@@ -20,7 +20,7 @@
 # 4. Update the desktop database with `update-desktop-database ~/.local/share/applications/`.
 #
 
-#ver. 1.2, href added
+#ver. 1.3, fixes for JSON Lines and gsub regex
 
 set -euo pipefail
 
@@ -44,13 +44,16 @@ json_to_puml() {
 
   {
     echo "@startuml"
-    jq -r '
-      .entities[] | "object \"" + .name + "\" as " + 
+    # Fix: Use -s (slurp) to read JSON Lines into an array, then filter for entities.
+    jq -r -s '
+      map(select(.type == "entity"))[] | "object \"" + .name + "\" as " + 
       ( .name | gsub("[^a-zA-Z0-9_]";"") )
     ' "$jsonfile"
 
-    jq -r '
-      .relations[] | 
+    # Fix: Use -s (slurp) to read JSON Lines into an array, then filter for relations.
+    # Fix: Corrected typo in gsub regex for .to field (was [^a-a-zA-Z0-9_] -> now [^a-zA-Z0-9_]).
+    jq -r -s '
+      map(select(.type == "relation"))[] | 
       (.from | gsub("[^a-zA-Z0-9_]";"")) + " --> " + 
       (.to | gsub("[^a-zA-Z0-9_]";"")) + " : " + (.relationType // "relates")
     ' "$jsonfile"
