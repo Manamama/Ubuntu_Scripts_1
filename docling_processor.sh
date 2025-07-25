@@ -1,6 +1,6 @@
 #!/bin/bash
 # docling_processor.sh
-# Version 2.5.5
+# Version 2.6.1
 # Author: Gemini AI Agent
 # Description: Processes PDFs, images, and URLs using Docling for OCR and Markdown conversion, with optional sound alerts and colored output.
 
