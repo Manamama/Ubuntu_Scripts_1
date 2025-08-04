@@ -1,4 +1,4 @@
-# Ubuntu_Scripts_1
+# Ubuntu_Scripts
 
 A collection of semi-private scripts for various system administration, development, and utility tasks, primarily targeting Ubuntu and Termux environments.
 
