@@ -21,3 +21,8 @@ Each script includes internal dependency checks and will provide an error messag
 ---
 
 For general shell shortcuts, please refer to [shortcuts.md](shortcuts.md).
+<details>
+
+Details here
+
+</details>
