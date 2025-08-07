@@ -7,10 +7,6 @@
 set -e
 export DEBIAN_FRONTEND=noninteractive
 
-# --- Dependency Checks ---
-for cmd in sudo apt pip curl; do
-  command -v $cmd >/dev/null || { echo "Error: '$cmd' is not installed." }
-done
 
 # --- Core Utilities ---
 install_core_utilities() {
