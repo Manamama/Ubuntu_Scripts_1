@@ -8,35 +8,35 @@
 export DEBIAN_FRONTEND=noninteractive
 
 # --- Dependency Checks ---
-command -v sudo >/dev/null || { echo "Error: sudo is not installed. This script requires sudo privileges."; exit 1; }
-command -v apt >/dev/null || { echo "Error: apt is not installed. This script is for Debian/Ubuntu-based systems."; exit 1; }
-command -v pip >/dev/null || { echo "Error: pip is not installed. Please install Python and pip."; exit 1; }
-command -v curl >/dev/null || { echo "Error: curl is not installed. Please install it."; exit 1; }
+command -v sudo >/dev/null || { echo "Error: sudo is not installed. This script requires sudo privileges." }
+command -v apt >/dev/null || { echo "Error: apt is not installed. This script is for Debian/Ubuntu-based systems." }
+command -v pip >/dev/null || { echo "Error: pip is not installed. Please install Python and pip." }
+command -v curl >/dev/null || { echo "Error: curl is not installed. Please install it." }
 
 # Function to install core utilities
 install_core_utilities() {
     echo "Installing core utilities..."
     
-    sudo apt update || { echo "Error: Failed to update apt packages."; exit 1; }
+    sudo apt update || { echo "Error: Failed to update apt packages." }
     
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y keyboard-configuration && sudo dpkg-reconfigure -f noninteractive keyboard-configuration
 
-    sudo apt install -y aptitude ffmpeg aria2 youtube-dl || { echo "Error: Failed to install core utilities."; exit 1; }
+    sudo apt install -y aptitude ffmpeg aria2 youtube-dl || { echo "Error: Failed to install core utilities." }
 }
 
 # Function to install AI/ML related tools
 install_ai_tools() {
     echo "Installing AI/ML tools..."
-    pip install git+https://github.com/openai/whisper.git || { echo "Error: Failed to install whisper."; exit 1; }
+    pip install git+https://github.com/openai/whisper.git || { echo "Error: Failed to install whisper." }
 }
 
 # Function to configure XRDP for remote desktop
 configure_xrdp() {
     echo "Configuring XRDP..."
-    sudo apt install -y xrdp || { echo "Error: Failed to install xrdp."; exit 1; }
-    sudo service xrdp start || { echo "Error: Failed to start xrdp service."; exit 1; }
+    sudo apt install -y xrdp || { echo "Error: Failed to install xrdp." }
+    sudo service xrdp start || { echo "Error: Failed to start xrdp service." }
     sudo adduser xrdp ssl-cert || { echo "Warning: Failed to add xrdp to ssl-cert group."; }
-    sudo service xrdp restart || { echo "Error: Failed to restart xrdp service."; exit 1; }
+    sudo service xrdp restart || { echo "Error: Failed to restart xrdp service." }
 }
 
 # Function to install system info and browser tools
@@ -46,7 +46,7 @@ install_system_tools() {
     sudo apt-get update
  sudo apt-get install pciutils build-essential cmake curl libcurl4-openssl-dev -y
  
-    sudo apt install -y neofetch geoip-bin ranger baobab firefox-esr || { echo "Error: Failed to install system tools."; exit 1; }
+    sudo apt install -y neofetch geoip-bin ranger baobab firefox || { echo "Error: Failed to install system tools." }
 }
 
 # Function to cleanly install the latest CMake via Kitware repo
@@ -67,7 +67,7 @@ install_modern_cmake() {
         | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
 
     sudo apt-get update
-    sudo apt-get install -y cmake || { echo "Error: Failed to install CMake."; exit 1; }
+    sudo apt-get install -y cmake || { echo "Error: Failed to install CMake." }
 }
 
 # Function to install Node.js, npm, and nvm properly (no apt)
