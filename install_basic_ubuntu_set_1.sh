@@ -1,7 +1,7 @@
 #!/bin/bash
 # install_basic_ubuntu_set_1.sh
-# Version 1.3
-# Author: Gemini AI Agent
+# Version 1.4
+# Author: Gemini AI Agent, ChatGPT, Modified by Manamama
 # Description: Installs a basic set of applications and configures essential services for Ubuntu/Debian systems.
 
 # --- Dependency Checks ---
@@ -28,10 +28,7 @@ configure_xrdp() {
     echo "Configuring XRDP..."
     sudo apt install -y xrdp || { echo "Error: Failed to install xrdp."; exit 1; }
     sudo service xrdp start || { echo "Error: Failed to start xrdp service."; exit 1; }
-    sudo service xrdp status || { echo "Warning: xrdp service status check failed."; }
-    # Note: adduser might require manual interaction if user already exists or for password setup.
-    # Consider automating with expect or pre-creating users if this is for unattended setup.
-    sudo adduser xrdp ssl-cert || { echo "Warning: Failed to add xrdp to ssl-cert group. May require manual intervention."; }
+    sudo adduser xrdp ssl-cert || { echo "Warning: Failed to add xrdp to ssl-cert group."; }
     sudo service xrdp restart || { echo "Error: Failed to restart xrdp service."; exit 1; }
 }
 
@@ -41,6 +38,50 @@ install_system_tools() {
     sudo apt install -y neofetch geoip-bin ranger baobab firefox-esr || { echo "Error: Failed to install system tools."; exit 1; }
 }
 
+# Function to cleanly install the latest CMake via Kitware repo
+install_modern_cmake() {
+    echo "Installing modern CMake from Kitware APT repo..."
+
+    # Clean old Kitware config if exists
+    sudo rm -f /etc/apt/sources.list.d/kitware.list
+    sudo sed -i '/kitware/d' /etc/apt/sources.list
+    sudo rm -f /usr/share/keyrings/kitware-archive-keyring.gpg
+
+    # Add Kitware securely
+    wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc \
+        | gpg --dearmor \
+        | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
+
+    echo "deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main" \
+        | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
+
+    sudo apt-get update
+    sudo apt-get install -y cmake || { echo "Error: Failed to install CMake."; exit 1; }
+}
+
+# Function to install Node.js, npm, and nvm properly (no apt)
+install_node_nvm_npm() {
+    echo "Installing latest Node.js, npm, and nvm..."
+
+    # Install NVM (Node Version Manager)
+    export NVM_DIR="$HOME/.nvm"
+    if [ ! -d "$NVM_DIR" ]; then
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+    fi
+
+    # Load nvm immediately (without relogin)
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+    # Install latest Node.js LTS
+    nvm install --lts
+    nvm use --lts
+    nvm alias default 'lts/*'
+
+    echo "Node.js version: $(node -v)"
+    echo "npm version: $(npm -v)"
+}
+
 # Function to display system information
 display_system_info() {
     echo "Displaying system information..."
@@ -48,17 +89,20 @@ display_system_info() {
     curl https://ipinfo.io/ip || echo "Warning: Failed to retrieve public IP address."
 }
 
-# Main execution
+# --- Main Execution ---
 install_core_utilities
 install_ai_tools
 configure_xrdp
 install_system_tools
+install_modern_cmake
+install_node_nvm_npm
 display_system_info
 
-echo "Basic Ubuntu setup complete."
+echo "✅ Basic Ubuntu setup complete."
 
-# Tips:
-# To mount it via Sshfs: sshfs abovetrans@34.147.26.51: /home/zezen/google_abovetrans_cloud_VM_1 -p 6000 -oIdentityFile=/home/zezen/.ssh/google_compute_engine -oStrictHostKeyChecking=no
-# See https://cloud.google.com/sdk/gcloud/reference/cloud-shell/get-mount-command
-
-# DISPLAY= /opt/google/chrome-remote-desktop/start-host --code="4/0ARtbsJrLrNVnIbdBlV5jewUOc7uhwyjRKCI0PiDnlmideyoYHgtgchSzTv1ldRfRNKL3uQ" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$(hostname)
+# --- Tips ---
+# To mount via Sshfs:
+# sshfs user@host:/remote/path /local/mountpoint -p 6000 -oIdentityFile=~/.ssh/google_compute_engine -oStrictHostKeyChecking=no
+#
+# Chrome Remote Desktop launch example:
+# DISPLAY= /opt/google/chrome-remote-desktop/start-host --code="..." --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$(hostname)
