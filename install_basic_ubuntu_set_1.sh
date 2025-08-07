@@ -4,6 +4,9 @@
 # Author: Gemini AI Agent, ChatGPT, Modified by Manamama
 # Description: Installs a basic set of applications and configures essential services for Ubuntu/Debian systems.
 
+
+export DEBIAN_FRONTEND=noninteractive
+
 # --- Dependency Checks ---
 command -v sudo >/dev/null || { echo "Error: sudo is not installed. This script requires sudo privileges."; exit 1; }
 command -v apt >/dev/null || { echo "Error: apt is not installed. This script is for Debian/Ubuntu-based systems."; exit 1; }
@@ -13,7 +16,11 @@ command -v curl >/dev/null || { echo "Error: curl is not installed. Please insta
 # Function to install core utilities
 install_core_utilities() {
     echo "Installing core utilities..."
+    
     sudo apt update || { echo "Error: Failed to update apt packages."; exit 1; }
+    
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y keyboard-configuration && sudo dpkg-reconfigure -f noninteractive keyboard-configuration
+
     sudo apt install -y aptitude ffmpeg aria2 youtube-dl || { echo "Error: Failed to install core utilities."; exit 1; }
 }
 
