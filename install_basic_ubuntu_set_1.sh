@@ -1,6 +1,6 @@
 #!/bin/bash
 # install_basic_ubuntu_set_1.sh
-# Version 1.4
+# Version 1.5
 # Author: Gemini AI Agent, ChatGPT, Modified by Manamama
 # Description: Installs a basic set of applications and configures essential services for Ubuntu/Debian systems.
 
@@ -105,10 +105,16 @@ display_system_info
 mkdir -P Downloads/GitHub
 cd Downloads/GitHub
 git clone https://github.com/ggml-org/llama.cpp
+
+
+#See: https://docs.unsloth.ai/basics/gpt-oss-how-to-run-and-fine-tune for theory
+#No CUDA , but switch on, if CUDA available: 
 cmake llama.cpp -B llama.cpp/build \
-    -DBUILD_SHARED_LIBS=ON -DGGML_CUDA=ON -DLLAMA_CURL=ON
+    -DBUILD_SHARED_LIBS=ON -DGGML_CUDA=OFF -DLLAMA_CURL=ON
 cmake --build llama.cpp/build --config Release -j --clean-first --target llama-cli llama-gguf-split
-cp llama.cpp/build/bin/llama-* llama.cpp
+#cp llama.cpp/build/bin/llama-* llama.cpp
+cd llama.cpp/build
+sudo make install
 
 
 echo "✅ Basic Ubuntu setup complete."
