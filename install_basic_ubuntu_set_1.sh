@@ -34,13 +34,17 @@ configure_xrdp() {
 
 # Function to install system info and browser tools
 install_system_tools() {
-    echo "Installing system info and browser tools..."
+    echo "Installing system info, development and browser tools..."
+    
+    sudo apt-get update
+ sudo apt-get install pciutils build-essential cmake curl libcurl4-openssl-dev -y
+ 
     sudo apt install -y neofetch geoip-bin ranger baobab firefox-esr || { echo "Error: Failed to install system tools."; exit 1; }
 }
 
 # Function to cleanly install the latest CMake via Kitware repo
 install_modern_cmake() {
-    echo "Installing modern CMake from Kitware APT repo..."
+    echo "Installing development tools and modern CMake from Kitware APT repo..."
 
     # Clean old Kitware config if exists
     sudo rm -f /etc/apt/sources.list.d/kitware.list
@@ -66,7 +70,7 @@ install_node_nvm_npm() {
     # Install NVM (Node Version Manager)
     export NVM_DIR="$HOME/.nvm"
     if [ ! -d "$NVM_DIR" ]; then
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/HEAD/install.sh | bash
     fi
 
     # Load nvm immediately (without relogin)
@@ -97,6 +101,15 @@ install_system_tools
 install_modern_cmake
 install_node_nvm_npm
 display_system_info
+
+mkdir -P Downloads/GitHub
+cd Downloads/GitHub
+git clone https://github.com/ggml-org/llama.cpp
+cmake llama.cpp -B llama.cpp/build \
+    -DBUILD_SHARED_LIBS=ON -DGGML_CUDA=ON -DLLAMA_CURL=ON
+cmake --build llama.cpp/build --config Release -j --clean-first --target llama-cli llama-gguf-split
+cp llama.cpp/build/bin/llama-* llama.cpp
+
 
 echo "✅ Basic Ubuntu setup complete."
 
