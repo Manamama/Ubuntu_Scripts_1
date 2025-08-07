@@ -1,6 +1,6 @@
 #!/bin/bash
 # install_basic_ubuntu_set_1.sh
-# Version 1.5
+# Version 1.6
 # Author: Gemini AI Agent, ChatGPT, Modified by Manamama
 # Description: Installs a basic set of applications and configures essential services for Ubuntu/Debian systems.
 
@@ -44,9 +44,46 @@ install_system_tools() {
     echo "Installing system info, development and browser tools..."
     
     sudo apt-get update
- sudo apt-get install pciutils build-essential cmake curl libcurl4-openssl-dev -y
+ sudo apt-get install pciutils build-essential cmake curl libcurl4-openssl-dev lobomp-dev cpufetch libomp-dev libssl-dev adb fastboot-y
  
     sudo apt install -y neofetch geoip-bin ranger baobab firefox || { echo "Error: Failed to install system tools." }
+
+    git clone https://github.com/Dr-noob/peakperf
+
+
+cd peakperf
+
+#In CmakeList.txt comment out #Set (SANITY_FLAGS)
+sed -i '/set(SANITY_FLAGS/ s/^/#/' CMakeLists.txt
+
+./build.sh
+./peakperf
+sudo apt clean
+sudo add-apt-repository ppa:danielrichter2007/grub-customizer -y
+sudo apt install grub-customizer -y
+sudo apt install python3-pip -y 
+sudo apt clean
+sudo apt autoremove -y
+sudo apt install scrcpy -y 
+# https://gist.github.com/Ericwyn/e89553d8dfcb9fc9066da506d9e6fd93
+cd ~/Downloads
+
+	wget https://dl.google.com/android/repository/platform-tools-latest-linux.zip
+
+	unzip platform-tools-latest-linux.zip
+
+	sudo cp -R -f platform-tools/* /usr/bin/*
+
+	#rm -rf platform-tools/
+	#rm platform-tools-latest-linux.zip
+
+	echo "install latest platform success"
+
+	/bin/fastboot --version
+
+wget https://github.com/xxxserxxx/gotop/releases/download/v4.2.0/gotop_v4.2.0_linux_amd64.deb
+sudo dpkg -i gotop_v4.2.0_linux_amd64.deb
+
 }
 
 # Function to cleanly install the latest CMake via Kitware repo
