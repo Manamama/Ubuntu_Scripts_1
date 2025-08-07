@@ -9,7 +9,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 # --- Dependency Checks ---
 for cmd in sudo apt pip curl; do
-  command -v $cmd >/dev/null || { echo "Error: '$cmd' is not installed."; exit 1; }
+  command -v $cmd >/dev/null || { echo "Error: '$cmd' is not installed." }
 done
 
 # --- Core Utilities ---
@@ -36,44 +36,45 @@ configure_xrdp() {
 }
 
 # --- System and Dev Tools ---
-install_system_tools() {
-  echo "🧰 Installing system and dev tools..."
+install_system_tools() {install_system_tools() {
+    echo "🧰 Installing system and dev tools..."
 
-  sudo apt install -y neofetch geoip-bin ranger baobab \
-      build-essential curl libcurl4-openssl-dev libomp-dev \
-      pciutils cmake cpufetch lobomp-dev libssl-dev adb fastboot
+    sudo apt-get update
 
-  # Fallback to Snap Firefox (no firefox-esr in Ubuntu 20.04)
-  if ! sudo apt install -y firefox; then
-    echo "⚠️ Firefox via APT failed. Installing via Snap..."
-    sudo snap install firefox || echo "⚠️ Snap Firefox install also failed. Skipping browser install."
-  fi
+    # Core dev tools
+    sudo apt-get install -y \
+        pciutils build-essential cmake curl libcurl4-openssl-dev \
+        libomp-dev libssl-dev adb fastboot neofetch geoip-bin ranger baobab firefox \
+        || echo "⚠️ Some base packages failed to install."
 
-  # PeakPerf setup
-  git clone https://github.com/Dr-noob/peakperf
-  pushd peakperf
+    # Optional: cpufetch (available only in 22.04+)
+    if apt-cache show cpufetch >/dev/null 2>&1; then
+        sudo apt install -y cpufetch || echo "⚠️ Failed to install cpufetch."
+    else
+        echo "ℹ️ cpufetch not available on this system."
+    fi
+
+    # PeakPerf setup
+    git clone https://github.com/Dr-noob/peakperf || echo "⚠️ Failed to clone peakperf."
+    cd peakperf || return
+
+    # Patch CMakeLists.txt to skip SANITY_FLAGS
     sed -i '/set(SANITY_FLAGS/ s/^/#/' CMakeLists.txt
-    ./build.sh && ./peakperf
-  popd
 
-  # Grub Customizer
-  sudo add-apt-repository -y ppa:danielrichter2007/grub-customizer
-  sudo apt install -y grub-customizer
+    ./build.sh && ./peakperf || echo "⚠️ Peakperf build/run failed."
 
-  # Python pip & extras
-  sudo apt install -y python3-pip scrcpy
+    cd ~ || return
 
-  # Android Platform Tools
-  pushd ~/Downloads
-    wget -q https://dl.google.com/android/repository/platform-tools-latest-linux.zip
+    sudo apt clean
+    sudo add-apt-repository ppa:danielrichter2007/grub-customizer -y
+    sudo apt install -y grub-customizer python3-pip scrcpy || echo "⚠️ Some optional tools failed."
+
+    # Install Android Platform Tools
+    cd ~/Downloads
+    wget https://dl.google.com/android/repository/platform-tools-latest-linux.zip
     unzip -o platform-tools-latest-linux.zip
-    sudo cp -rf platform-tools/* /usr/bin/
-    /bin/fastboot --version || echo "⚠️ fastboot not found post-install."
-  popd
+    sudo cp -r platform-tools/* /usr/bin/
 
-  # Gotop
-  wget https://github.com/xxxserxxx/gotop/releases/download/v4.2.0/gotop_v4.2.0_linux_amd64.deb
-  sudo dpkg -i gotop_v4.2.0_linux_amd64.deb || sudo apt -f install -y
 }
 
 # --- Modern CMake ---
