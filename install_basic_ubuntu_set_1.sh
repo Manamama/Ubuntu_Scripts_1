@@ -53,7 +53,12 @@ install_system_tools() {install_system_tools() {
     else
         echo "ℹ️ cpufetch not available on this system."
     fi
+git clone https://github.com/Dr-Noob/cpufetch
+cd cpufetch
+sudo make install 
+cpufetch
 
+cd .. 
     # PeakPerf setup
     git clone https://github.com/Dr-noob/peakperf || echo "⚠️ Failed to clone peakperf."
     cd peakperf || return
@@ -63,7 +68,7 @@ install_system_tools() {install_system_tools() {
 
     ./build.sh && ./peakperf || echo "⚠️ Peakperf build/run failed."
 
-    cd ~ || return
+    cd .. || return
 
     sudo apt clean
     sudo add-apt-repository ppa:danielrichter2007/grub-customizer -y
