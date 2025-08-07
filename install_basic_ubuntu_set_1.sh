@@ -117,6 +117,12 @@ cd llama.cpp/build
 sudo make install
 
 
+
+#Gemini: 
+ npm install -g @google/gemini-cli
+ export NO_BROWSER=1 
+ echo run `gemini` now. 
+
 echo "✅ Basic Ubuntu setup complete."
 
 # --- Tips ---
