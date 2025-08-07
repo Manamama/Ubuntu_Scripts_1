@@ -32,7 +32,7 @@ configure_xrdp() {
 }
 
 # --- System and Dev Tools ---
-install_system_tools() {install_system_tools() {
+install_system_tools() {
     echo "🧰 Installing system and dev tools..."
 
     sudo apt-get update
