@@ -84,6 +84,11 @@ install_node_nvm_npm() {
 
     echo "Node.js version: $(node -v)"
     echo "npm version: $(npm -v)"
+
+    grep -qxF 'export NVM_DIR="$HOME/.nvm"' ~/.bashrc || echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
+grep -qxF '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' ~/.bashrc || echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> ~/.bashrc
+
+
 }
 
 # Function to display system information
