@@ -1,6 +1,6 @@
 #!/bin/bash
 # install_basic_ubuntu_set_1.sh
-# Version 1.7
+# Version 2.2.1
 # Author: Gemini AI Agent, ChatGPT, Modified by Manamama
 # Description: Installs a robust development and AI environment on Ubuntu/Debian systems.
 
@@ -161,3 +161,82 @@ echo "✅ Basic Ubuntu setup complete."
 
 # Chrome Remote Desktop:
 # DISPLAY= /opt/google/chrome-remote-desktop/start-host --code="..." --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$(hostname)
+
+
+
+
+## Replit adaptation
+
+Here be an ugly paste of interim idea how to install most of these in Replit: 
+
+
+# Installation Plan
+ 
+
+This plan outlines the steps to install the software from the `install_basic_ubuntu_set_1.sh` script, using a combination of `nix`, `pip`, and `npm` as requested.
+
+## 1. Core Utilities
+
+These are fundamental tools for development and media manipulation.
+
+*   **Tools**: `ffmpeg`, `aria2`, `youtube-dl`
+*   **Method**: `pip`. Failing that: `npm`. Failing that: `nix`
+
+## 2. AI Tools
+
+This section covers AI and machine learning tools.
+
+*   **Tool**: `whisper`
+*   **Method**: `pip`
+*   **Command**:
+    ```bash
+    pip install git+https://github.com/openai/whisper.git
+    ```
+
+## 3. System and Dev Tools
+
+This section includes a variety of development and system inspection tools.
+
+*   **Tools**: `pciutils`, `build-essential`, `cmake`, `curl`, `libcurl4-openssl-dev`, `libomp-dev`, `libssl-dev`, `adb`, `fastboot`, `neofetch`, `geoip-bin`, `ranger`, `baobab`, `firefox`, `scrcpy`
+*   **Method**: `nix`
+*   **Command**:
+    ```bash
+    nix profile install nixpkgs#pciutils nixpkgs#build-essential nixpkgs#cmake nixpkgs#curl nixpkgs#libcurl nixpkgs#libomp nixpkgs#openssl nixpkgs#android-tools nixpkgs#neofetch nixpkgs#geoip nixpkgs#ranger nixpkgs#baobab nixpkgs#firefox nixpkgs#scrcpy
+    ```
+
+*   **Tool**: `cpufetch`
+*   **Method**: Build from source
+*   **Commands**:
+    ```bash
+    git build-essential --run "git clone https://github.com/Dr-Noob/cpufetch && cd cpufetch && make && sudo make install"
+    ```
+Watch out for errors.
+
+*   **Tool**: `peakperf`
+*   **Method**: Build from source
+*   **Commands**:
+    ```bash
+    git cmake build-essential --run "git clone https://github.com/Dr-noob/peakperf && cd peakperf && sed -i '/set(SANITY_FLAGS/ s/^/#/' CMakeLists.txt && ./build.sh"
+    ```
+
+## 4. Node.js + NVM
+
+This section may sets up the Node.js environment using NVM, as requested, but likely not needed as Replit should have the newest nvm etc stuff anyway.
+
+## 5. LLaMA Build
+
+This section covers building the `llama.cpp` project.
+
+*   **Tool**: `llama.cpp`
+*   **Method**: Build from source
+*   **Commands**:
+    ```bash
+    mkdir -p ~/Downloads/GitHub && cd ~/Downloads/GitHub
+    git cmake build-essential --run "git clone https://github.com/ggml-org/llama.cpp && cd llama.cpp && cmake . -B build -DBUILD_SHARED_LIBS=ON -DGGML_CUDA=OFF -DLLAMA_CURL=ON && cmake --build build --config Release -j --clean-first --target llama-cli llama-gguf-split"
+    ```
+
+## 6. Gemini CLI
+Not needed as Gemini AI is already in one and is using it right now ;)
+
+## 7. XRDP Setup
+Not needed, skipped
