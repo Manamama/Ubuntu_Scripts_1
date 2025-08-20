@@ -13,6 +13,8 @@ install_core_utilities() {
   echo "🔧 Installing core utilities..."
   
   export PATH=$PATH:$HOME/.local/bin
+  mkdir -p $HOME/.local/bin
+  #Decide if to move $HOME/.cache/ to some /temp/.cache folder here
   sudo chown $(whoami):$(whoami) $HOME/.local/bin
   mkdir -p $PATH:$HOME/.local/bin
   sudo apt update
