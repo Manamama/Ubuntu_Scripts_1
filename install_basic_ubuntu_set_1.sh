@@ -53,6 +53,9 @@ install_system_tools() {
     else
         echo "ℹ️ cpufetch not available on this system."
     fi
+    wget https://github.com/cjbassi/gotop/releases/download/3.0.0/gotop_3.0.0_linux_amd64.deb
+sudo dpkg -i gotop_3.0.0_linux_amd64.deb
+
 git clone https://github.com/Dr-Noob/cpufetch
 cd cpufetch
 sudo make install 
