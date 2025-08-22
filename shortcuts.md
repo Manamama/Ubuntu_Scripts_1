@@ -4,6 +4,10 @@
 
 **Ctrl + E** → Move to end of line
 
+**Ctrl + P** → Previous command
+
+**Ctrl + N** → Next command, or clear the editing line
+
 **Ctrl + U** → Delete from cursor to start of line
 
 **Ctrl + K** → Delete from cursor to end of line
