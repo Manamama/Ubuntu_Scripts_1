@@ -165,39 +165,37 @@ install_modern_cmake() {
 # --- Node.js + NVM ---
 install_node_nvm_npm() {
     echo "🕸 Installing Node.js via NVM..."
+ 
 
     export NVM_DIR="$HOME/.nvm"
+    mkdir -p "$NVM_DIR"
 
-    # Install NVM if not present
-    if [ ! -d "$NVM_DIR" ]; then
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+    # Clone the official NVM repository if not present
+    if [ ! -d "$NVM_DIR/.git" ]; then
+        git clone https://github.com/nvm-sh/nvm.git "$NVM_DIR"
     fi
+
+    cd "$NVM_DIR" || return
+    # Checkout the latest release tag (stable LTS support)
+    git fetch --tags --quiet
+    LATEST_TAG=$(git describe --tags "$(git rev-list --tags --max-count=1)")
+    git checkout "$LATEST_TAG" --quiet
 
     # Load NVM
-    if [ -s "$NVM_DIR/nvm.sh" ]; then
-        \. "$NVM_DIR/nvm.sh"
-    else
-        echo "❌ NVM script not found at $NVM_DIR/nvm.sh"
-        return 1
-    fi
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-    # Install latest LTS Node.js if not already installed
-    LTS_VERSION=$(nvm ls-remote --lts | tail -1 | awk '{print $1}')
-    if ! nvm ls "$LTS_VERSION" >/dev/null 2>&1; then
-        nvm install "$LTS_VERSION"
-    fi
+    # Install and use latest LTS Node.js
+    nvm install --lts
+    nvm use --lts
+    nvm alias default 'lts/*'
 
-    # Use LTS version safely
-    PROVIDED_VERSION="$LTS_VERSION"
-    nvm use "$PROVIDED_VERSION"
-    nvm alias default "$PROVIDED_VERSION"
-
-    # Ensure NVM is loaded in future shells
+    # Ensure NVM loads in future shells
     grep -qxF 'export NVM_DIR="$HOME/.nvm"' ~/.bashrc || echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
     grep -qxF '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' ~/.bashrc || echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> ~/.bashrc
 
     echo "✅ Node.js: $(node -v), npm: $(npm -v)"
 }
+ 
 
 # --- Sysinfo ---
 display_system_info() {
