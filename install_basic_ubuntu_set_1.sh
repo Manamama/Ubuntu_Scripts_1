@@ -1,6 +1,6 @@
 #!/bin/bash
 # install_basic_ubuntu_set_1.sh
-# Version 2.2.1
+# Version 2.3.0
 # Author: Gemini AI Agent, ChatGPT, Modified by Manamama
 # Description: Installs a robust development and AI environment on Ubuntu/Debian systems.
 
@@ -18,9 +18,20 @@ install_core_utilities() {
   #Check if not linked already: 
   ls -ls $HOME/.local
   echo
+  mkdir -p /opt/user_home_data/
+    sudo chown $(whoami):$(whoami) -R /opt/user_home_data/
+
+  mkdir /opt/user_home_data/.local
+    mkdir /opt/user_home_data/.cache
+
+  ln -s /opt/user_home_data/.local $HOME/.local
+  ln -s /opt/user_home_data/.cache $HOME/.cache
+  
+  ls -ls $HOME/.local
+  echo
   mkdir -p $HOME/.local/bin
   #Decide if to move $HOME/.cache/ to some /temp/.cache folder here
-  sudo chown $(whoami):$(whoami) $HOME/.local/bin
+  sudo chown $(whoami):$(whoami) -R $HOME/.local/
   mkdir -p $PATH:$HOME/.local/bin
   sudo apt update
   DEBIAN_FRONTEND=noninteractive sudo apt-get install -y keyboard-configuration && sudo dpkg-reconfigure -f noninteractive keyboard-configuration
