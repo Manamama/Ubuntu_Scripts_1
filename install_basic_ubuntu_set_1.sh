@@ -16,18 +16,25 @@ install_core_utilities() {
   export DEBIAN_FRONTEND=noninteractive
 
   export PATH=$PATH:$HOME/.local/bin
+  mkdir -p /opt/user_home_data/
+  
   #Check if not linked already: 
   ls -ls $HOME/.local
   echo
-  mkdir -p /opt/user_home_data/
-    sudo chown $(whoami):$(whoami) -R /opt/user_home_data/
+  mv $HOME/.local $HOME/.local.bak 
+  mv $HOME/.cache $HOME/.cache.bak 
+   
+  sudo chown $(whoami):$(whoami) -R /opt/user_home_data/
 
   mkdir -p /opt/user_home_data/.local
-    mkdir -p /opt/user_home_data/.cache
+  mkdir -p /opt/user_home_data/.cache
 
   ln -s /opt/user_home_data/.local $HOME/.local || true
   ln -s /opt/user_home_data/.cache $HOME/.cache || true
   
+
+
+
   ls -ls $HOME/.local 
   echo
   mkdir -p $HOME/.local/bin
