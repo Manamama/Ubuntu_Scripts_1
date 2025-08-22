@@ -15,8 +15,15 @@ export DEBIAN_FRONTEND=noninteractive
 # --- Core Utilities ---
 install_core_utilities() {
 
+
+
   echo "🔧 Installing core utilities..."
+  #No warning in GCloud about persistence of apt
+mkdir ~/.cloudshell
+  touch ~/.cloudshell/no-apt-get-warning
+
   export DEBIAN_FRONTEND=noninteractive
+  
   export PATH=$PATH:$HOME/.local/bin
   mkdir -p /opt/user_home_data/
 
