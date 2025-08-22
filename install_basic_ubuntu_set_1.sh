@@ -24,7 +24,7 @@ install_core_utilities() {
   mkdir -p $PATH:$HOME/.local/bin
   sudo apt update
   DEBIAN_FRONTEND=noninteractive sudo apt-get install -y keyboard-configuration && sudo dpkg-reconfigure -f noninteractive keyboard-configuration
-  sudo apt install -y aptitude ffmpeg aria2 youtube-dl
+  sudo apt install -y aptitude ffmpeg aria2 
 }
 
 # --- AI Tools ---
@@ -69,6 +69,8 @@ sudo make install
 cpufetch
 
 cd .. 
+
+pip install -U youtube-dl
     # PeakPerf setup
     git clone https://github.com/Dr-noob/peakperf || echo "⚠️ Failed to clone peakperf."
     cd peakperf || return
