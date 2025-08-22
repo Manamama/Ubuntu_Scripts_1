@@ -93,7 +93,7 @@ install_system_tools() {
 
     # Core dev tools
     sudo apt-get install -y pciutils build-essential cmake curl libcurl4-openssl-dev \
-        libomp-dev libssl-dev adb fastboot neofetch geoip-bin ranger baobab firefox
+        libomp-dev libssl-dev adb fastboot neofetch geoip-bin ranger baobab firefox python3-pip
 
     # Optional: cpufetch
     if apt-cache show cpufetch >/dev/null 2>&1; then
@@ -231,9 +231,9 @@ install_gemini_cli() {
   echo "🔮 Run \`gemini\` to get started."
 }
 
-
+echo
 echo "📌 Starting Ubuntu setup..."
-
+echo  
 # 1️⃣ Core environment and utilities first
 install_core_utilities
 
