@@ -107,7 +107,7 @@ install_system_tools() {
     fi
 
     # gotop
-    wget https://github.com/cjbassi/gotop/releases/download/3.0.0/gotop_3.0.0_linux_amd64.deb
+    wget -c https://github.com/cjbassi/gotop/releases/download/3.0.0/gotop_3.0.0_linux_amd64.deb
     sudo dpkg -i gotop_3.0.0_linux_amd64.deb
 
     # youtube-dl
@@ -131,7 +131,7 @@ install_system_tools() {
     # Android Platform Tools
     mkdir -p ~/Downloads
     cd ~/Downloads
-    wget https://dl.google.com/android/repository/platform-tools-latest-linux.zip
+    wget -c https://dl.google.com/android/repository/platform-tools-latest-linux.zip
     unzip -o platform-tools-latest-linux.zip
     sudo cp -r platform-tools/* /usr/bin/
 }
@@ -150,7 +150,7 @@ install_modern_cmake() {
     sudo rm -f /usr/share/keyrings/kitware-archive-keyring.gpg
 
     # Add Kitware key
-    wget -qO - https://apt.kitware.com/keys/kitware-archive-latest.asc \
+    wget  -c -qO - https://apt.kitware.com/keys/kitware-archive-latest.asc \
         | gpg --dearmor \
         | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
 
