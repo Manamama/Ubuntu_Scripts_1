@@ -116,25 +116,35 @@ pip install -U youtube-dl
     sudo cp -r platform-tools/* /usr/bin/
 
 }
-
 # --- Modern CMake ---
 install_modern_cmake() {
-  echo "🛠 Installing latest CMake via Kitware..."
+    echo "🛠 Installing latest CMake via Kitware..."
 
-  sudo rm -f /etc/apt/sources.list.d/kitware.list
-  sudo sed -i '/kitware/d' /etc/apt/sources.list
-  sudo rm -f /usr/share/keyrings/kitware-archive-keyring.gpg
+    # Detect Ubuntu codename dynamically
+    CODENAME=$(lsb_release -cs)
+    echo "ℹ️ Detected Ubuntu codename: $CODENAME"
 
-  wget -qO - https://apt.kitware.com/keys/kitware-archive-latest.asc \
-    | gpg --dearmor \
-    | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
+    # Clean previous Kitware sources if any
+    sudo rm -f /etc/apt/sources.list.d/kitware.list
+    sudo sed -i '/kitware/d' /etc/apt/sources.list
+    sudo rm -f /usr/share/keyrings/kitware-archive-keyring.gpg
 
-  echo "deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main" \
-    | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
+    # Add Kitware key
+    wget -qO - https://apt.kitware.com/keys/kitware-archive-latest.asc \
+        | gpg --dearmor \
+        | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
 
-  sudo apt-get update
-  sudo apt-get install -y cmake
+    # Add the correct Kitware repository for detected Ubuntu version
+    echo "deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu $CODENAME main" \
+        | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
+
+    # Update apt and install CMake
+    sudo apt-get update
+    sudo apt-get install -y cmake || echo "⚠️ CMake install failed. Check for unmet dependencies."
+
+    echo "✅ Modern CMake installation complete."
 }
+
 
 # --- Node.js + NVM ---
 install_node_nvm_npm() {
