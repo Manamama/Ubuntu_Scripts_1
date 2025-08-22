@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 2.4.3
+# Version 2.4.4
 # Author: Gemini AI Agent, ChatGPT, Modified by Manamama
 # Description: Installs a robust development and AI environment on Ubuntu/Debian systems.
 
@@ -29,8 +29,8 @@ mkdir ~/.cloudshell
   mkdir -p /opt/user_home_data/
 
   # Show current .local and .cache
-  ls -ls "$HOME/.local"
-  ls -ls "$HOME/.cache"
+  #ls -ls "$HOME/.local"
+  #ls -ls "$HOME/.cache"
   echo
 
   # Check what these are, informative only
@@ -45,10 +45,12 @@ mkdir ~/.cloudshell
   mv -n "$HOME/.cache" "$HOME/.cache.bak"
 
   sudo chown $(whoami):$(whoami) -R /opt/user_home_data/
-  mkdir -p /opt/user_home_data/.local /opt/user_home_data/.cache
+  mkdir -p /opt/user_home_data/.local 
+  mkdir /tmp/user_cache 
+  #/opt/user_home_data/.cache
 
   ln -s /opt/user_home_data/.local "$HOME/.local"
-  ln -s /opt/user_home_data/.cache "$HOME/.cache"
+  ln -s /tmp/user_cache  "$HOME/.cache"
 
   ls -ls "$HOME/.local"
   echo
