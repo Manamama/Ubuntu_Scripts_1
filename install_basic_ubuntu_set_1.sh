@@ -60,7 +60,7 @@ mkdir -p '$HOME/.local/lib'
   sudo chown -R "$(whoami):$(whoami)" "$HOME/.local"
 
   sudo apt update
-  DEBIAN_FRONTEND=noninteractive sudo apt-get install -y keyboard-configuration
+  #DEBIAN_FRONTEND=noninteractive sudo apt-get install -y keyboard-configuration
   sudo dpkg-reconfigure -f noninteractive keyboard-configuration
   sudo apt install -y aptitude ffmpeg aria2
 
