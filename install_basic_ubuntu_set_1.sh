@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 2.4.1
+# Version 2.4.3
 # Author: Gemini AI Agent, ChatGPT, Modified by Manamama
 # Description: Installs a robust development and AI environment on Ubuntu/Debian systems.
 
@@ -119,7 +119,7 @@ install_system_tools() {
     # Patch CMakeLists.txt to skip SANITY_FLAGS
     sed -i '/set(SANITY_FLAGS/ s/^/#/' CMakeLists.txt
     ./build.sh
-    #cp "$HOME/.local"
+    cp  ./peakperf "$HOME/.local/bin/"
     sudo make install 
     #./peakperf
     cd ..
