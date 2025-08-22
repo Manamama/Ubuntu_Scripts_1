@@ -58,7 +58,7 @@ install_ai_tools() {
 configure_xrdp() {
   echo "🖥️ Configuring XRDP..."
   sudo apt install -y xrdp
-  sudo systemctl enable --now xrdp
+  sudo systemctl enable --now xrdp || true
   sudo adduser xrdp ssl-cert || true
   sudo systemctl restart xrdp || true
 }
