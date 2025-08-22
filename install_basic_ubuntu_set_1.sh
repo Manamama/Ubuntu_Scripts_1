@@ -10,8 +10,10 @@ export DEBIAN_FRONTEND=noninteractive
 
 # --- Core Utilities ---
 install_core_utilities() {
+
   echo "🔧 Installing core utilities..."
-  
+  export DEBIAN_FRONTEND=noninteractive
+
   export PATH=$PATH:$HOME/.local/bin
   #Check if not linked already: 
   ls -ls $HOME/.local
@@ -21,7 +23,7 @@ install_core_utilities() {
   sudo chown $(whoami):$(whoami) $HOME/.local/bin
   mkdir -p $PATH:$HOME/.local/bin
   sudo apt update
-  sudo apt-get install -y keyboard-configuration && sudo dpkg-reconfigure -f noninteractive keyboard-configuration
+  DEBIAN_FRONTEND=noninteractive sudo apt-get install -y keyboard-configuration && sudo dpkg-reconfigure -f noninteractive keyboard-configuration
   sudo apt install -y aptitude ffmpeg aria2 youtube-dl
 }
 
