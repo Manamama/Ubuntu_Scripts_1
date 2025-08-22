@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 2.3.2
+# Version 2.4.1
 # Author: Gemini AI Agent, ChatGPT, Modified by Manamama
 # Description: Installs a robust development and AI environment on Ubuntu/Debian systems.
 
@@ -11,50 +11,62 @@ set -uo pipefail  # keep -u and -o pipefail
 export DEBIAN_FRONTEND=noninteractive
 
 
+
 # --- Core Utilities ---
 install_core_utilities() {
 
   echo "🔧 Installing core utilities..."
   export DEBIAN_FRONTEND=noninteractive
-
   export PATH=$PATH:$HOME/.local/bin
   mkdir -p /opt/user_home_data/
-  
-  #Check if not linked already: 
-  ls -ls $HOME/.local
+
+  # Show current .local and .cache
+  ls -ls "$HOME/.local"
+  ls -ls "$HOME/.cache"
   echo
-  mv $HOME/.local $HOME/.local.bak 
-  mv $HOME/.cache $HOME/.cache.bak 
-   
+
+  # Check what these are, informative only
+  echo ".local:"
+  file "$HOME/.local" || echo "does not exist"
+
+  echo ".cache:"
+  file "$HOME/.cache" || echo "does not exist"
+
+  # Now do the actual backup (mv)
+  mv -n "$HOME/.local" "$HOME/.local.bak"
+  mv -n "$HOME/.cache" "$HOME/.cache.bak"
+
   sudo chown $(whoami):$(whoami) -R /opt/user_home_data/
+  mkdir -p /opt/user_home_data/.local /opt/user_home_data/.cache
 
-  mkdir -p /opt/user_home_data/.local
-  mkdir -p /opt/user_home_data/.cache
+  ln -s /opt/user_home_data/.local "$HOME/.local"
+  ln -s /opt/user_home_data/.cache "$HOME/.cache"
 
-  ln -s /opt/user_home_data/.local $HOME/.local || true
-  ln -s /opt/user_home_data/.cache $HOME/.cache || true
-  
-
-
-
-  ls -ls $HOME/.local 
+  ls -ls "$HOME/.local"
   echo
-  mkdir -p $HOME/.local/bin
-  #Decide if to move $HOME/.cache/ to some /temp/.cache folder here
-  sudo chown $(whoami):$(whoami) -R $HOME/.local/
-  mkdir -p $PATH:$HOME/.local/bin
+
+  mkdir -p "$HOME/.local/bin"
+  sudo chown -R "$(whoami):$(whoami)" "$HOME/.local"
+
   sudo apt update
-  DEBIAN_FRONTEND=noninteractive sudo apt-get install -y keyboard-configuration && sudo dpkg-reconfigure -f noninteractive keyboard-configuration
-  sudo apt install -y aptitude ffmpeg aria2 
+  DEBIAN_FRONTEND=noninteractive sudo apt-get install -y keyboard-configuration
+  sudo dpkg-reconfigure -f noninteractive keyboard-configuration
+  sudo apt install -y aptitude ffmpeg aria2
+
+  
+  mkdir -p ~/Downloads/GitHub && cd ~/Downloads/GitHub
+  
 }
+
 
 # --- AI Tools ---
 install_ai_tools() {
   echo "🧠 Installing AI/ML tools..."
-  pip install -U whisperx
-  #pip install git+https://github.com/openai/whisper.git
-  python -m pip install numpy torch torchvision torchaudio tensorflow-cpu jax jaxlib protobuf --upgrade --extra-index-url https://download.pytorch.org/whl/cpu
+  python -m ensurepip
+  python -m pip install -U whisperx numpy torch torchvision torchaudio tensorflow-cpu jax jaxlib protobuf --extra-index-url https://download.pytorch.org/whl/cpu
+  # python -m pip install git+https://github.com/openai/whisper.git
 }
+
 
 # --- XRDP Setup ---
 configure_xrdp() {
@@ -72,50 +84,48 @@ install_system_tools() {
     sudo apt-get update
 
     # Core dev tools
-    sudo apt-get install -y \
-        pciutils build-essential cmake curl libcurl4-openssl-dev \
-        libomp-dev libssl-dev adb fastboot neofetch geoip-bin ranger baobab firefox \
-        || echo "⚠️ Some base packages failed to install."
+    sudo apt-get install -y pciutils build-essential cmake curl libcurl4-openssl-dev \
+        libomp-dev libssl-dev adb fastboot neofetch geoip-bin ranger baobab firefox
 
-    # Optional: cpufetch (available only in 22.04+)
+    # Optional: cpufetch
     if apt-cache show cpufetch >/dev/null 2>&1; then
-        sudo apt install -y cpufetch || echo "⚠️ Failed to install cpufetch."
+        sudo apt install -y cpufetch
     else
-        echo "ℹ️ cpufetch not available on this system."
+        echo "ℹ️ cpufetch not available via apt, building from source..."
+        git clone https://github.com/Dr-Noob/cpufetch
+        cd cpufetch
+        sudo make install
+        cd ..
     fi
+
+    # gotop
     wget https://github.com/cjbassi/gotop/releases/download/3.0.0/gotop_3.0.0_linux_amd64.deb
-sudo dpkg -i gotop_3.0.0_linux_amd64.deb
+    sudo dpkg -i gotop_3.0.0_linux_amd64.deb
 
-git clone https://github.com/Dr-Noob/cpufetch  || echo "⚠️ cpufetch already exists or failed clone, continuing..."
-cd cpufetch
-sudo make install 
-cpufetch
+    # youtube-dl
+    python -m pip install -U youtube-dl
 
-cd .. 
-
-pip install -U youtube-dl
     # PeakPerf setup
-    git clone https://github.com/Dr-noob/peakperf || echo "⚠️ Exists or failed to clone peakperf."
-    cd peakperf || return
-
+    git clone https://github.com/Dr-noob/peakperf
+    cd peakperf
     # Patch CMakeLists.txt to skip SANITY_FLAGS
     sed -i '/set(SANITY_FLAGS/ s/^/#/' CMakeLists.txt
-
-    ./build.sh && ./peakperf || echo "⚠️ Peakperf build/run failed."
-
-    cd .. || return
+    ./build.sh
+    ./peakperf
+    cd ..
 
     sudo apt clean
     sudo add-apt-repository ppa:danielrichter2007/grub-customizer -y
-    sudo apt install -y grub-customizer python3-pip scrcpy || echo "⚠️ Some optional tools failed."
+    sudo apt install -y grub-customizer python3-pip scrcpy
 
-    # Install Android Platform Tools
+    # Android Platform Tools
+    mkdir -p ~/Downloads
     cd ~/Downloads
     wget https://dl.google.com/android/repository/platform-tools-latest-linux.zip
     unzip -o platform-tools-latest-linux.zip
     sudo cp -r platform-tools/* /usr/bin/
-
 }
+
 # --- Modern CMake ---
 install_modern_cmake() {
     echo "🛠 Installing latest CMake via Kitware..."
@@ -145,25 +155,30 @@ install_modern_cmake() {
     echo "✅ Modern CMake installation complete."
 }
 
-
 # --- Node.js + NVM ---
 install_node_nvm_npm() {
-  echo "🕸 Installing Node.js via NVM..."
+    echo "🕸 Installing Node.js via NVM..."
 
-  export NVM_DIR="$HOME/.nvm"
-  [ ! -d "$NVM_DIR" ] && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+    export NVM_DIR="$HOME/.nvm"
 
-  export NVM_DIR="$HOME/.nvm"
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    # Install NVM if not present
+    if [ ! -d "$NVM_DIR" ]; then
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+    fi
 
-  nvm install --lts
-  nvm use --lts
-  nvm alias default 'lts/*'
+    # Load NVM
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-  grep -qxF 'export NVM_DIR="$HOME/.nvm"' ~/.bashrc || echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
-  grep -qxF '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' ~/.bashrc || echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> ~/.bashrc
+    # Install and use latest LTS Node.js
+    nvm install --lts
+    nvm use --lts
+    nvm alias default 'lts/*'
 
-  echo "✅ Node: $(node -v), npm: $(npm -v)"
+    # Ensure NVM is loaded in future shells
+    grep -qxF 'export NVM_DIR="$HOME/.nvm"' ~/.bashrc || echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
+    grep -qxF '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' ~/.bashrc || echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> ~/.bashrc
+
+    echo "✅ Node.js: $(node -v), npm: $(npm -v)"
 }
 
 # --- Sysinfo ---
@@ -177,11 +192,12 @@ display_system_info() {
 build_llama() {
   echo "🦙 Cloning and building llama.cpp..."
 
-  mkdir -p ~/Downloads/GitHub && cd ~/Downloads/GitHub
   git clone https://github.com/ggml-org/llama.cpp  || echo "⚠️ llama.cpp already exists, continuing..."
   cmake llama.cpp -B llama.cpp/build -DBUILD_SHARED_LIBS=ON -DGGML_CUDA=OFF -DLLAMA_CURL=ON
   cmake --build llama.cpp/build --config Release -j --clean-first --target llama-cli llama-gguf-split
   cd llama.cpp/build && sudo make install
+  cd ../..
+  
 }
 
 # --- Gemini CLI ---
@@ -191,101 +207,71 @@ install_gemini_cli() {
   echo "🔮 Run \`gemini\` to get started."
 }
 
-# --- Execution Flow ---
+echo "📌 Starting Ubuntu setup..."
+
+# 1️⃣ Core environment and utilities first
 install_core_utilities
-install_ai_tools
-configure_xrdp
-install_system_tools
+
+# 2️⃣ Modern CMake early, for any builds that require it
 install_modern_cmake
+
+# 3️⃣ System and dev tools (depends on core utilities and CMake)
+install_system_tools
+
+# 4️⃣ AI/ML tools (depends on Python environment from system tools)
+install_ai_tools
+
+# 5️⃣ Node.js environment (optional, after core dev tools)
 install_node_nvm_npm
-display_system_info
+
+# 6️⃣ LLaMA build (depends on modern CMake and system dev tools)
 build_llama
+
+# 7️⃣ Gemini CLI (optional, requires Node.js)
 install_gemini_cli
+
+# 8️⃣ XRDP (optional, non-systemd systems may skip)
+configure_xrdp || echo "⚠️ XRDP setup skipped (non-systemd system)."
+
+# 9️⃣ Display system info at the end
+display_system_info
 
 echo "✅ Basic Ubuntu setup complete."
 
-# --- Notes ---
-# SSHFS Mount:
-# sshfs user@host:/remote/path /local/mountpoint -p 6000 -oIdentityFile=~/.ssh/google_compute_engine -oStrictHostKeyChecking=no
-
-# Chrome Remote Desktop:
-# DISPLAY= /opt/google/chrome-remote-desktop/start-host --code="..." --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$(hostname)
 
 
+# --- Replit Adaptation ---
+replit_adapt() {
+    echo "🌀 Adapting setup for Replit environment..."
 
+    # 1️⃣ Core utilities (user-space install)
+    pip install --user ffmpeg aria2 youtube-dl
 
-## Replit adaptation
+    # 2️⃣ AI/ML tools (user-space)
+    python -m ensurepip
+    python -m pip install --user -U whisperx numpy torch torchvision torchaudio tensorflow-cpu jax jaxlib protobuf --extra-index-url https://download.pytorch.org/whl/cpu
 
-Here be an ugly paste of interim idea how to install most of these in Replit: 
+    # 3️⃣ Node.js (skip NVM, assume latest Node already present)
+    echo "ℹ️ Using Node.js provided by Replit: $(node -v), npm: $(npm -v)"
 
+    # 4️⃣ System/dev tools (nix only, user-space)
+    nix profile install \
+        nixpkgs#pciutils nixpkgs#cmake nixpkgs#curl nixpkgs#libcurl nixpkgs#libomp \
+        nixpkgs#openssl nixpkgs#android-tools nixpkgs#neofetch nixpkgs#geoip nixpkgs#ranger \
+        nixpkgs#baobab nixpkgs#firefox nixpkgs#scrcpy
 
-# Installation Plan
- 
-
-This plan outlines the steps to install the software from the `install_basic_ubuntu_set_1.sh` script, using a combination of `nix`, `pip`, and `npm` as requested.
-
-## 1. Core Utilities
-
-These are fundamental tools for development and media manipulation.
-
-*   **Tools**: `ffmpeg`, `aria2`, `youtube-dl`
-*   **Method**: `pip`. Failing that: `npm`. Failing that: `nix`
-
-## 2. AI Tools
-
-This section covers AI and machine learning tools.
-
-*   **Tool**: `whisper`
-*   **Method**: `pip`
-*   **Command**:
-    ```bash
-    pip install git+https://github.com/openai/whisper.git
-    ```
-
-## 3. System and Dev Tools
-
-This section includes a variety of development and system inspection tools.
-
-*   **Tools**: `pciutils`, `build-essential`, `cmake`, `curl`, `libcurl4-openssl-dev`, `libomp-dev`, `libssl-dev`, `adb`, `fastboot`, `neofetch`, `geoip-bin`, `ranger`, `baobab`, `firefox`, `scrcpy`
-*   **Method**: `nix`
-*   **Command**:
-    ```bash
-    nix profile install nixpkgs#pciutils nixpkgs#build-essential nixpkgs#cmake nixpkgs#curl nixpkgs#libcurl nixpkgs#libomp nixpkgs#openssl nixpkgs#android-tools nixpkgs#neofetch nixpkgs#geoip nixpkgs#ranger nixpkgs#baobab nixpkgs#firefox nixpkgs#scrcpy
-    ```
-
-*   **Tool**: `cpufetch`
-*   **Method**: Build from source
-*   **Commands**:
-    ```bash
-    git build-essential --run "git clone https://github.com/Dr-Noob/cpufetch && cd cpufetch && make && sudo make install"
-    ```
-Watch out for errors.
-
-*   **Tool**: `peakperf`
-*   **Method**: Build from source
-*   **Commands**:
-    ```bash
-    git cmake build-essential --run "git clone https://github.com/Dr-noob/peakperf && cd peakperf && sed -i '/set(SANITY_FLAGS/ s/^/#/' CMakeLists.txt && ./build.sh"
-    ```
-
-## 4. Node.js + NVM
-
-This section may sets up the Node.js environment using NVM, as requested, but likely not needed as Replit should have the newest nvm etc stuff anyway.
-
-## 5. LLaMA Build
-
-This section covers building the `llama.cpp` project.
-
-*   **Tool**: `llama.cpp`
-*   **Method**: Build from source
-*   **Commands**:
-    ```bash
+    # 5️⃣ LLaMA build (build in workspace, user-space)
     mkdir -p ~/Downloads/GitHub && cd ~/Downloads/GitHub
-    git cmake build-essential --run "git clone https://github.com/ggml-org/llama.cpp && cd llama.cpp && cmake . -B build -DBUILD_SHARED_LIBS=ON -DGGML_CUDA=OFF -DLLAMA_CURL=ON && cmake --build build --config Release -j --clean-first --target llama-cli llama-gguf-split"
-    ```
+    git clone https://github.com/ggml-org/llama.cpp || echo "⚠️ llama.cpp exists, skipping clone"
+    cd llama.cpp
+    cmake . -B build -DBUILD_SHARED_LIBS=ON -DGGML_CUDA=OFF -DLLAMA_CURL=ON
+    cmake --build build --config Release -j --clean-first --target llama-cli llama-gguf-split
+    cd ~/  # return to home
 
-## 6. Gemini CLI
-Not needed as Gemini AI is already in one and is using it right now ;)
+    # 6️⃣ Skip XRDP, sudo-only commands, systemd services, /opt mounts
+    echo "ℹ️ Skipping XRDP, sudo, and /opt operations on Replit."
 
-## 7. XRDP Setup
-Not needed, skipped
+    echo "✅ Replit adaptation complete."
+}
+
+
