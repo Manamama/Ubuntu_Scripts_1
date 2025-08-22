@@ -60,7 +60,7 @@ configure_xrdp() {
   sudo apt install -y xrdp
   sudo systemctl enable --now xrdp
   sudo adduser xrdp ssl-cert || true
-  sudo systemctl restart xrdp
+  sudo systemctl restart xrdp || true
 }
 
 # --- System and Dev Tools ---
