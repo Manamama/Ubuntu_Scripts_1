@@ -77,7 +77,7 @@ install_system_tools() {
     wget https://github.com/cjbassi/gotop/releases/download/3.0.0/gotop_3.0.0_linux_amd64.deb
 sudo dpkg -i gotop_3.0.0_linux_amd64.deb
 
-git clone https://github.com/Dr-Noob/cpufetch
+git clone https://github.com/Dr-Noob/cpufetch  || echo "⚠️ cpufetch already exists or failed clone, continuing..."
 cd cpufetch
 sudo make install 
 cpufetch
@@ -86,7 +86,7 @@ cd ..
 
 pip install -U youtube-dl
     # PeakPerf setup
-    git clone https://github.com/Dr-noob/peakperf || echo "⚠️ Failed to clone peakperf."
+    git clone https://github.com/Dr-noob/peakperf || echo "⚠️ Exists or failed to clone peakperf."
     cd peakperf || return
 
     # Patch CMakeLists.txt to skip SANITY_FLAGS
@@ -159,7 +159,7 @@ build_llama() {
   echo "🦙 Cloning and building llama.cpp..."
 
   mkdir -p ~/Downloads/GitHub && cd ~/Downloads/GitHub
-  git clone https://github.com/ggml-org/llama.cpp
+  git clone https://github.com/ggml-org/llama.cpp  || echo "⚠️ llama.cpp already exists, continuing..."
   cmake llama.cpp -B llama.cpp/build -DBUILD_SHARED_LIBS=ON -DGGML_CUDA=OFF -DLLAMA_CURL=ON
   cmake --build llama.cpp/build --config Release -j --clean-first --target llama-cli llama-gguf-split
   cd llama.cpp/build && sudo make install
