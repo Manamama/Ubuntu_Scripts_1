@@ -25,10 +25,10 @@ install_core_utilities() {
   mkdir -p /opt/user_home_data/.local
     mkdir -p /opt/user_home_data/.cache
 
-  ln -s /opt/user_home_data/.local $HOME/.local
-  ln -s /opt/user_home_data/.cache $HOME/.cache
+  ln -s /opt/user_home_data/.local $HOME/.local || true
+  ln -s /opt/user_home_data/.cache $HOME/.cache || true
   
-  ls -ls $HOME/.local
+  ls -ls $HOME/.local 
   echo
   mkdir -p $HOME/.local/bin
   #Decide if to move $HOME/.cache/ to some /temp/.cache folder here
