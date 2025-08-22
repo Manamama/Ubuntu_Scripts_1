@@ -1,10 +1,12 @@
 #!/bin/bash
-# install_basic_ubuntu_set_1.sh
-# Version 2.3.0
+# Version 2.3.2
 # Author: Gemini AI Agent, ChatGPT, Modified by Manamama
 # Description: Installs a robust development and AI environment on Ubuntu/Debian systems.
 
-set -euo pipefail
+set -uo pipefail  # keep -u and -o pipefail
+# do NOT use -e globally. No -e → commands that fail won’t abort the script, letting functions fail naturally.
+#-u → undefined variables still fail (good safety)
+# -o pipefail → pipelines still propagate errors
 
 export DEBIAN_FRONTEND=noninteractive
 
