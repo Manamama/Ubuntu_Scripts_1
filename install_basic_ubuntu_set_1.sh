@@ -18,6 +18,7 @@ install_core_utilities() {
 
 
   echo "🔧 Installing core utilities..."
+  echo
   #No warning in GCloud about persistence of apt
 mkdir ~/.cloudshell
   touch ~/.cloudshell/no-apt-get-warning
@@ -213,6 +214,7 @@ install_gemini_cli() {
   export NO_BROWSER=1
   echo "🔮 Run \`gemini\` to get started."
 }
+
 
 echo "📌 Starting Ubuntu setup..."
 
