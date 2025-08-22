@@ -119,7 +119,9 @@ install_system_tools() {
     # Patch CMakeLists.txt to skip SANITY_FLAGS
     sed -i '/set(SANITY_FLAGS/ s/^/#/' CMakeLists.txt
     ./build.sh
-    ./peakperf
+    #cp "$HOME/.local"
+    sudo make install 
+    #./peakperf
     cd ..
 
     sudo apt clean
@@ -194,13 +196,17 @@ install_node_nvm_npm() {
     grep -qxF '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' ~/.bashrc || echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> ~/.bashrc
 
     echo "✅ Node.js: $(node -v), npm: $(npm -v)"
+    cd ~/Downloads
 }
  
 
 # --- Sysinfo ---
 display_system_info() {
   echo "📟 System Info:"
-  neofetch || true
+  cpufetch
+  peakperf
+    neofetch || true
+    
   curl -s https://ipinfo.io/ip || echo "⚠️ IP fetch failed."
 }
 
@@ -209,9 +215,11 @@ build_llama() {
   echo "🦙 Cloning and building llama.cpp..."
 
   git clone https://github.com/ggml-org/llama.cpp  || echo "⚠️ llama.cpp already exists, continuing..."
-  cmake llama.cpp -B llama.cpp/build -DBUILD_SHARED_LIBS=ON -DGGML_CUDA=OFF -DLLAMA_CURL=ON
-  cmake --build llama.cpp/build --config Release -j --clean-first --target llama-cli llama-gguf-split
-  cd llama.cpp/build && sudo make install
+
+ cmake -S llama.cpp -B llama.cpp/build -DBUILD_SHARED_LIBS=ON -DGGML_CUDA=OFF -DLLAMA_CURL=ON -DCMAKE_INSTALL_PREFIX=/usr/local
+sudo cmake --install llama.cpp/build
+
+  #cd llama.cpp/build && sudo make install
   cd ../..
   
 }
