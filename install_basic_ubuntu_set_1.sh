@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 2.4.4
+# Version 2.4.5
 # Author: Gemini AI Agent, ChatGPT, Modified by Manamama
 # Description: Installs a robust development and AI environment on Ubuntu/Debian systems.
 
@@ -27,6 +27,7 @@ mkdir ~/.cloudshell
   
   export PATH=$PATH:$HOME/.local/bin
   mkdir -p /opt/user_home_data/
+mkdir -p '$HOME/.local/lib'
 
   # Show current .local and .cache
   #ls -ls "$HOME/.local"
