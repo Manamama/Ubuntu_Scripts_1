@@ -247,7 +247,7 @@ install_system_tools
 install_ai_tools
 
 # 5️⃣ Node.js environment (optional, after core dev tools)
-install_node_nvm_npm
+#install_node_nvm_npm
 
 # 6️⃣ LLaMA build (depends on modern CMake and system dev tools)
 build_llama
