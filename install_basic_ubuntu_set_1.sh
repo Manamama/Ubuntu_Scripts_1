@@ -162,7 +162,6 @@ install_modern_cmake() {
 
     echo "✅ Modern CMake installation complete."
 }
-
 # --- Node.js + NVM ---
 install_node_nvm_npm() {
     echo "🕸 Installing Node.js via NVM..."
@@ -175,12 +174,23 @@ install_node_nvm_npm() {
     fi
 
     # Load NVM
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    if [ -s "$NVM_DIR/nvm.sh" ]; then
+        \. "$NVM_DIR/nvm.sh"
+    else
+        echo "❌ NVM script not found at $NVM_DIR/nvm.sh"
+        return 1
+    fi
 
-    # Install and use latest LTS Node.js
-    nvm install --lts
-    nvm use --lts
-    nvm alias default 'lts/*'
+    # Install latest LTS Node.js if not already installed
+    LTS_VERSION=$(nvm ls-remote --lts | tail -1 | awk '{print $1}')
+    if ! nvm ls "$LTS_VERSION" >/dev/null 2>&1; then
+        nvm install "$LTS_VERSION"
+    fi
+
+    # Use LTS version safely
+    PROVIDED_VERSION="$LTS_VERSION"
+    nvm use "$PROVIDED_VERSION"
+    nvm alias default "$PROVIDED_VERSION"
 
     # Ensure NVM is loaded in future shells
     grep -qxF 'export NVM_DIR="$HOME/.nvm"' ~/.bashrc || echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
