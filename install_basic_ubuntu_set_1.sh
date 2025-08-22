@@ -22,8 +22,8 @@ install_core_utilities() {
   mkdir -p /opt/user_home_data/
     sudo chown $(whoami):$(whoami) -R /opt/user_home_data/
 
-  mkdir /opt/user_home_data/.local
-    mkdir /opt/user_home_data/.cache
+  mkdir -p /opt/user_home_data/.local
+    mkdir -p /opt/user_home_data/.cache
 
   ln -s /opt/user_home_data/.local $HOME/.local
   ln -s /opt/user_home_data/.cache $HOME/.cache
