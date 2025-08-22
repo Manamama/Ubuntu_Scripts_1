@@ -4,7 +4,8 @@
 # Author: Gemini AI Agent, ChatGPT, Modified by Manamama
 # Description: Installs a robust development and AI environment on Ubuntu/Debian systems.
 
-set -e
+set -euo pipefail
+
 export DEBIAN_FRONTEND=noninteractive
 
 
