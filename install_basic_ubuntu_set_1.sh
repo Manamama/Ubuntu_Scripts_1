@@ -30,7 +30,9 @@ install_core_utilities() {
 # --- AI Tools ---
 install_ai_tools() {
   echo "🧠 Installing AI/ML tools..."
-  pip install git+https://github.com/openai/whisper.git
+  pip install -U whisperx
+  #pip install git+https://github.com/openai/whisper.git
+  python -m pip install numpy torch torchvision torchaudio tensorflow-cpu jax jaxlib protobuf --upgrade --extra-index-url https://download.pytorch.org/whl/cpu
 }
 
 # --- XRDP Setup ---
