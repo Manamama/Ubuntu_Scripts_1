@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 2.4.5
+
 # Author: Gemini AI Agent, ChatGPT, Modified by Manamama
 # Description: Installs a robust development and AI environment on Ubuntu/Debian systems.
 
@@ -45,7 +45,8 @@ mkdir -p '$HOME/.local/lib'
   # Now do the actual backup (mv)
   unlink "$HOME/.local"
   #mv -n "$HOME/.local" "$HOME/.local.bak"
-  mv -n "$HOME/.cache" "$HOME/.cache.bak"
+  unlink "$HOME/.cache"
+  rm -rf "$HOME/.cache"
 
   sudo chown $(whoami):$(whoami) -R /opt/user_home_data/
   #mkdir -p /opt/user_home_data/.local 
@@ -245,6 +246,7 @@ install_gemini_cli() {
 
 echo
 echo "📌 Starting Ubuntu setup..."
+echo "Version 2.4.8"
 echo  
 # 1️⃣ Core environment and utilities first
 install_core_utilities
