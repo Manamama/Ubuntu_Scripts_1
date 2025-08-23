@@ -198,6 +198,7 @@ sudo apt autoremove -y
 # Install Node.js 22.x (latest LTS) from NodeSource
 curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt install -y nodejs
+export PATH="$HOME/.npm-global/bin:$PATH"
 
 # Verify
 node --version   # should print v22.x
@@ -233,6 +234,7 @@ install_node_nvm_npm2() {
     # Ensure NVM loads in future shells
     grep -qxF 'export NVM_DIR="$HOME/.nvm"' ~/.bashrc || echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
     grep -qxF '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' ~/.bashrc || echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> ~/.bashrc
+export PATH="$HOME/.npm-global/bin:$PATH"
 
     echo "✅ Node.js: $(node -v), npm: $(npm -v)"
     cd ~/Downloads
