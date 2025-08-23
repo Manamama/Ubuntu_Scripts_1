@@ -9,7 +9,9 @@ set -uo pipefail  # keep -u and -o pipefail
 # -o pipefail → pipelines still propagate errors
 
 export DEBIAN_FRONTEND=noninteractive
+git config --global user.email manamama@github.com
 
+git config --global user.name ManamaMa
 
 
 # --- Core Utilities ---
@@ -19,48 +21,36 @@ install_core_utilities() {
 
   echo "🔧 Installing core utilities..."
   echo
+  # --- Verify Critical Mounts ---
+  echo "🔎 Verifying that data directories are correctly relocated..."
+
+  local all_mounts_ok=true
+  local CACHE_SRC="$HOME/.cache"
+  local LIB_SRC="$HOME/.local/lib"
+
+  if ! mount | grep -q "on $CACHE_SRC"; then
+    echo "⚠️ WARNING: $CACHE_SRC is not a bind mount. The relocation logic in .bashrc may have failed."
+    all_mounts_ok=false
+  fi
+
+  if ! mount | grep -q "on $LIB_SRC"; then
+    echo "⚠️ WARNING: $LIB_SRC is not a bind mount. The relocation logic in .bashrc may have failed."
+    all_mounts_ok=false
+  fi
+
+  if [ "$all_mounts_ok" = true ]; then
+    echo "✅ Success: ~/.cache and ~/.local/lib are correctly relocated."
+  fi
+  echo
+  # --- End of Verification ---
+
   #No warning in GCloud about persistence of apt
-mkdir ~/.cloudshell
+  mkdir ~/.cloudshell
   touch ~/.cloudshell/no-apt-get-warning
 
   export DEBIAN_FRONTEND=noninteractive
   
   export PATH=$PATH:$HOME/.local/bin
-  echo Creating local libraries... 
-  mkdir -p /opt/user_home_data/
-mkdir -p '$HOME/.local/lib'
-
-  # Show current .local and .cache
-  #ls -ls "$HOME/.local"
-  #ls -ls "$HOME/.cache"
-  echo
-
-  # Check what these are, informative only
-  echo ".local:"
-  file "$HOME/.local" || echo "does not exist"
-
-  echo ".cache:"
-  file "$HOME/.cache" || echo "does not exist"
-
-  # Now do the actual backup (mv)
-  unlink "$HOME/.local"
-  #mv -n "$HOME/.local" "$HOME/.local.bak"
-  unlink "$HOME/.cache"
-  rm -rf "$HOME/.cache"
-
-  sudo chown $(whoami):$(whoami) -R /opt/user_home_data/
-  #mkdir -p /opt/user_home_data/.local 
-  mkdir /tmp/user_cache 
-  #/opt/user_home_data/.cache
-
-  #ln -s /opt/user_home_data/.local "$HOME/.local"
-  ln -s /tmp/user_cache  "$HOME/.cache"
-
-  ls -ls "$HOME/.local"
-  echo
-
-  mkdir -p "$HOME/.local/bin"
-  sudo chown -R "$(whoami):$(whoami)" "$HOME/.local"
 
   sudo apt update
   #DEBIAN_FRONTEND=noninteractive sudo apt-get install -y keyboard-configuration
@@ -110,6 +100,9 @@ install_system_tools() {
     if apt-cache show cpufetch >/dev/null 2>&1; then
         sudo apt install -y cpufetch
     else
+cd ~/Downloads/GitHub
+
+
         echo "ℹ️ cpufetch not available via apt, building from source..."
         git clone https://github.com/Dr-Noob/cpufetch
         cd cpufetch
@@ -125,6 +118,7 @@ install_system_tools() {
     python -m pip install -U youtube-dl
 
     # PeakPerf setup
+cd ~/Downloads/GitHub
     git clone https://github.com/Dr-noob/peakperf
     cd peakperf
     # Patch CMakeLists.txt to skip SANITY_FLAGS
@@ -229,10 +223,6 @@ install_node_nvm_npm2() {
     nvm use --lts
     nvm alias default 'lts/*'
 
-    # Ensure NVM loads in future shells
-    grep -qxF 'export NVM_DIR="$HOME/.nvm"' ~/.bashrc || echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
-    grep -qxF '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' ~/.bashrc || echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> ~/.bashrc
-
     echo "✅ Node.js: $(node -v), npm: $(npm -v)"
     cd ~/Downloads
 }
@@ -271,7 +261,7 @@ install_gemini_cli() {
 
 echo
 echo "📌 Starting Ubuntu setup..."
-echo "Version 2.4.8"
+echo "Version 2.5.1"
 echo  
 # 1️⃣ Core environment and utilities first
 install_core_utilities
@@ -335,5 +325,3 @@ replit_adapt() {
 
     echo "✅ Replit adaptation complete."
 }
-
-
