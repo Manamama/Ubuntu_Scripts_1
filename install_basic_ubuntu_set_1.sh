@@ -113,7 +113,7 @@ install_system_tools() {
         echo "ℹ️ cpufetch not available via apt, building from source..."
         git clone https://github.com/Dr-Noob/cpufetch
         cd cpufetch
-        sudo make install
+        sudo make install -j8
         cd ..
     fi
 
@@ -131,7 +131,7 @@ install_system_tools() {
     sed -i '/set(SANITY_FLAGS/ s/^/#/' CMakeLists.txt
     ./build.sh
     cp  ./peakperf "$HOME/.local/bin/"
-    sudo make install 
+    sudo make install -j8 
     #./peakperf
     cd ..
 
@@ -255,7 +255,8 @@ build_llama() {
   git clone https://github.com/ggml-org/llama.cpp  || echo "⚠️ llama.cpp already exists, continuing..."
 cmake -S llama.cpp -B llama.cpp/build -DBUILD_SHARED_LIBS=ON -DGGML_CUDA=OFF -DLLAMA_CURL=ON
 cmake --build llama.cpp/build --config Release -j
-cd llama.cpp/build && sudo make install
+cd llama.cpp/build 
+sudo make install -j8
 
   cd ../..
   
