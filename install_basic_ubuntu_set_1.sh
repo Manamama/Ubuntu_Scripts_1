@@ -43,15 +43,15 @@ mkdir -p '$HOME/.local/lib'
   file "$HOME/.cache" || echo "does not exist"
 
   # Now do the actual backup (mv)
-  mv -n "$HOME/.local" "$HOME/.local.bak"
+  #mv -n "$HOME/.local" "$HOME/.local.bak"
   mv -n "$HOME/.cache" "$HOME/.cache.bak"
 
   sudo chown $(whoami):$(whoami) -R /opt/user_home_data/
-  mkdir -p /opt/user_home_data/.local 
+  #mkdir -p /opt/user_home_data/.local 
   mkdir /tmp/user_cache 
   #/opt/user_home_data/.cache
 
-  ln -s /opt/user_home_data/.local "$HOME/.local"
+  #ln -s /opt/user_home_data/.local "$HOME/.local"
   ln -s /tmp/user_cache  "$HOME/.cache"
 
   ls -ls "$HOME/.local"
