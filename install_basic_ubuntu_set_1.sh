@@ -287,11 +287,10 @@ install_node_nvm_npm
 
 install_ai_tools
 
-# 6️⃣ LLaMA build (depends on modern CMake and system dev tools)
-build_llama
-
-# 7️⃣ Gemini CLI (optional, requires Node.js)
 install_gemini_cli
+
+# 6️⃣ LLaMA build (depends on modern CMake and system dev tools)
+build_llama 
 
 # 8️⃣ XRDP (optional, non-systemd systems may skip)
 configure_xrdp || echo "⚠️ XRDP setup skipped (non-systemd system)."
