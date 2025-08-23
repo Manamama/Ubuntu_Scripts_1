@@ -56,7 +56,8 @@ install_core_utilities() {
   #DEBIAN_FRONTEND=noninteractive sudo apt-get install -y keyboard-configuration
   sudo dpkg-reconfigure -f noninteractive keyboard-configuration
   sudo apt install -y aptitude ffmpeg aria2
-  sudo apt upgrade -y 
+  #This takes too much time:
+  #sudo apt upgrade -y 
   
 
   
@@ -191,6 +192,7 @@ sudo apt autoremove -y
 # Install Node.js 22.x (latest LTS) from NodeSource
 curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt install -y nodejs
+export PATH="$HOME/.npm-global/bin:$PATH"
 
 # Verify
 node --version   # should print v22.x
@@ -222,6 +224,11 @@ install_node_nvm_npm2() {
     nvm install --lts
     nvm use --lts
     nvm alias default 'lts/*'
+
+    # Ensure NVM loads in future shells
+    grep -qxF 'export NVM_DIR="$HOME/.nvm"' ~/.bashrc || echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
+    grep -qxF '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' ~/.bashrc || echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> ~/.bashrc
+export PATH="$HOME/.npm-global/bin:$PATH"
 
     echo "✅ Node.js: $(node -v), npm: $(npm -v)"
     cd ~/Downloads
@@ -276,11 +283,10 @@ install_node_nvm_npm
 
 install_ai_tools
 
-# 6️⃣ LLaMA build (depends on modern CMake and system dev tools)
-build_llama
-
-# 7️⃣ Gemini CLI (optional, requires Node.js)
 install_gemini_cli
+
+# 6️⃣ LLaMA build (depends on modern CMake and system dev tools)
+build_llama 
 
 # 8️⃣ XRDP (optional, non-systemd systems may skip)
 configure_xrdp || echo "⚠️ XRDP setup skipped (non-systemd system)."
