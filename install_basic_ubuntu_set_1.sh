@@ -66,7 +66,8 @@ mkdir -p '$HOME/.local/lib'
   #DEBIAN_FRONTEND=noninteractive sudo apt-get install -y keyboard-configuration
   sudo dpkg-reconfigure -f noninteractive keyboard-configuration
   sudo apt install -y aptitude ffmpeg aria2
-  sudo apt upgrade -y 
+  #This takes too much time:
+  #sudo apt upgrade -y 
   
 
   
