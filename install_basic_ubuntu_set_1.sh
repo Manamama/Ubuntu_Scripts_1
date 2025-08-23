@@ -26,6 +26,7 @@ mkdir ~/.cloudshell
   export DEBIAN_FRONTEND=noninteractive
   
   export PATH=$PATH:$HOME/.local/bin
+  echo Creating local libraries... 
   mkdir -p /opt/user_home_data/
 mkdir -p '$HOME/.local/lib'
 
