@@ -137,18 +137,23 @@ install_system_tools() {
     sudo add-apt-repository ppa:danielrichter2007/grub-customizer -y
     sudo apt install -y grub-customizer python3-pip scrcpy
 
-    # Android Platform Tools
-    mkdir -p ~/Downloads
-    cd ~/Downloads
-    wget -c https://dl.google.com/android/repository/platform-tools-latest-linux.zip
-    unzip -o platform-tools-latest-linux.zip
-    sudo cp -r platform-tools/* /usr/bin/
-    # Debian/Ubuntu glow
-sudo mkdir -p /etc/apt/keyrings
-curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo tee /etc/apt/keyrings/charm.gpg >/dev/null
+# Android Platform Tools
+mkdir -p ~/Downloads
+cd ~/Downloads
+wget -c https://dl.google.com/android/repository/platform-tools-latest-linux.zip
+unzip -o platform-tools-latest-linux.zip
+sudo cp -r platform-tools/* /usr/bin/
 
-echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
-sudo apt install glow
+
+sudo mkdir -p /etc/apt/keyrings
+# Use gpg --dearmor safely, overwrite without prompt
+curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor --yes -o /etc/apt/keyrings/charm.gpg
+# Add repo referencing the keyring
+echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt * *" | sudo tee /etc/apt/sources.list.d/charm.list
+
+sudo apt install -y glow
+
+
 
 }
 
