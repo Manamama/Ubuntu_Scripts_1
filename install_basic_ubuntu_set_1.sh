@@ -98,7 +98,7 @@ install_system_tools() {
 
     # Core dev tools
     sudo apt-get install -y pciutils build-essential cmake curl libcurl4-openssl-dev \
-        libomp-dev libssl-dev adb fastboot neofetch geoip-bin ranger baobab firefox python3-pip npm 
+        libomp-dev libssl-dev adb fastboot neofetch geoip-bin ranger baobab firefox python3-pip ncdu npm 
 
     # Optional: cpufetch
     if apt-cache show cpufetch >/dev/null 2>&1; then
