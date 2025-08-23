@@ -75,6 +75,9 @@ mkdir -p '$HOME/.local/lib'
 
 # --- AI Tools ---
 install_ai_tools() {
+
+npm install -g rust-just
+
   echo "🧠 Installing AI/ML tools..."
   python -m ensurepip
   python -m pip install -U whisperx numpy torch torchvision torchaudio tensorflow-cpu jax jaxlib protobuf --extra-index-url https://download.pytorch.org/whl/cpu
@@ -99,7 +102,7 @@ install_system_tools() {
 
     # Core dev tools
     sudo apt-get install -y pciutils build-essential cmake curl libcurl4-openssl-dev \
-        libomp-dev libssl-dev adb fastboot neofetch geoip-bin ranger baobab firefox python3-pip ncdu npm 
+        libomp-dev libssl-dev adb fastboot neofetch geoip-bin ranger baobab firefox python3-pip ncdu 
 
     # Optional: cpufetch
     if apt-cache show cpufetch >/dev/null 2>&1; then
@@ -144,9 +147,7 @@ install_system_tools() {
 sudo mkdir -p /etc/apt/keyrings
 curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg
 echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
-sudo apt update && sudo apt install glow
-
-npm install -g rust-just
+sudo apt install glow
 
 }
 
@@ -179,8 +180,22 @@ install_modern_cmake() {
     echo "✅ Modern CMake installation complete."
 }
 # --- Node.js + NVM ---
+
 install_node_nvm_npm() {
-    echo "🕸 Installing Node.js via NVM..."
+# Remove the old Node.js + npm first
+sudo apt remove -y nodejs npm
+
+# Install Node.js 22.x (latest LTS) from NodeSource
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# Verify
+node --version   # should print v22.x
+npm --version
+}
+
+install_node_nvm_npm2() {
+    echo "🕸 Installing Node and npm..."
  
 
     export NVM_DIR="$HOME/.nvm"
@@ -257,11 +272,9 @@ install_modern_cmake
 # 3️⃣ System and dev tools (depends on core utilities and CMake)
 install_system_tools
 
-# 4️⃣ AI/ML tools (depends on Python environment from system tools)
-install_ai_tools
+install_node_nvm_npm
 
-# 5️⃣ Node.js environment (optional, after core dev tools)
-#install_node_nvm_npm
+install_ai_tools
 
 # 6️⃣ LLaMA build (depends on modern CMake and system dev tools)
 build_llama
