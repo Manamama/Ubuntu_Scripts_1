@@ -66,6 +66,8 @@ mkdir -p '$HOME/.local/lib'
   #DEBIAN_FRONTEND=noninteractive sudo apt-get install -y keyboard-configuration
   sudo dpkg-reconfigure -f noninteractive keyboard-configuration
   sudo apt install -y aptitude ffmpeg aria2
+  sudo apt upgrade -y 
+  
 
   
   mkdir -p ~/Downloads/GitHub && cd ~/Downloads/GitHub
@@ -190,6 +192,7 @@ install_modern_cmake() {
 install_node_nvm_npm() {
 # Remove the old Node.js + npm first
 sudo apt remove -y nodejs npm
+sudo apt autoremove -y 
 
 # Install Node.js 22.x (latest LTS) from NodeSource
 curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
