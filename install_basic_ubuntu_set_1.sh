@@ -43,6 +43,7 @@ mkdir -p '$HOME/.local/lib'
   file "$HOME/.cache" || echo "does not exist"
 
   # Now do the actual backup (mv)
+  unlink "$HOME/.local"
   #mv -n "$HOME/.local" "$HOME/.local.bak"
   mv -n "$HOME/.cache" "$HOME/.cache.bak"
 
