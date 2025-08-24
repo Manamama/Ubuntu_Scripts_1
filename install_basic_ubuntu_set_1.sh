@@ -79,7 +79,7 @@ cd ~/Downloads/GitHub
 # --- AI Tools ---
 install_ai_tools() {
 
-npm install -g rust-just
+sudo npm install -g rust-just
 
   echo "🧠 Installing AI/ML tools..."
   python -m ensurepip
