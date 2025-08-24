@@ -247,7 +247,12 @@ export PATH="$HOME/.npm-global/bin:$PATH"
 # --- Sysinfo ---
 display_system_info() {
   echo "📟 System Info:"
-  cpufetch
+  #cpufetch
+#No logo: 
+cpufetch --logo-short \
+  | sed -E 's/\x1b\[[0-9;]*m//g' \
+  | sed -E ':a; s/#[^#]*#//g; ta; s/#//g; s/^[^[:alnum:]]+//; /^[[:space:]]*$/d'
+
   peakperf  -r 1 -w1
     neofetch --off || true
     
