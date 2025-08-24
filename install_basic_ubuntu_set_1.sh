@@ -248,8 +248,8 @@ export PATH="$HOME/.npm-global/bin:$PATH"
 display_system_info() {
   echo "📟 System Info:"
   cpufetch
-  peakperf
-    neofetch || true
+  peakperf  -r 1 -w1
+    neofetch --off || true
     
   curl -s https://ipinfo.io/ip || echo "⚠️ IP fetch failed."
 }
