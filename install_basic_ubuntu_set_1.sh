@@ -260,12 +260,12 @@ build_llama() {
 cd ~/Downloads/GitHub
 
   git clone https://github.com/ggml-org/llama.cpp  || echo "⚠️ llama.cpp already exists, continuing..."
-cmake -S llama.cpp -B llama.cpp/build -DBUILD_SHARED_LIBS=ON -DGGML_CUDA=OFF -DLLAMA_CURL=ON
-cmake --build llama.cpp/build --config Release -j
-cd llama.cpp/build 
-sudo make install -j8
 
-  cd ../..
+cmake -S llama.cpp -B llama.cpp/build -DBUILD_SHARED_LIBS=ON -DGGML_CUDA=OFF -DLLAMA_CURL=ON
+cmake --build llama.cpp/build --config Release -j8
+sudo cmake --install llama.cpp/build
+
+  
   
 }
 
