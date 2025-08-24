@@ -54,7 +54,7 @@ install_core_utilities() {
   # --- End of Verification ---
 
   #No warning in GCloud about persistence of apt
-  mkdir ~/.cloudshell
+  mkdir -p ~/.cloudshell
   touch ~/.cloudshell/no-apt-get-warning
 
   export DEBIAN_FRONTEND=noninteractive
@@ -70,7 +70,8 @@ install_core_utilities() {
   
 
   
-  mkdir -p ~/Downloads/GitHub && cd ~/Downloads/GitHub
+  mkdir -p ~/Downloads/GitHub 
+cd ~/Downloads/GitHub
   
 }
 
@@ -144,8 +145,7 @@ cd ~/Downloads/GitHub
     sudo apt install -y grub-customizer python3-pip scrcpy
 
 # Android Platform Tools
-mkdir -p ~/Downloads
-cd ~/Downloads
+cd ~/Downloads/GitHub
 wget -c https://dl.google.com/android/repository/platform-tools-latest-linux.zip
 unzip -o platform-tools-latest-linux.zip
 sudo cp -r platform-tools/* /usr/bin/
@@ -240,7 +240,7 @@ install_node_nvm_npm2() {
 export PATH="$HOME/.npm-global/bin:$PATH"
 
     echo "✅ Node.js: $(node -v), npm: $(npm -v)"
-    cd ~/Downloads
+    cd ~/Downloads/GitHub
 }
  
 
@@ -257,6 +257,7 @@ display_system_info() {
 # --- LLaMA Build ---
 build_llama() {
   echo "🦙 Cloning and building llama.cpp..."
+cd ~/Downloads/GitHub
 
   git clone https://github.com/ggml-org/llama.cpp  || echo "⚠️ llama.cpp already exists, continuing..."
 cmake -S llama.cpp -B llama.cpp/build -DBUILD_SHARED_LIBS=ON -DGGML_CUDA=OFF -DLLAMA_CURL=ON
@@ -277,7 +278,7 @@ install_gemini_cli() {
 
 echo
 echo "📌 Starting Ubuntu setup..."
-echo "Version 2.5.1"
+echo "Version 2.5.2"
 echo  
 # 1️⃣ Core environment and utilities first
 install_core_utilities
