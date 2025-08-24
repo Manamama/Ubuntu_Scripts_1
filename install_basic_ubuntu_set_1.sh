@@ -9,6 +9,15 @@ set -uo pipefail  # keep -u and -o pipefail
 # -o pipefail → pipelines still propagate errors
 
 export DEBIAN_FRONTEND=noninteractive
+sudo debconf-set-selections <<EOF
+keyboard-configuration keyboard-configuration/layoutcode string us
+keyboard-configuration keyboard-configuration/modelcode string pc105
+keyboard-configuration keyboard-configuration/variant string 
+keyboard-configuration keyboard-configuration/optionscode string
+EOF
+
+
+
 git config --global user.email manamama@github.com
 
 git config --global user.name ManamaMa
