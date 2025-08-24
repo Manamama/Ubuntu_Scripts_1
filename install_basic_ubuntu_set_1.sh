@@ -126,7 +126,7 @@ cd ~/Downloads/GitHub
     sudo dpkg -i gotop_3.0.0_linux_amd64.deb
 
     # youtube-dl
-    python -m pip install -U youtube-dl
+    python -m pip install -U yt-dlp youtube-dl
 
     # PeakPerf setup
 cd ~/Downloads/GitHub
