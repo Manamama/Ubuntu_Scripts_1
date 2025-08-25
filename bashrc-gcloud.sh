@@ -140,8 +140,9 @@ source /google/devshell/bashrc.google
 export PATH="$PATH:$HOME/.local/usr/bin"
 mkdir -p "$HOME/.local/var/lib/dpkg"
 
-mkdir -p /home/abovetrans/.local/var/lib/dpkg
+#mkdir -p $HOME/.local/var/lib/dpkg
 
+# git clone https://github.com/Manamama/Ubuntu_Scripts_1/tree/main 
 # And install there for permanence: sudo dpkg --instdir=/home/abovetrans/.local --admindir=/home/abovetrans/.local/var/lib/dpkg --no-triggers -i gotop_v4.2.0_linux_amd64.deb
 
 #You can bind /home, but not advised, as it is a temp, ephemeral folder:
