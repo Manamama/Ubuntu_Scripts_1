@@ -16,18 +16,23 @@ keyboard-configuration keyboard-configuration/variant string
 keyboard-configuration keyboard-configuration/optionscode string
 EOF
 
-DCMAKE_INSTALL_PREFIX=/usr/.local
 
 git config --global user.email manamama@github.com
 
 git config --global user.name ManamaMa
 
+
+export CMAKE_INSTALL_PREFIX=/usr/.local
+
+
+: '
 By default, CMake installs into /usr/local unless told otherwise. That’s why you see -- Installing: /usr/local/lib/....
 
-The variable that controls this is CMAKE_INSTALL_PREFIX
-# --- Core Utilities ---
-install_core_utilities() {
+during regular `make install` without such environmental variables. 
 
+
+The variable that controls this is CMAKE_INSTALL_PREFIX
+'
 
 
   echo "🔧 Installing core utilities..."
