@@ -135,7 +135,9 @@ source /google/devshell/bashrc.google
 # sudo apt-get install -y neofetch
 # sudo apt-get install -y plocate &
 
-export PATH="$PATH:/home/abovetrans/.local/usr/bin"
+export PATH="$PATH:$HOME/.local/usr/bin"
+mkdir -p "$HOME/.local/var/lib/dpkg"
+
 mkdir -p /home/abovetrans/.local/var/lib/dpkg
 
 # And install there for permanence: sudo dpkg --instdir=/home/abovetrans/.local --admindir=/home/abovetrans/.local/var/lib/dpkg --no-triggers -i gotop_v4.2.0_linux_amd64.deb
