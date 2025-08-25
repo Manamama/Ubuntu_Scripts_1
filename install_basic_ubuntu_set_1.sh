@@ -81,7 +81,7 @@ install_core_utilities() {
   #sudo apt upgrade -y 
   
 
-  
+  mkdir -p $HOME/.local/var/lib/dpkg
   mkdir -p ~/Downloads/GitHub 
 cd ~/Downloads/GitHub
   
@@ -136,7 +136,7 @@ cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local
 
     # gotop
     wget -c https://github.com/cjbassi/gotop/releases/download/3.0.0/gotop_3.0.0_linux_amd64.deb
-    dpkg -i gotop_3.0.0_linux_amd64.deb  --instdir=$HOME/.local
+    dpkg -i gotop_3.0.0_linux_amd64.deb  --instdir=$HOME/.local --admindir=$HOME/.local/var/lib/dpkg
 
     # youtube-dl
     python -m pip install -U yt-dlp youtube-dl
