@@ -142,7 +142,7 @@ mkdir -p "$HOME/.local/var/lib/dpkg"
 
 mkdir -p $HOME/Downloads/GitHub 
 
-# git clone  https://github.com/Manamama/Ubuntu_Scripts_1/ $HOME/Downloads/GitHub/Ubuntu_Scripts_1
+git clone  https://github.com/Manamama/Ubuntu_Scripts_1/ $HOME/Downloads/GitHub/Ubuntu_Scripts_1
 
 # And install there for permanence: sudo dpkg --instdir=/home/abovetrans/.local --admindir=/home/abovetrans/.local/var/lib/dpkg --no-triggers -i gotop_v4.2.0_linux_amd64.deb
 
@@ -166,7 +166,7 @@ export PATH="$HOME/.npm-global/bin:$PATH"
 mkdir -p "$HOME/.local/bin"
 echo "[INFO] Ensured bin dir exists at: $HOME/.local/bin"
 
-mkdir -p ~/Dowmloads/GitHub
+
 
 # --- Python site-packages relocation ---
 PYTHON_LIB=$(python -m site --user-site)
