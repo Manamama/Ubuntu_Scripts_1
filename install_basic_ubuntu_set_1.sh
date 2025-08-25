@@ -129,13 +129,14 @@ cd ~/Downloads/GitHub
         echo "ℹ️ cpufetch not available via apt, building from source..."
         git clone https://github.com/Dr-Noob/cpufetch
         cd cpufetch
-        sudo make install -j8
+cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local 
+        make install -j8
         cd ..
     fi
 
     # gotop
     wget -c https://github.com/cjbassi/gotop/releases/download/3.0.0/gotop_3.0.0_linux_amd64.deb
-    sudo dpkg -i gotop_3.0.0_linux_amd64.deb
+    dpkg -i gotop_3.0.0_linux_amd64.deb  --instdir=$HOME/.local
 
     # youtube-dl
     python -m pip install -U yt-dlp youtube-dl
@@ -160,7 +161,7 @@ cd ~/Downloads/GitHub
 cd ~/Downloads/GitHub
 wget -c https://dl.google.com/android/repository/platform-tools-latest-linux.zip
 unzip -o platform-tools-latest-linux.zip
-sudo cp -r platform-tools/* /usr/bin/
+sudo cp -r platform-tools/* /$HOME/.local/bin/
 
 
 sudo mkdir -p /etc/apt/keyrings
