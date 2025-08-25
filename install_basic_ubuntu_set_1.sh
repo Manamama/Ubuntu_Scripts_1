@@ -23,7 +23,7 @@ git config --global user.name ManamaMa
 
 
 export CMAKE_INSTALL_PREFIX=/usr/.local
-
+#But that above does not work at first, as:  
 
 : '
 By default, CMake installs into /usr/local unless told otherwise. That’s why you see -- Installing: /usr/local/lib/....
