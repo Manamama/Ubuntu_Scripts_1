@@ -99,6 +99,8 @@ alias l='ls -CF'
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
 
 
+
+
 #neofetch --off
 
 
@@ -162,6 +164,8 @@ export PATH="$HOME/.npm-global/bin:$PATH"
 mkdir -p "$HOME/.local/bin"
 echo "[INFO] Ensured bin dir exists at: $HOME/.local/bin"
 
+mkdir -p ~/Dowmloads/GitHub
+
 # --- Python site-packages relocation ---
 PYTHON_LIB=$(python -m site --user-site)
 mkdir -p "$PYTHON_LIB"
@@ -197,7 +201,7 @@ fi
 # Bind mount with exec
 
     echo "[ACTION] Binding $PYTHON_LIB_DEST -> $PYTHON_LIB ..."
-    sudo mount --bind -o remount,exec "$PYTHON_LIB_DEST" "$PYTHON_LIB"
+    sudo mount --bind -o exec "$PYTHON_LIB_DEST" "$PYTHON_LIB"
     echo "[DONE] Bound $PYTHON_LIB_DEST -> $PYTHON_LIB"
 
 
@@ -219,7 +223,7 @@ echo "[INFO] Cache destination: $CACHE_DEST"
 
 # Bind mount cache with exec
     echo "[ACTION] Binding $CACHE_DEST -> $CACHE_SRC ..."
-    sudo mount --bind -o remount,exec "$CACHE_DEST" "$CACHE_SRC"
+    sudo mount --bind -o exec "$CACHE_DEST" "$CACHE_SRC"
     echo "[DONE] Bound $CACHE_DEST -> $CACHE_SRC"
 
 # Sanity check
