@@ -31,7 +31,12 @@ By default, CMake installs into /usr/local unless told otherwise. That’s why y
 during regular `make install` without such environmental variables. 
 
 
-The variable that controls this is CMAKE_INSTALL_PREFIX
+The variable that controls this is CMAKE_INSTALL_PREFIX. 
+
+Unless CMake < 3.29 (cloudshell, Ubuntu-ish), like here, because then CMAKE_INSTALL_PREFIX controls nothing. 
+
+So here do not use it, even though cmake be hand updated below by script, as you see. 
+
 '
 
 
