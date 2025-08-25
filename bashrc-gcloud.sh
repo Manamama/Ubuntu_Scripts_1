@@ -125,6 +125,10 @@ if ! shopt -oq posix; then
 fi
 source /google/devshell/bashrc.google
 
+
+
+
+#Added: 
 # The following apt-get commands are commented out because they don't need to run on every shell startup.
 # If you need these tools, please run these commands manually once.
 # sudo apt-get install -y ncdu
