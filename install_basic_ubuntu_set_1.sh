@@ -39,7 +39,7 @@ So here do not use it, even though cmake be hand updated below by script, as you
 
 '
 
-
+install_core_utilities{
   echo "🔧 Installing core utilities..."
   echo
   # --- Verify Critical Mounts ---
@@ -297,7 +297,7 @@ install_gemini_cli() {
 
 echo
 echo "📌 Starting Ubuntu setup..."
-echo "Version 2.5.2"
+echo "Version 2.5.3"
 echo  
 # 1️⃣ Core environment and utilities first
 install_core_utilities
