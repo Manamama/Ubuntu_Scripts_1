@@ -39,7 +39,7 @@ So here do not use it, even though cmake be hand updated below by script, as you
 
 '
 
-install_core_utilities{
+install_core_utilities() {
   echo "🔧 Installing core utilities..."
   echo
   # --- Verify Critical Mounts ---
