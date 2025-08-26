@@ -1,11 +1,11 @@
-# See https://github.com/OHF-Voice/piper1-gpl/issues/7 and https://gist.github.com/Manamama/5a76b442feeb35a96b42343d06dcee6c/edit
-# This one is for Ubuntu, but could be made universal finally pacem some DIRT and modularization principles
+# See https://github.com/OHF-Voice/piper1-gpl/issues/7 and https://github.com/Manamama/piper1-gpl and https://wiki.termux.com/wiki/Termux-tts-speak
+# This one is for Ubuntu, but could be made universal finally pacem some DRY and modularization principles
 
 
 
 piperme () 
 {
-    echo "piperme: Using piper TTS to voice text. Version 3.0.1 (DIRT logic)"
+    echo "piperme: Using piper TTS to voice text on Termux. Version 3.0.3"
 
     local voice_model_dir="$HOME/.cache/piper"
     local lang_code="en"    # Default language
@@ -26,6 +26,8 @@ piperme ()
         echo "  -f <file_to_speak>: Path to a file containing text to synthesize."
         echo "Example: piperme -l en \"Hello, how are you?\""
         echo "Example: piperme -l pl -f my_polish_text.txt"
+echo
+echo "Use also: termux-tts-speak [-e engine] [-l language] [-n region] [-v variant] [-p pitch] [-r rate] [-s stream] [text-to-speak], with -e "org.woheller69.ttsengine" for the same". 
         return 0
     fi
 
@@ -109,15 +111,9 @@ piperme ()
 
     # --- Playback ---
     echo "Playing it..."
-    if command -v play-audio >/dev/null 2>&1; then
-        play-audio "$outfile"
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-        open "$outfile"
-    elif command -v ffplay >/dev/null 2>&1; then
-        ffplay -nodisp -autoexit "$outfile"
-    else
-        echo "Audio file generated at: $outfile"
-        echo "No supported playback command found (play-audio, open, or ffplay)."
-    fi
+termux-open "$outfile"
+#play-audio "$outfile"
+
+    
 }
 
