@@ -202,29 +202,33 @@ echo "[INFO] Ensured bin dir exists at: $HOME/.local/bin"
 
 # --- Python site-packages relocation ---
 PYTHON_LIB=$(python -m site --user-site)
+PERSISTENT_DEST_BASE="/root/home_extended"
+CUR_USER=$(whoami)
+CUR_HOME="$HOME"
 PYTHON_LIB_DEST="${PYTHON_LIB/$HOME/$PERSISTENT_DEST_BASE}"
 
-# Ensure destination exists
+# Ensure source and destination exist
+mkdir -p "$PYTHON_LIB"
 sudo mkdir -p "$PYTHON_LIB_DEST"
 sudo chown "$CUR_USER:$CUR_USER" "$PYTHON_LIB_DEST"
 
+# Unmount any previous mounts at the source
 while mountpoint -q "$PYTHON_LIB"; do
     echo "[RESET] Unmounting $PYTHON_LIB ..."
     sudo umount "$PYTHON_LIB"
 done
 
-# Bind + remount exec
+# Bind and remount with exec
 echo "[ACTION] Binding $PYTHON_LIB_DEST -> $PYTHON_LIB ..."
 sudo mount --bind "$PYTHON_LIB_DEST" "$PYTHON_LIB"
 sudo mount -o remount,rw,exec "$PYTHON_LIB"
 echo "[DONE] Bound with exec: $PYTHON_LIB_DEST -> $PYTHON_LIB"
 
-
 # --- Cache relocation ---
 CACHE_SRC="$CUR_HOME/.cache"
 CACHE_DEST="$PERSISTENT_DEST_BASE/.cache"
 
-# Ensure destination exists
+mkdir -p "$CACHE_SRC"
 sudo mkdir -p "$CACHE_DEST"
 sudo chown "$CUR_USER:$CUR_USER" "$CACHE_DEST"
 
@@ -234,12 +238,11 @@ while mountpoint -q "$CACHE_SRC"; do
     sudo umount "$CACHE_SRC"
 done
 
-# Bind + remount exec
+# Bind and remount with exec
 echo "[ACTION] Binding $CACHE_DEST -> $CACHE_SRC ..."
 sudo mount --bind "$CACHE_DEST" "$CACHE_SRC"
 sudo mount -o remount,rw,exec "$CACHE_SRC"
 echo "[DONE] Bound with exec: $CACHE_DEST -> $CACHE_SRC"
-
 
 # --- Sanity check ---
 echo
@@ -248,11 +251,6 @@ findmnt -R "$PYTHON_LIB"
 findmnt -R "$CACHE_SRC"
 echo
 
-# Sanity check
-echo
-echo "Relocated, bound mount points:"
-mount | grep /home
-echo 
 
 # --- End of relocation ---
 
