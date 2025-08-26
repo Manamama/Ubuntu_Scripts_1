@@ -263,6 +263,6 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
-echo ver. 2.5.3
+echo ver. 2.5.4
 echo 
 
