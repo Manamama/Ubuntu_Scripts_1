@@ -262,7 +262,7 @@ echo "Final mount state:"
 mount | grep /home
 echo
 echo "Space free on /home (persistent storage):" 
-df -h | grep Filesystem
+df -h | grep Use%
 df -h | grep /home
 
 
