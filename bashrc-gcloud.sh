@@ -177,56 +177,59 @@ PERSISTENT_DEST_BASE="/root/home_extended"
 CUR_USER=$(whoami)
 CUR_HOME="$HOME"
 
+
+
+
+
+
+# --- Python site-packages relocation ---
+PYTHON_LIB=$(python -m site --user-site)
 PYTHON_LIB_DEST="${PYTHON_LIB/$HOME/$PERSISTENT_DEST_BASE}"
-echo "[INFO] Source site-packages: $PYTHON_LIB"
-echo "[INFO] Destination site-packages: $PYTHON_LIB_DEST"
 
-# Create destination if missing
-if [ ! -d "$PYTHON_LIB_DEST" ]; then
-    echo "[ACTION] Creating $PYTHON_LIB_DEST ..."
-    sudo mkdir -p "$PYTHON_LIB_DEST"
-    sudo chown "$CUR_USER:$CUR_USER" "$PYTHON_LIB_DEST"
-    echo "[DONE] Created and set ownership for: $PYTHON_LIB_DEST"
-else
-    echo "[SKIP] Destination already exists: $PYTHON_LIB_DEST"
-fi
+# Ensure destination exists
+sudo mkdir -p "$PYTHON_LIB_DEST"
+sudo chown "$CUR_USER:$CUR_USER" "$PYTHON_LIB_DEST"
 
-# Move libraries if needed
-if [ -n "$(ls -A "$PYTHON_LIB" 2>/dev/null)" ] && [ -z "$(ls -A "$PYTHON_LIB_DEST" 2>/dev/null)" ]; then
-    echo "[ACTION] Moving libraries from $PYTHON_LIB to $PYTHON_LIB_DEST..."
-    sudo rsync -a "$PYTHON_LIB"/ "$PYTHON_LIB_DEST"/
-    echo "[DONE] Moved libraries."
-else
-    echo "[SKIP] Nothing to move (source empty or destination not empty)."
-fi
+# Reset stacked mounts if any
+while mountpoint -q "$PYTHON_LIB"; do
+    echo "[RESET] Unmounting $PYTHON_LIB ..."
+    sudo umount "$PYTHON_LIB"
+done
 
-# Bind mount with exec
-
-    echo "[ACTION] Binding $PYTHON_LIB_DEST -> $PYTHON_LIB ..."
-    sudo mount --bind -o exec "$PYTHON_LIB_DEST" "$PYTHON_LIB"
-    echo "[DONE] Bound $PYTHON_LIB_DEST -> $PYTHON_LIB"
+# Bind + remount exec
+echo "[ACTION] Binding $PYTHON_LIB_DEST -> $PYTHON_LIB ..."
+sudo mount --bind "$PYTHON_LIB_DEST" "$PYTHON_LIB"
+sudo mount -o remount,rw,exec "$PYTHON_LIB"
+echo "[DONE] Bound with exec: $PYTHON_LIB_DEST -> $PYTHON_LIB"
 
 
 # --- Cache relocation ---
 CACHE_SRC="$CUR_HOME/.cache"
 CACHE_DEST="$PERSISTENT_DEST_BASE/.cache"
 
-# Remove old symlink if exists
-[ -L "$CACHE_SRC" ] && echo "[ACTION] Removing old symlink $CACHE_SRC" && unlink "$CACHE_SRC"
-
-# Ensure source exists
-mkdir -p "$CACHE_SRC"
-echo "[INFO] Cache source: $CACHE_SRC"
-
-# Create destination and set ownership
+# Ensure destination exists
 sudo mkdir -p "$CACHE_DEST"
 sudo chown "$CUR_USER:$CUR_USER" "$CACHE_DEST"
-echo "[INFO] Cache destination: $CACHE_DEST"
 
-# Bind mount cache with exec
-    echo "[ACTION] Binding $CACHE_DEST -> $CACHE_SRC ..."
-    sudo mount --bind -o exec "$CACHE_DEST" "$CACHE_SRC"
-    echo "[DONE] Bound $CACHE_DEST -> $CACHE_SRC"
+# Reset stacked mounts if any
+while mountpoint -q "$CACHE_SRC"; do
+    echo "[RESET] Unmounting $CACHE_SRC ..."
+    sudo umount "$CACHE_SRC"
+done
+
+# Bind + remount exec
+echo "[ACTION] Binding $CACHE_DEST -> $CACHE_SRC ..."
+sudo mount --bind "$CACHE_DEST" "$CACHE_SRC"
+sudo mount -o remount,rw,exec "$CACHE_SRC"
+echo "[DONE] Bound with exec: $CACHE_DEST -> $CACHE_SRC"
+
+
+# --- Sanity check ---
+echo
+echo "Final mount state:"
+findmnt -R "$PYTHON_LIB"
+findmnt -R "$CACHE_SRC"
+echo
 
 # Sanity check
 echo
