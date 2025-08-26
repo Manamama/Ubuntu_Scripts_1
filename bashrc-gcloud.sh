@@ -227,7 +227,7 @@ while mountpoint -q "$PYTHON_LIB"; do
 done
 
 #Wipe the current ones, sic! :
-rm - rf $PYTHON_LIB
+rm -rf $PYTHON_LIB
 mkdir -p "$PYTHON_LIB"
 
 # Bind and remount with exec
@@ -251,7 +251,7 @@ while mountpoint -q "$CACHE_SRC"; do
 done
 
 #Wipe the current ones, sic! :
-rm - rf $CACHE_SRC
+rm -rf $CACHE_SRC
 mkdir -p "$CACHE_SRC"
 
 
@@ -291,6 +291,6 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
-echo ver. 2.7.5
+echo ver. 2.7.6
 echo 
 
