@@ -26,6 +26,8 @@ gc1() {
 
     echo -n "This GCloud box IP: "
     echo "$GCloud_IP" | lolcat
+echo
+echo
 
     gcloud config list
 
