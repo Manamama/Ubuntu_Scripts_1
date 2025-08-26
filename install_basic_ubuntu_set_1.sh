@@ -270,6 +270,10 @@ cpufetch --logo-short \
     neofetch --off || true
     
   curl -s https://ipinfo.io/ip || echo "⚠️ IP fetch failed."
+
+echo Changing the status that the script has been fully executed via markwr: .installed_basic_set_1
+touch "$(dirname "$0")/.installed_basic_set_1"
+
 }
 
 # --- LLaMA Build ---
