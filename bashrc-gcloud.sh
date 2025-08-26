@@ -165,7 +165,7 @@ if [ ! -d "$REPO_DIR/.git" ]; then
     git clone "$REPO_URL" "$REPO_DIR"
 else
     echo "[ACTION] Updating repo in $REPO_DIR ..."
-    (cd "$REPO_DIR" && git pull --rebase --autostash)
+    cd "$REPO_DIR" && git pull --rebase --autostash
 fi
 
 # --- Run install script if marker missing ---
