@@ -215,7 +215,7 @@ sudo chown "$CUR_USER:$CUR_USER" "$PYTHON_LIB_DEST"
 # Unmount any previous mounts at the source
 while mountpoint -q "$PYTHON_LIB"; do
     echo "[RESET] Unmounting $PYTHON_LIB ..."
-    sudo umount - l "$PYTHON_LIB"
+    sudo umount -l "$PYTHON_LIB"
 done
 
 # Bind and remount with exec
@@ -235,7 +235,7 @@ sudo chown "$CUR_USER:$CUR_USER" "$CACHE_DEST"
 # Reset stacked mounts if any
 while mountpoint -q "$CACHE_SRC"; do
     echo "[RESET] Unmounting $CACHE_SRC ..."
-    sudo umount - l "$CACHE_SRC"
+    sudo umount -l "$CACHE_SRC"
 done
 
 # Bind and remount with exec
@@ -263,6 +263,6 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
-echo ver. 2.5.6
+echo ver. 2.5.7
 echo 
 
