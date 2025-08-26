@@ -164,8 +164,7 @@ fi
 if [ ! -f "$MARKER_FILE" ]; then
     echo "[ACTION] Running install script: $INSTALL_SCRIPT"
     bash "$INSTALL_SCRIPT"
-    echo "[ACTION] Creating marker file: $MARKER_FILE"
-    touch "$MARKER_FILE"
+   
 else
     echo "[SKIP] Install script already run (marker exists: $MARKER_FILE)"
 fi
@@ -208,6 +207,11 @@ PYTHON_LIB_DEST="${PYTHON_LIB/$HOME/$PERSISTENT_DEST_BASE}"
 # Ensure destination exists
 sudo mkdir -p "$PYTHON_LIB_DEST"
 sudo chown "$CUR_USER:$CUR_USER" "$PYTHON_LIB_DEST"
+
+while mountpoint -q "$PYTHON_LIB"; do
+    echo "[RESET] Unmounting $PYTHON_LIB ..."
+    sudo umount "$PYTHON_LIB"
+done
 
 # Bind + remount exec
 echo "[ACTION] Binding $PYTHON_LIB_DEST -> $PYTHON_LIB ..."
