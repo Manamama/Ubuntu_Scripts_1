@@ -13,7 +13,7 @@ gc1() {
 #Use this: gcloud cloud-shell ssh --authorize-session --command 'source ~/.profile && whisperx' 
 
 #or use: gcloud cloud-shell ssh --dry-run
-#If quota overused: gcloud config set account prykryk@gmail.com|
+#If quota overused: gcloud config set account .... 
 # Restart only via: https://shell.cloud.google.com/?hl=en_GB&fromcloudshell=true&show=terminal
 # This does not work: gcloud cloud-shell ssh --authorize-session --command 'sudo kill 1'
 
