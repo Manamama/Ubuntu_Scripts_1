@@ -104,7 +104,19 @@ alias l='ls -CF'
 #neofetch --off
 
 
-sudo apt install neofetch -y
+#!/usr/bin/env bash
+
+mkdir -p "$HOME/.local/bin"
+
+for cmd in neofetch ncdu plocate; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        echo "$cmd not found, installing..."
+        sudo apt install -y "$cmd"
+        cp "/usr/bin/$cmd" "$HOME/.local/bin/"
+    fi
+done
+
+
  neofetch --off 
  echo -n 'This box IP:' && curl -s https://ipinfo.io/ip || echo '⚠️ IP fetch failed.' && echo && echo 
 
@@ -130,12 +142,7 @@ source /google/devshell/bashrc.google
 
 
 
-#Added: 
-# The following apt-get commands are commented out because they don't need to run on every shell startup.
-# If you need these tools, please run these commands manually once.
-# sudo apt-get install -y ncdu
-# sudo apt-get install -y neofetch
-# sudo apt-get install -y plocate &
+
 
 export PATH="$PATH:$HOME/.local/usr/bin"
 mkdir -p "$HOME/.local/var/lib/dpkg"
@@ -283,6 +290,6 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
-echo ver. 2.7.2
+echo ver. 2.7.3
 echo 
 
