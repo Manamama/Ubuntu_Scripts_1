@@ -273,39 +273,16 @@ df -h | grep /home
 
 # The 'exec' option is crucial here. Without it, shared libraries (.so files) # and other executables in $LIB_SRC cannot be loaded or run. This was # causing the 'failed to map segment from shared object' error when running # applications like whisperx that rely on libraries in this directory
 
-: '
+
 # this below is nonsense that it's not the cause of the problem of GCloud shell running out of space, only the mounts above which are hiding the real files left behind. The stragglers is the problem. Here we are leaving it for legacy reasons.
 # --- Overlayfs /home ghost usage check ---
 # This warns the user if ephemeral overlay upper-layer usage is high
-check_overlay_home_usage() {
-    MOUNT="/home"
-    THRESHOLD=$((500*1024*1024))  # 500 MB threshold for ghost/hidden files
 
-    # Get df (total allocated blocks) and du (visible files) in bytes
-    DF_USED=$(sudo df -B1 $MOUNT 2>/dev/null | awk 'NR==2 {print $3}')
-    DU_USED=$(sudo du -s -B1 $MOUNT 2>/dev/null | awk '{print $1}')
-
-    # Calculate ghost bytes (allocated but invisible)
-    GHOST=$((DF_USED - DU_USED))
-
-    if (( GHOST > THRESHOLD )); then
-        RED='\033[0;31m'
-        NC='\033[0m'
-        echo -e "${RED}WARNING: Overlay /home is nearly full!${NC}"
-        echo -e "${RED}Ephemeral/upper-layer files are consuming ~${GHOST} bytes${NC}"
-        echo -e "${RED}Standard tools (du) cannot see these files.${NC}"
-        echo -e "${RED}Action: perform a 'hard reset' of Cloud Shell via the GCloud GUI to clear ephemeral layer.${NC}"
-    fi
-}
-
-# Run the check at every shell startup
-check_overlay_home_usage
-'
 
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
-echo ver. 2.7.1
+echo ver. 2.7.2
 echo 
 
