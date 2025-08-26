@@ -108,6 +108,8 @@ alias l='ls -CF'
 
 mkdir -p "$HOME/.local/bin"
 
+
+# see also the install_deb_local() trick in install_basic_ubuntu_set_1.sh 
 for cmd in neofetch ncdu ; do
     if ! command -v "$cmd" >/dev/null 2>&1; then
         echo "$cmd not found, installing..."
@@ -144,6 +146,7 @@ source /google/devshell/bashrc.google
 
 
 
+export LD_LIBRARY_PATH="$HOME/.local/lib:$LD_LIBRARY_PATH"
 
 export PATH="$PATH:$HOME/.local/usr/bin"
 mkdir -p "$HOME/.local/var/lib/dpkg"
@@ -291,6 +294,6 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
-echo ver. 2.7.6
+echo ver. 2.7.8
 echo 
 

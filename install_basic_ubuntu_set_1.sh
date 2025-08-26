@@ -39,6 +39,54 @@ So here do not use it, even though cmake be hand updated below by script, as you
 
 '
 
+
+
+
+
+install_deb_local() {
+    local DEB="$1"
+    local TMPROOT
+    local LOCALBIN="$HOME/.local/bin"
+    local LOCALLIB="$HOME/.local/lib"
+
+    if [ -z "$DEB" ] || [ ! -f "$DEB" ]; then
+        echo "Usage: install_deb_local <package.deb>"
+        return 1
+    fi
+
+    mkdir -p "$LOCALBIN" "$LOCALLIB"
+
+    # Create temporary extraction root
+    TMPROOT=$(mktemp -d)
+
+    echo "Extracting $DEB into $TMPROOT ..."
+    dpkg-deb -x "$DEB" "$TMPROOT"
+
+    # Move binaries
+    if [ -d "$TMPROOT/usr/local/bin" ]; then
+        mv "$TMPROOT/usr/local/bin/"* "$LOCALBIN/"
+    fi
+
+    # Move libraries (optional)
+    if [ -d "$TMPROOT/usr/local/lib" ]; then
+        mv "$TMPROOT/usr/local/lib/"* "$LOCALLIB/" 2>/dev/null || true
+    fi
+
+    # Clean up
+    rm -rf "$TMPROOT"
+
+    echo "Installation complete."
+    echo "Binaries in $LOCALBIN, libraries in $LOCALLIB."
+    echo "Add to your environment if needed:"
+    echo "export PATH=\"$LOCALBIN:\$PATH\""
+    echo "export LD_LIBRARY_PATH=\"$LOCALLIB:\$LD_LIBRARY_PATH\""
+}
+
+
+# Example usage:
+# install_deb_local /path/to/gotop_3.0.0_linux_amd64.deb
+
+
 install_core_utilities() {
   echo "🔧 Installing core utilities..."
   echo
@@ -76,7 +124,7 @@ install_core_utilities() {
   sudo apt update
   #DEBIAN_FRONTEND=noninteractive sudo apt-get install -y keyboard-configuration
   sudo dpkg-reconfigure -f noninteractive keyboard-configuration
-  sudo apt install -y aptitude ffmpeg aria2
+  sudo apt install -y aptitude plocate ffmpeg aria2
   #This takes too much time:
   #sudo apt upgrade -y 
   
@@ -136,7 +184,7 @@ cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local
 
     # gotop
     wget -c https://github.com/cjbassi/gotop/releases/download/3.0.0/gotop_3.0.0_linux_amd64.deb
-    dpkg -i gotop_3.0.0_linux_amd64.deb  --instdir=$HOME/.local --admindir=$HOME/.local/var/lib/dpkg
+    install_deb_local gotop_3.0.0_linux_amd64
 
     # youtube-dl
     python -m pip install -U yt-dlp youtube-dl
