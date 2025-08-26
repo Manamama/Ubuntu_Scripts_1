@@ -197,16 +197,6 @@ echo "[INFO] Ensured bin dir exists at: $HOME/.local/bin"
 
 
 
-# --- Python site-packages relocation ---
-PYTHON_LIB=$(python -m site --user-site)
-mkdir -p "$PYTHON_LIB"
-echo "[INFO] Ensured site-packages dir exists at: $PYTHON_LIB"
-
-PERSISTENT_DEST_BASE="/root/home_extended"
-CUR_USER=$(whoami)
-CUR_HOME="$HOME"
-
-
 
 
 
@@ -218,12 +208,6 @@ PYTHON_LIB_DEST="${PYTHON_LIB/$HOME/$PERSISTENT_DEST_BASE}"
 # Ensure destination exists
 sudo mkdir -p "$PYTHON_LIB_DEST"
 sudo chown "$CUR_USER:$CUR_USER" "$PYTHON_LIB_DEST"
-
-# Reset stacked mounts if any
-while mountpoint -q "$PYTHON_LIB"; do
-    echo "[RESET] Unmounting $PYTHON_LIB ..."
-    sudo umount "$PYTHON_LIB"
-done
 
 # Bind + remount exec
 echo "[ACTION] Binding $PYTHON_LIB_DEST -> $PYTHON_LIB ..."
@@ -277,6 +261,6 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
-echo ver. 2.5.2
+echo ver. 2.5.3
 echo 
 
