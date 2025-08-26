@@ -108,7 +108,7 @@ alias l='ls -CF'
 
 mkdir -p "$HOME/.local/bin"
 
-for cmd in neofetch ncdu plocate; do
+for cmd in neofetch ncdu ; do
     if ! command -v "$cmd" >/dev/null 2>&1; then
         echo "$cmd not found, installing..."
         sudo apt install -y "$cmd"
@@ -116,6 +116,7 @@ for cmd in neofetch ncdu plocate; do
     fi
 done
 
+#plocate
 
  neofetch --off 
  echo -n 'This box IP:' && curl -s https://ipinfo.io/ip || echo '⚠️ IP fetch failed.' && echo && echo 
@@ -290,6 +291,6 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
-echo ver. 2.7.3
+echo ver. 2.7.5
 echo 
 
