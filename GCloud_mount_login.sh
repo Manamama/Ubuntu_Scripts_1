@@ -29,7 +29,7 @@ gc1() {
 echo
 echo
 
-    gcloud config list
+   #Useful info: gcloud config list 
 
     # Update rclone config
     rclone config update 'GCloud_01' host "$GCloud_IP"
@@ -41,36 +41,36 @@ echo
     echo
 
     # Mount rclone remote
-    MOUNT_PATH=~/storage/GCloud_01_rclone
-    mkdir -p "$MOUNT_PATH"
-    echo "Mounting rclone remote at $MOUNT_PATH..."
-    mount | grep gcloud | lolcat
+    RCLONE_MOUNT_PATH=~/storage/GCloud_01_rclone_$GCloud_USER
+    mkdir -p "$RCLONE_MOUNT_PATH"
+    echo "Mounting rclone remote at $RCLONE_MOUNT_PATH..."
+    mount | grep GCloud | lolcat
 
     # Run umount and rclone mount attached to Termux FUSE server
 echo "✅ Rclone umount and remount command issued in background... "
 
-sudo umount /data/data/com.termux/files/home/storage/GCloud_01_rclone
+sudo umount $RCLONE_MOUNT_PATH
 
 time sudo rclone mount \
     --config /data/data/com.termux/files/home/.config/rclone/rclone.conf \
-    GCloud_01: "$MOUNT_PATH" \
+    GCloud_01: "$RCLONE_MOUNT_PATH" \
     --allow-other \
     --vfs-cache-mode writes  &
 #Nota bene: --daemon does not work well
     
-echo "Test of mount:" 
-sudo mount | grep $MOUNT_PATH
-
+#echo "Test of mount:" 
+#sudo mount | grep $RCLONE_MOUNT_PATH | lolcat
 
     # Mount Cloud Shell via SSHFS as fallback
-    SSHFS_MOUNT=~/storage/GCloud_01_sshfs
+    SSHFS_MOUNT=~/storage/GCloud_01_$GCloud_USER_sshfs
     mkdir -p "$SSHFS_MOUNT"
     KEY_PATH=/data/data/com.termux/files/home/.ssh/google_compute_engine
 
-    if mountpoint -q "$SSHFS_MOUNT"; then
-        echo "✅ Already mounted at $SSHFS_MOUNT"
-    else
-        echo "🔌 Mounting Cloud Shell via SSHFS at $SSHFS_MOUNT..."
+    #if mountpoint -q "$SSHFS_MOUNT"; then
+        #echo "✅ Already mounted at $SSHFS_MOUNT"
+    #else
+        echo "🔌 Unmounting and mounting Cloud Shell via SSHFS at $SSHFS_MOUNT..."
+sudo umount $SSHFS_MOUNT
         sudo sshfs "$GCloud_USER@$GCloud_IP": "$SSHFS_MOUNT" -p 6000 \
             -o IdentityFile="$KEY_PATH" \
             -o StrictHostKeyChecking=no \
@@ -80,13 +80,13 @@ sudo mount | grep $MOUNT_PATH
             -o TCPKeepAlive=yes \
             -o allow_other
  echo "Test of mount: "
-sudo mount | grep $SSHFS_MOUNT
+sudo mount | grep $SSHFS_MOUNT | lolcat
 
-    fi
+    #fi
 
     echo
-    echo "To restart GCloud, use:"
-    echo "gcloud cloud-shell ssh --authorize-session --command 'sudo kill 1'" | lolcat
+    echo "To reset GCloud, use:"
+    echo "https://shell.cloud.google.com/?hl=en_GB&fromcloudshell=true&show=terminal" | lolcat
     echo "👉 Starting gcloud cloud-shell ssh --authorize-session ..."
     gcloud cloud-shell ssh --authorize-session
 
