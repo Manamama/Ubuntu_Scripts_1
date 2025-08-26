@@ -248,6 +248,6 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
-echo ver. 2.4.3
+echo ver. 2.51
 echo 
 
