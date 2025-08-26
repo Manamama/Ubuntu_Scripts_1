@@ -45,6 +45,8 @@ gc1() {
     mount | grep gcloud | lolcat
 
     # Run umount and rclone mount attached to Termux FUSE server
+echo "✅ Rclone umount and remount command issued in background... "
+
 sudo umount /data/data/com.termux/files/home/storage/GCloud_01_rclone
 
 time sudo rclone mount \
@@ -53,19 +55,20 @@ time sudo rclone mount \
     --allow-other \
     --vfs-cache-mode writes  &
 #Nota bene: --daemon does not work well
-    echo "✅ Rclone mount command issued in background. Test: "
+    
+echo "Test of mount:" 
 sudo mount | grep $MOUNT_PATH
 
 
     # Mount Cloud Shell via SSHFS as fallback
-    SSHFS_MOUNT=~/storage/gcloud_01
+    SSHFS_MOUNT=~/storage/GCloud_01_sshfs
     mkdir -p "$SSHFS_MOUNT"
     KEY_PATH=/data/data/com.termux/files/home/.ssh/google_compute_engine
 
     if mountpoint -q "$SSHFS_MOUNT"; then
         echo "✅ Already mounted at $SSHFS_MOUNT"
     else
-        echo "🔌 Mounting Cloud Shell via SSHFS..."
+        echo "🔌 Mounting Cloud Shell via SSHFS at $SSHFS_MOUNT..."
         sudo sshfs "$GCloud_USER@$GCloud_IP": "$SSHFS_MOUNT" -p 6000 \
             -o IdentityFile="$KEY_PATH" \
             -o StrictHostKeyChecking=no \
@@ -74,10 +77,13 @@ sudo mount | grep $MOUNT_PATH
             -o ServerAliveCountMax=3 \
             -o TCPKeepAlive=yes \
             -o allow_other
+ echo "Test of mount: "
+sudo mount | grep $SSHFS_MOUNT
+
     fi
 
     echo
-    echo "To restart it, use:"
+    echo "To restart GCloud, use:"
     echo "gcloud cloud-shell ssh --authorize-session --command 'sudo kill 1'" | lolcat
     echo "👉 Starting gcloud cloud-shell ssh --authorize-session ..."
     gcloud cloud-shell ssh --authorize-session

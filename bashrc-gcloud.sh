@@ -247,8 +247,10 @@ echo "[DONE] Bound with exec: $CACHE_DEST -> $CACHE_SRC"
 # --- Sanity check ---
 echo
 echo "Final mount state:"
-findmnt -R "$PYTHON_LIB"
-findmnt -R "$CACHE_SRC"
+#findmnt -R "$PYTHON_LIB"
+#findmnt -R "$CACHE_SRC"
+
+mount | grep /home
 echo
 
 
@@ -263,6 +265,6 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
-echo ver. 2.5.7
+echo ver. 2.5.8
 echo 
 
