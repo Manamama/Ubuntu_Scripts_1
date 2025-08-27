@@ -151,34 +151,7 @@ export LD_LIBRARY_PATH="$HOME/.local/lib:$LD_LIBRARY_PATH"
 export PATH="$PATH:$HOME/.local/usr/bin"
 mkdir -p "$HOME/.local/var/lib/dpkg"
 
-mkdir -p $HOME/Downloads/GitHub 
 
-#idempotent init run: 
-
-REPO_URL="https://github.com/Manamama/Ubuntu_Scripts_1/"
-REPO_DIR="$HOME/Downloads/GitHub/Ubuntu_Scripts_1"
-INSTALL_SCRIPT="$REPO_DIR/install_basic_ubuntu_set_1.sh"
-MARKER_FILE="$REPO_DIR/.installed_basic_set_1"
-
-# --- Ensure repo directory exists ---
-mkdir -p "$(dirname "$REPO_DIR")"
-
-if [ ! -d "$REPO_DIR/.git" ]; then
-    echo "[ACTION] Cloning repo into $REPO_DIR ..."
-    git clone "$REPO_URL" "$REPO_DIR"
-else
-    echo "[ACTION] Updating repo in $REPO_DIR ..."
-    cd "$REPO_DIR" && git pull --rebase --autostash
-fi
-
-# --- Run install script if marker missing ---
-if [ ! -f "$MARKER_FILE" ]; then
-    echo "[ACTION] Running install script: $INSTALL_SCRIPT"
-    bash "$INSTALL_SCRIPT"
-   
-else
-    echo "[SKIP] Install script already run (marker exists: $MARKER_FILE)"
-fi
 
 
 
@@ -190,7 +163,7 @@ fi
 
 
 export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-export LD_LIBRARY_PATH=$HOME/.local/lib:$LD_LIBRARY_PATH
+
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
@@ -290,10 +263,39 @@ df -h | grep /home
 # This warns the user if ephemeral overlay upper-layer usage is high
 
 
+mkdir -p $HOME/Downloads/GitHub 
+
+#idempotent init run: 
+
+REPO_URL="https://github.com/Manamama/Ubuntu_Scripts_1/"
+REPO_DIR="$HOME/Downloads/GitHub/Ubuntu_Scripts_1"
+INSTALL_SCRIPT="$REPO_DIR/install_basic_ubuntu_set_1.sh"
+MARKER_FILE="$REPO_DIR/.installed_basic_set_1"
+
+# --- Ensure repo directory exists ---
+mkdir -p "$(dirname "$REPO_DIR")"
+
+if [ ! -d "$REPO_DIR/.git" ]; then
+    echo "[ACTION] Cloning repo into $REPO_DIR ..."
+    git clone "$REPO_URL" "$REPO_DIR"
+else
+    echo "[ACTION] Updating repo in $REPO_DIR ..."
+    cd "$REPO_DIR" && git pull --rebase --autostash
+fi
+
+# --- Run install script if marker missing ---
+if [ ! -f "$MARKER_FILE" ]; then
+    echo "[ACTION] Running install script: $INSTALL_SCRIPT"
+    bash "$INSTALL_SCRIPT"
+   
+else
+    echo "[SKIP] Install script already run (marker exists: $MARKER_FILE)"
+fi
+
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
-echo ver. 2.7.8
+echo ver. 2.8.1
 echo 
 
