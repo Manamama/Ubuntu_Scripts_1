@@ -120,7 +120,9 @@ done
 
 #plocate
 
- neofetch --off 
+ #neofetch --off 
+fastfetch -l none
+
  echo -n 'This box IP:' && curl -s https://ipinfo.io/ip || echo '⚠️ IP fetch failed.' && echo && echo 
 
 : '

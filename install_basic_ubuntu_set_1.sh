@@ -181,6 +181,11 @@ cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local
         make install -j8
         cd ..
     fi
+git clone https://github.com/fastfetch-cli/fastfetch
+cd fastfetch 
+#sudo make install
+cmake -B build -DCMAKE_INSTALL_PREFIX=$HOME/.local
+cmake --build build --target install
 
     # gotop
     wget -c https://github.com/cjbassi/gotop/releases/download/3.0.0/gotop_3.0.0_linux_amd64.deb
@@ -316,7 +321,9 @@ cpufetch --logo-short \
 
   peakperf  -r 1 -w1
     neofetch --off || true
-    
+    fastfetch -l none
+
+
   curl -s https://ipinfo.io/ip || echo "⚠️ IP fetch failed."
 
 echo Changing the status that the script has been fully executed via markwr: .installed_basic_set_1
