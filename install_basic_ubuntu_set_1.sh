@@ -128,7 +128,9 @@ install_core_utilities() {
   #This takes too much time:
   #sudo apt upgrade -y 
   
-
+#Just in case, never enough:
+mkdir -p /home/codespace/./home/codespace/.local/lib/bin
+mkdir -p 
   mkdir -p $HOME/.local/var/lib/dpkg
   mkdir -p ~/Downloads/GitHub 
 cd ~/Downloads/GitHub
@@ -357,7 +359,7 @@ install_gemini_cli() {
 
 echo
 echo "📌 Starting Ubuntu setup..."
-echo "Version 2.5.3"
+echo "Version 2.5.4"
 echo  
 # 1️⃣ Core environment and utilities first
 install_core_utilities
