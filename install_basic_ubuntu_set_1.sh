@@ -191,7 +191,10 @@ cmake --build build --target install
 
     # gotop
     wget -c https://github.com/cjbassi/gotop/releases/download/3.0.0/gotop_3.0.0_linux_amd64.deb
-    install_deb_local gotop_3.0.0_linux_amd64
+
+#for good measure:
+sudo dpkg -i gotop_3.0.0_linux_amd64.deb
+    install_deb_local gotop_3.0.0_linux_amd64.deb
 
     # youtube-dl
     python -m pip install -U yt-dlp youtube-dl

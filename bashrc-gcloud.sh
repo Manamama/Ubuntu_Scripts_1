@@ -150,7 +150,8 @@ source /google/devshell/bashrc.google
 
 export LD_LIBRARY_PATH="$HOME/.local/lib:$LD_LIBRARY_PATH"
 
-export PATH="$PATH:$HOME/.local/usr/bin"
+export PATH="$PATH:$HOME/.local/usr/bin:'/$(python3 -c 'import sysconfig; print(sysconfig.get_config_var("BINDIR"))'')
+"
 mkdir -p "$HOME/.local/var/lib/dpkg"
 
 
@@ -182,15 +183,26 @@ echo "[INFO] Ensured bin dir exists at: $HOME/.local/bin"
 
 
 
-
-
-
-
-# --- Python site-packages relocation ---
-PYTHON_LIB=$(python -m site --user-site)
-PERSISTENT_DEST_BASE="/root/home_extended"
 CUR_USER=$(whoami)
 CUR_HOME="$HOME"
+
+#Checking the OS and naming
+
+
+
+PYTHON_LIB=$(python -m site --user-site)
+
+#Asssumes GCloud: 
+PERSISTENT_DEST_BASE="/root/home_extended"
+
+
+if [ -n "$CODESPACE_NAME" ]; then
+    echo "[INFO] Detected GitHub Codespace: using /tmp for temporary storage"
+    PERSISTENT_DEST_BASE="/tmp"
+else
+
+# --- Python site-packages relocation ---
+
 PYTHON_LIB_DEST="${PYTHON_LIB/$HOME/$PERSISTENT_DEST_BASE}"
 
 # Ensure source and destination exist
@@ -214,7 +226,11 @@ sudo mount --bind "$PYTHON_LIB_DEST" "$PYTHON_LIB"
 sudo mount -o remount,rw,exec "$PYTHON_LIB"
 echo "[DONE] Bound with exec: $PYTHON_LIB_DEST -> $PYTHON_LIB"
 
-# --- Cache relocation ---
+fi
+
+# --- Cache relocation , ver. 1.1---
+
+
 CACHE_SRC="$CUR_HOME/.cache"
 CACHE_DEST="$PERSISTENT_DEST_BASE/.cache"
 
@@ -242,15 +258,32 @@ echo "[DONE] Bound with exec: $CACHE_DEST -> $CACHE_SRC"
 # --- Sanity check ---
 echo
 echo "Final mount state:"
-#findmnt -R "$PYTHON_LIB"
-#findmnt -R "$CACHE_SRC"
-
 mount | grep /home
-echo
-echo "Space free on /home (persistent storage):" 
-df -h | grep Use%
-df -h | grep /home
 
+# swap make , for Github mostly
+# 1️⃣ Create a 16 GB swap file
+sudo fallocate -l 16G /tmp/swapfile
+
+# 2️⃣ Restrict permissions
+sudo chmod 600 /tmp/swapfile
+
+# 3️⃣ Set up the swap area
+sudo mkswap /tmp/swapfile
+
+# 4️⃣ Enable the swap
+sudo swapon /tmp/swapfile
+
+# 5️⃣ Verify
+swapon --show
+free -h
+
+echo
+echo "Space free on /home or /workspace (on the persistent thus too limited storage):" 
+df -h | grep Use%
+#if GCloud or like:
+df -h | grep /home
+#if GitHub Workspace or like:
+df -h | grep /workspace
 
 # --- End of relocation ---
 
@@ -298,6 +331,6 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
-echo ver. 2.8.1
+echo ver. 2.9.1
 echo 
 

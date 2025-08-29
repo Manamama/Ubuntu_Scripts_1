@@ -10,17 +10,23 @@ process_audio() {
     echo "   → file: $file"
     echo "   → full_path_without_ext: $full_path_without_ext"
 
-    echo -e "🗃️  Input file duration: \e[34m$(mediainfo --Inform='Audio;%Duration/String2%' "$file")\e[0m"
+    echo -n "🗃️  Input file duration: "
+echo $(mediainfo --Inform='Audio;%Duration/String2%' "$file") | lolcat
+
     echo
 
-    echo "Running whisperx with highlighted words, float32 precision (needed on Android), --threads 4 (out of 8, so that it does not crash because of the memory error)..."
-    echo "Add --highlight_words False --no_align to speed up."
+    echo "Running whisperx with highlighted words, float32 precision (needed on Android), --threads 6, --model medium."
+echo "(If that crashes Droid, because of the memory error, change to '--model small', provide language: '--language Polish' to avoid detection, restart Android, use outside machine e.g. GitHub Codespaces, via ssh call...)"
+    echo -n "Add " 
+echo -n "--highlight_words False --no_align" | lolcat
+echo " to speed up."
 
     whisperx \
         --compute_type float32 \
         --print_progress True \
         --fp16 False \
-        --threads 4 \
+        --threads 6 \
+--model medium \
         --output_dir "$dir_name" \
         --highlight_words True \
         "$file" "${@:2}"
@@ -48,7 +54,8 @@ whisperxme_deb() {
     local temp_path="$PREFIX/tmp/whisperx"
     mkdir -p "$temp_path"
 
-    
+   echo
+
     echo "Received filepath: $file_path"
 
     if [[ "$file_path" == $external_sd_path* ]]; then
@@ -64,6 +71,10 @@ whisperxme_deb() {
         return 1
     fi
     
+echo "Break now and add " 
+echo "--highlight_words False --no_align" | lolcat
+echo " to speed up."
+
     echo "Calling whisperxme in prooted Debian with: $file_path ${@:2} ..."
     proot-distro login debian --shared-tmp -- whisperxme "$file_path" "${@:2}"
 
