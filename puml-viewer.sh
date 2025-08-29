@@ -64,6 +64,8 @@ json_to_puml() {
 
 puml_business() {
   local puml_file="$1"
+  
+  #TODO: add the theme here somehow, see https://plantuml.com/theme
   plantuml "$puml_file"
 
   local png_file="${puml_file%.puml}.png"
