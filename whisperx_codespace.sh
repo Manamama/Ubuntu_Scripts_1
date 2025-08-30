@@ -56,7 +56,7 @@ echo
 
 # ================= Step 3: Detect Codespace =================
 echo "🔍 Detecting available GitHub Codespace..."
-CODESPACE_NAME=$(gh codespace list --json name,state | jq -r '.[]  | .name' | head -n1)
+CODESPACE_NAME=$(gh codespace list --json name,state | jq -r '.[] | .name' | head -n1)
 if [[ -z "$CODESPACE_NAME" ]]; then
     echo "❌ No available Codespace found"
     exit 1
@@ -77,7 +77,7 @@ echo
 # ================= Step 5: Verify remote file existence =================
 echo "🔍 Verifying remote file existence..."
 if gh codespace ssh -c "$CODESPACE_NAME" "test -f \"\$HOME/Downloads/$base_filename\""; then
-    echo "✅ Remote file exists: ~/Downloads/$base_filename"
+    echo "✅ Remote file exists: \"~/Downloads/$base_filename\" "
 else
     echo "❌ Remote file missing, cannot continue"
     exit 1
@@ -86,7 +86,7 @@ echo
 
 # ================= Step 6: Run WhisperX in Codespace =================
 echo "🤖 Running WhisperX inside Codespace..."
-run_cmd="time whisperx --compute_type float32 --model medium \$HOME/Downloads/$base_filename --output_dir \$HOME/Downloads/ --print_progress True $extra_args"
+run_cmd="time whisperx --compute_type float32 --model medium \"\$HOME/Downloads/$base_filename\" --output_dir \$HOME/Downloads/ --print_progress True $extra_args"
 echo "📜 Command: $run_cmd"
 
 if gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd"; then
@@ -102,7 +102,7 @@ remote_srt="\$HOME/Downloads/${filename_no_ext}.srt"
 remote_json="\$HOME/Downloads/${filename_no_ext}.json"
 
 echo "🔍 Checking remote output files..."
-if gh codespace ssh -c "$CODESPACE_NAME" "test -f $remote_srt && test -f $remote_json"; then
+if gh codespace ssh -c "$CODESPACE_NAME" "test -f \"$remote_srt\" && test -f \"$remote_json\" "; then
     echo "✅ Both .srt and .json exist remotely"
 else
     echo "❌ Output files missing remotely"
@@ -128,7 +128,7 @@ done
 echo "But let us check:"
 file "$file_dir/${filename_no_ext}.srt"
 echo "Statistics via 'wc':"
-wc $file_dir/${filename_no_ext}.srt
+wc "$file_dir/${filename_no_ext}.srt"
 echo
 
 # ================= Step 9: Play notification and open SRT =================
