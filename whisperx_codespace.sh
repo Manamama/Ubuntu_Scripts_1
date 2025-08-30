@@ -66,7 +66,7 @@ echo
 
 # ================= Step 4: Upload to Codespace =================
 echo "⬆️  Uploading $file to Codespace..."
-if gh codespace cp -e -c "$CODESPACE_NAME" "$file" "remote:~/Downloads/"; then
+if time gh codespace cp -e -c "$CODESPACE_NAME" "$file" "remote:~/Downloads/"; then
     echo "✅ Upload complete: ~/Downloads/$base_filename"
 else
     echo "❌ Upload failed"
@@ -89,7 +89,7 @@ echo "🤖 Running WhisperX inside Codespace..."
 run_cmd="time whisperx --compute_type float32 --model medium \"\$HOME/Downloads/$base_filename\" --output_dir \$HOME/Downloads/ --print_progress True $extra_args"
 echo "📜 Command: $run_cmd"
 
-if gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd"; then
+if time gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd"; then
     echo "✅ WhisperX completed successfully inside Codespace"
 else
     echo "❌ WhisperX run failed inside Codespace"
@@ -117,21 +117,21 @@ remote_json="remote:~/Downloads/${filename_no_ext}.json"
 
 for f in "$remote_srt" "$remote_json"; do
     echo "🔍 Downloading ${f#remote:}..."
-    if ! gh codespace cp -e -c "$CODESPACE_NAME" "$f" "$file_dir/"; then
-        echo "❌ Failed to download ${f#remote:}"
-    else
+    if time gh codespace cp -e -c "$CODESPACE_NAME" "$f" "$file_dir/"; then
         echo "✅ Downloaded ${f#remote:}"
-
+    else
+        
+echo "❌ Failed to download ${f#remote:}"
     fi
 done
 
-echo "But let us check:"
+echo "But let us check also local version of the .srt file:"
 file "$file_dir/${filename_no_ext}.srt"
 echo "Statistics via 'wc':"
 wc "$file_dir/${filename_no_ext}.srt"
 echo
 
-# ================= Step 9: Play notification and open SRT =================
+# ================= Step 9: Play notification  =================
 echo "🔔 Playing notification sound..."
 termux-media-player play "/storage/5951-9E0F/Audio/Funny_Sounds/Quack Quack-SoundBible.com-620056916.mp3"
 echo "✅ Notification sound played"
@@ -141,8 +141,9 @@ echo "✅ Notification sound played"
 # Done
 # ---------------------------
 
-echo "📂 Opening audio file $file..."
+echo "📂 Opening (sharing) audio file '$file'..."
 termux-share "$file"
-echo "✅ $file with SRT file opened"
+echo "✅ '$file' with the corresponding mew SRT file has been invoked."
 echo "---------------------"
-echo "🎉 All steps completed successfully. WhisperX output ready: $file_dir/${filename_no_ext}.srt"
+echo -n "🎉 All steps completed successfully. WhisperX output ready:" 
+ echo '$file_dir/${filename_no_ext}.srt'  " | lolcat
