@@ -88,7 +88,7 @@ echo
 
 # ================= Step 6: Run WhisperX in Codespace =================
 echo "🤖 Running WhisperX inside Codespace..."
-run_cmd="time whisperx --compute_type float32 --model medium \"\$HOME/Downloads/$base_filename\" --output_dir \$HOME/Downloads/ --print_progress True $extra_args"
+run_cmd="whisperx --compute_type float32 --model medium \"\$HOME/Downloads/$base_filename\" --output_dir \$HOME/Downloads/ --print_progress True $extra_args"
 echo "📜 Command: $run_cmd"
 
 if time gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd"; then
