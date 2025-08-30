@@ -30,9 +30,10 @@ base_filename=$(basename "$file")
 filename_no_ext="${base_filename%.*}"
 file_dir=$(dirname "$file")
 
-echo "ℹ️  Input file (maybe shared, then path is changed): $file"
-echo "ℹ️  Extra arguments for WhisperX: $extra_args"
-echo "ℹ️  Base filename: $base_filename"
+echo "Input file (maybe shared, then path is changed): "
+echo "$file" | lolcat
+echo "Extra arguments for WhisperX: $extra_args"
+echo "Base filename: $base_filename"
 echo
 
 # ================= Step 1: Check input file =================
@@ -143,9 +144,10 @@ echo "✅ Notification sound played"
 # Done
 # ---------------------------
 
-echo -n "📂 Opening (sharing) audio file" echo "'$file'..." | lolcat
+echo -n "📂 Opening (sharing) audio file: " 
+echo "'$file'..." | lolcat
 termux-share "$file"
-echo "✅ '$file' with the corresponding mew SRT file has been invoked."
+echo "✅ File '$file' with the corresponding mew SRT file has been invoked."
 echo "---------------------"
 echo -n "🎉 All steps completed successfully. WhisperX output ready e.g. here:" 
  echo " '$file_dir/${filename_no_ext}.srt'  " | lolcat
