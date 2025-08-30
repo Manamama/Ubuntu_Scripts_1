@@ -56,7 +56,7 @@ echo
 
 # ================= Step 3: Detect Codespace =================
 echo "🔍 Detecting available GitHub Codespace..."
-CODESPACE_NAME=$(gh codespace list --json name,state | jq -r '.[] | select(.state=="Available") | .name' | head -n1)
+CODESPACE_NAME=$(gh codespace list --json name,state | jq -r '.[]  | .name' | head -n1)
 if [[ -z "$CODESPACE_NAME" ]]; then
     echo "❌ No available Codespace found"
     exit 1
@@ -76,7 +76,7 @@ echo
 
 # ================= Step 5: Verify remote file existence =================
 echo "🔍 Verifying remote file existence..."
-if gh codespace ssh -c "$CODESPACE_NAME" "test -f \$HOME/Downloads/$base_filename"; then
+if gh codespace ssh -c "$CODESPACE_NAME" "test -f \"\$HOME/Downloads/$base_filename\""; then
     echo "✅ Remote file exists: ~/Downloads/$base_filename"
 else
     echo "❌ Remote file missing, cannot continue"
