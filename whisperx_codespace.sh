@@ -67,7 +67,7 @@ echo "$CODESPACE_NAME" | lolcat
 echo
 
 # ================= Step 4: Upload to Codespace =================
-echo "⬆️  Uploading $file to Codespace..."
+echo "⬆️  Uploading '$file' to Codespace..."
 if time gh codespace cp -e -c "$CODESPACE_NAME" "$file" "remote:~/Downloads/" | lolcat ; then
     echo "✅ Upload complete: ~/Downloads/$base_filename"
 else
