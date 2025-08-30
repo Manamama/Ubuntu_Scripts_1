@@ -144,10 +144,13 @@ echo "✅ Notification sound played"
 # Done
 # ---------------------------
 
-echo -n "📂 Opening (sharing) audio file: " 
+echo -n "📂 Opening (or sharing) audio file: " 
 echo "'$file'..." | lolcat
-termux-share "$file"
-echo "✅ File '$file' with the corresponding mew SRT file has been invoked."
+# this version sharing sometimes works better somehow with some apps:
+#termux-share "$file"
+termux-open "$file"
+
+echo "✅ File '$file', with the corresponding newly whisperx created SRT file, has been invoked."
 echo "---------------------"
-echo -n "🎉 All steps completed successfully. WhisperX output ready e.g. here:" 
+echo -n "🎉 All the steps completed successfully. WhisperX output is ready e.g. here: " 
  echo " '$file_dir/${filename_no_ext}.srt'  " | lolcat
