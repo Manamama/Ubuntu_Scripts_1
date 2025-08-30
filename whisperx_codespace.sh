@@ -38,10 +38,10 @@ echo
 # ================= Step 1: Check input file =================
 echo "🔍 Checking input file existence..."
 if [[ ! -f "$file" ]]; then
-    echo "❌ Input file not found: $file"
+    echo "❌ Input file not found: '$file' "
     exit 1
 fi
-echo "✅ Input file exists: $file"
+echo "✅ Input file exists: '$file' "
 echo
 
 # ================= Step 2: Show file duration =================
@@ -61,7 +61,7 @@ if [[ -z "$CODESPACE_NAME" ]]; then
     echo "❌ No available Codespace found"
     exit 1
 fi
-echo -n "✅ Using Codespace:" 
+echo -n "✅ Using Codespace: " 
 echo "$CODESPACE_NAME" | lolcat
 echo
 
