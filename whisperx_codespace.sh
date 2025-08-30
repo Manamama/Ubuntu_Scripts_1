@@ -147,5 +147,5 @@ echo -n "📂 Opening (sharing) audio file" echo "'$file'..." | lolcat
 termux-share "$file"
 echo "✅ '$file' with the corresponding mew SRT file has been invoked."
 echo "---------------------"
-echo -n "🎉 All steps completed successfully. WhisperX output ready:" 
- echo '$file_dir/${filename_no_ext}.srt'  " | lolcat
+echo -n "🎉 All steps completed successfully. WhisperX output ready e.g. here:" 
+ echo " '$file_dir/${filename_no_ext}.srt'  " | lolcat
