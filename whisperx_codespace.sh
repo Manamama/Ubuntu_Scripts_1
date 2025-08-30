@@ -30,7 +30,7 @@ base_filename=$(basename "$file")
 filename_no_ext="${base_filename%.*}"
 file_dir=$(dirname "$file")
 
-echo "ℹ️  Input file: $file"
+echo "ℹ️  Input file (maybe shared, then path is changed): $file"
 echo "ℹ️  Extra arguments for WhisperX: $extra_args"
 echo "ℹ️  Base filename: $base_filename"
 echo
@@ -61,12 +61,13 @@ if [[ -z "$CODESPACE_NAME" ]]; then
     echo "❌ No available Codespace found"
     exit 1
 fi
-echo "✅ Using Codespace: $CODESPACE_NAME"
+echo -n "✅ Using Codespace:" 
+echo "$CODESPACE_NAME" | lolcat
 echo
 
 # ================= Step 4: Upload to Codespace =================
 echo "⬆️  Uploading $file to Codespace..."
-if time gh codespace cp -e -c "$CODESPACE_NAME" "$file" "remote:~/Downloads/"; then
+if time gh codespace cp -e -c "$CODESPACE_NAME" "$file" "remote:~/Downloads/" | lolcat ; then
     echo "✅ Upload complete: ~/Downloads/$base_filename"
 else
     echo "❌ Upload failed"
@@ -119,6 +120,7 @@ for f in "$remote_srt" "$remote_json"; do
     echo "🔍 Downloading ${f#remote:}..."
     if time gh codespace cp -e -c "$CODESPACE_NAME" "$f" "$file_dir/"; then
         echo "✅ Downloaded ${f#remote:}"
+echo
     else
         
 echo "❌ Failed to download ${f#remote:}"
@@ -128,7 +130,7 @@ done
 echo "But let us check also local version of the .srt file:"
 file "$file_dir/${filename_no_ext}.srt"
 echo "Statistics via 'wc':"
-wc "$file_dir/${filename_no_ext}.srt"
+wc "$file_dir/${filename_no_ext}.srt" | lolcat
 echo
 
 # ================= Step 9: Play notification  =================
@@ -141,7 +143,7 @@ echo "✅ Notification sound played"
 # Done
 # ---------------------------
 
-echo "📂 Opening (sharing) audio file '$file'..."
+echo -n "📂 Opening (sharing) audio file" echo "'$file'..." | lolcat
 termux-share "$file"
 echo "✅ '$file' with the corresponding mew SRT file has been invoked."
 echo "---------------------"
