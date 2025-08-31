@@ -9,6 +9,7 @@ A collection of semi-private scripts for various system administration, developm
 *   `piperme_function.sh`: Provides a bash function for text-to-speech using Piper TTS.
 *   `puml-viewer.sh`: Visualizes PlantUML (.puml) files and graph descriptions from JSON stream files (.json).
 *   `install_basic_ubuntu_set_1.sh`: Installs a basic set of applications and configures essential services for Ubuntu/Debian systems.
+Testing this one, adapting it for both Google Cloud and GitHub code spaces, the most dynamic.
 *   `install_xfce_google_RDP.sh`: Installs and configures XFCE desktop environment, Chrome Remote Desktop, TeamViewer, and XRDP.
 *   `X11.sh`: Manages the Termux X11 server and related applications.
 *   `unhyphenate.py`: Unhyphenates text from a file, with language selection.
