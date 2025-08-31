@@ -324,6 +324,7 @@ cpufetch --logo-short \
   | sed -E 's/\x1b\[[0-9;]*m//g' \
   | sed -E ':a; s/#[^#]*#//g; ta; s/#//g; s/^[^[:alnum:]]+//; /^[[:space:]]*$/d'
 
+echo Trying: 'peakperf  -r 1 -w1'. It fails on GitHub Spaces, so then add: '-b ice_lake' or like, see also 'peakperf --help' then. 
   peakperf  -r 1 -w1
     neofetch --off || true
     fastfetch -l none
