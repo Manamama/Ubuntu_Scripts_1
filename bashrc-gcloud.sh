@@ -1,6 +1,5 @@
 
-
-# this below is supposed to be appended a source to the standard bashrc scripts in Google Cloud and GitHub code spaces together.
+# This script configures the shell environment, manages storage (Python site-packages, cache), sets up swap, and initializes a Git repository for Google Cloud and GitHub Codespaces.
 
 
 
