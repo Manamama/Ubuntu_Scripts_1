@@ -1,1 +1,5 @@
-git pull && git add . && git commit -m smth && git push
+git pull
+git add . 
+git commit -m "Automatic scripted mini code change commit"
+
+git push
