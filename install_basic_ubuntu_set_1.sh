@@ -325,14 +325,17 @@ cpufetch --logo-short \
   | sed -E ':a; s/#[^#]*#//g; ta; s/#//g; s/^[^[:alnum:]]+//; /^[[:space:]]*$/d'
 
 echo Trying: 'peakperf  -r 1 -w1'. It fails on GitHub Spaces, so then add: '-b ice_lake' or like, see also 'peakperf --help' then. 
-  peakperf  -r 1 -w1
+
+  alias peakperf  -r 1 -w1 || peakperf  -r 1 -w1 -b ice_lake
+peakperf 
     neofetch --off || true
     fastfetch -l none
 
 
   curl -s https://ipinfo.io/ip || echo "⚠️ IP fetch failed."
 
-echo Changing the status that the script has been fully executed via markwr: .installed_basic_set_1
+echo Changing the status so that the script has been fully executed, via this marker: .installed_basic_set_1
+
 touch "$(dirname "$0")/.installed_basic_set_1"
 
 }
@@ -363,7 +366,7 @@ install_gemini_cli() {
 
 echo
 echo "📌 Starting Ubuntu setup..."
-echo "Version 2.5.4"
+echo "Version 2.6.1"
 echo  
 # 1️⃣ Core environment and utilities first
 install_core_utilities
