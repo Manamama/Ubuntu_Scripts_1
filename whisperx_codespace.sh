@@ -32,7 +32,8 @@ file_dir=$(dirname "$file")
 
 echo "Input file (maybe shared, then path is changed): "
 echo "$file" | lolcat
-echo "Extra arguments for WhisperX: $extra_args"
+echo -n "You may add: '--model high' and '--diarize' there. Extra arguments for WhisperX: "
+echo " $extra_args" | lolcat
 echo "Base filename: $base_filename"
 echo
 
@@ -87,7 +88,7 @@ fi
 echo
 
 # ================= Step 6: Run WhisperX in Codespace =================
-echo "🤖 Running WhisperX with medium quality and higlighting of words inside Codespace..."
+echo "🤖 Running WhisperX. Default is medium quality, higlighting of words, and no diarize, unless you specified these,   inside Codespace..."
 run_cmd="whisperx --compute_type float32 --model medium \"\$HOME/Downloads/$base_filename\" --output_dir \$HOME/Downloads/ --highlight_words True --print_progress True  $extra_args"
 echo "📜 Command: $run_cmd"
 
