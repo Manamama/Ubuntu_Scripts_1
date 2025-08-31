@@ -1,0 +1,76 @@
+
+
+
+## Instructions for AI: Correcting Mistagged Speakers Using Transcript Context
+
+Goal:
+Identify and propose corrections for mistagged speaker IDs in WhisperX output without access to audio or video, relying solely on textual and contextual cues.
+
+1. Input
+
+JSON/SRT with:
+
+Speaker IDs
+
+Timestamps (objective, must not be changed)
+
+Transcribed text
+
+2. Detect Potential Mistagging
+
+Analyze linguistic patterns per speaker:
+
+Pronouns, gendered language, common roles (e.g., husband/wife, teacher/student)
+
+Lexical style, recurring phrases, vocabulary similarity
+
+Look for contextual inconsistencies:
+
+A segment assigned to Speaker #3 uses patterns or pronouns consistent with Speaker #1 or #2.
+
+Segments that are out-of-turn in dialogue structure (e.g., a “wife” speaking tagged as a new speaker in a sequence dominated by husband/wife).
+
+3. Clustering / Candidate Mapping
+
+Cluster segments across all chunks using:
+
+Textual similarity
+
+Dialogue roles inferred from pronouns and context
+
+Generate candidate merges: identify ghost speakers whose text content is indistinguishable from a known speaker.
+
+4. Propose Corrections to User
+
+For each candidate ghost speaker:
+
+Present the AI’s proposed mapping: “Segment(s) currently tagged as Speaker #3 appear to belong to Speaker #2.”
+
+Ask for user confirmation: e.g., “Is this correct?”
+
+Do not modify timestamps; only propose speaker ID reassignment.
+
+5. Output
+
+Corrected speaker tags (JSON/SRT) after user verification
+
+Mark segments that were proposed for reassignment for auditing
+
+6. Conceptual Notes
+
+Why it works:
+
+AI leverages symbolic reasoning over text, including role, pronoun usage, and context.
+
+Analogous to how we infer intent from circumlocutions or repeated synonyms in voice-to-text.
+
+AI operates only on shadows of reality (transcripts, tags, timestamps) but can approximate the real speaker distribution.
+
+Constraints:
+
+Timestamps are immutable.
+
+No listening or watching — reasoning is purely textual.
+
+Human verification is necessary because AI cannot perceive nuances in tone, pauses, or nonverbal cues.
+
