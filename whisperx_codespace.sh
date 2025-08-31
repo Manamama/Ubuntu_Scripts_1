@@ -96,6 +96,7 @@ if time gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd"; then
     echo "✅ WhisperX completed successfully inside Codespace"
 else
     echo "❌ WhisperX run failed inside Codespace"
+termux-notification  -c "Fail: $file_dir/${filename_no_ext}.srt" --title "Whisperx" --vibrate 500,1000,200
     exit 1
 fi
 echo
@@ -140,6 +141,8 @@ echo "🔔 Playing notification sound..."
 termux-media-player play "/storage/5951-9E0F/Audio/Funny_Sounds/Quack Quack-SoundBible.com-620056916.mp3"
 echo "✅ Notification sound played"
 
+# for smartwatch notifications after linking to Termux API in application in watch settings.
+termux-notification  -c "OK: $file_dir/${filename_no_ext}.srt" --title "Whisperx" --vibrate 500,1000,200
 
 
 # Done
