@@ -32,7 +32,7 @@ file_dir=$(dirname "$file")
 
 echo "Input file (maybe shared, then path is changed): "
 echo "$file" | lolcat
-echo -n "You may add: '--model high' and '--diarize' there. Extra arguments for WhisperX: "
+echo -n "You may add: '--model high' and '--diarize' there. Diarize requires your 'HF_TOKEN env. Extra arguments for WhisperX: "
 echo " $extra_args" | lolcat
 echo "Base filename: $base_filename"
 echo
