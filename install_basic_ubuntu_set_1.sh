@@ -326,7 +326,7 @@ cpufetch --logo-short \
 
 echo Trying: 'peakperf  -r 1 -w1'. It fails on GitHub Spaces, so then add: '-b ice_lake' or like, see also 'peakperf --help' then. 
 
-  alias peakperf  -r 1 -w1 || peakperf  -r 1 -w1 -b ice_lake
+  alias peakperf="peakperf  -r 1 -w1 || peakperf  -r 1 -w1 -b ice_lake"
 peakperf 
     neofetch --off || true
     fastfetch -l none
