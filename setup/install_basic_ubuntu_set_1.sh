@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# Check for marker file to prevent re-execution
-MARKER_FILE=".installed_basic_set_1" # Marker file in current working directory
-if [ -f "$MARKER_FILE" ]; then
-    echo "✅ Script already executed. Exiting."
-    exit 0
-fi
 
 # Author: Gemini AI Agent, ChatGPT, Modified by Manamama
 # Description: Installs a robust development and AI environment on Ubuntu/Debian systems.
@@ -109,6 +103,16 @@ configure_system_resources() {
       PERSISTENT_DEST_BASE="/tmp"
   fi
 
+  while mountpoint -q "$PYTHON_LIB"; do
+      echo "[RESET] Unmounting $PYTHON_LIB ..."
+      sudo umount -l "$PYTHON_LIB"
+  done
+
+
+  if [ -n "$CODESPACE_NAME" ]; then
+      echo "[INFO] Detected GitHub Codespace: leaving $PYTHON_LIB in place"
+  else
+
   # --- Python site-packages relocation ---
   local PYTHON_LIB_DEST="${PYTHON_LIB/$HOME/$PERSISTENT_DEST_BASE}"
 
@@ -116,10 +120,6 @@ configure_system_resources() {
   sudo mkdir -p "$PYTHON_LIB_DEST"
   sudo chown "$CUR_USER:$CUR_USER" "$PYTHON_LIB_DEST"
 
-  while mountpoint -q "$PYTHON_LIB"; do
-      echo "[RESET] Unmounting $PYTHON_LIB ..."
-      sudo umount -l "$PYTHON_LIB"
-  done
 
   rm -rf "$PYTHON_LIB"
   mkdir -p "$PYTHON_LIB"
@@ -128,6 +128,8 @@ configure_system_resources() {
   sudo mount --bind "$PYTHON_LIB_DEST" "$PYTHON_LIB"
   sudo mount -o remount,rw,exec "$PYTHON_LIB"
   echo "[DONE] Bound with exec: $PYTHON_LIB_DEST -> $PYTHON_LIB"
+
+fi
 
   # --- Cache relocation ---
   local CACHE_SRC="$CUR_HOME/.cache"
@@ -178,41 +180,38 @@ configure_persistent_environment() {
   local ENV_FILE="/workspaces/Ubuntu_Scripts_1/utils/ubuntu_scripts_env.sh"
 
   # Create or update the environment file
-  cat <<EOF > "$ENV_FILE"
+  cat <<'EOF' > "$ENV_FILE"
 # This script sets up environment variables and sources NVM for Ubuntu_Scripts_1 project.
 # It is sourced by ~/.bashrc to ensure persistence across shell sessions.
 
 # Add local bin directories to PATH
-export PATH="\$HOME/.local/bin:\$PATH"
-export PATH="\$HOME/.npm/bin:\$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.npm/bin:$PATH"
 # This path is complex and might be slow on every shell start.
 # Consider if it's truly needed on every shell start or if tools are installed elsewhere.
 # For now, including as per original script.
-export PATH="\$PATH:\$HOME/.local/usr/bin:'/\$(python3 -c 'import sysconfig; print(sysconfig.get_config_var("BINDIR"))')'"
+export PATH="$HOME/.local/usr/bin:$PATH"
 
 # Add local lib directories to LD_LIBRARY_PATH
-export LD_LIBRARY_PATH="/$HOME/.local/lib:$LD_LIBRARY_PATH"
-export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" 
+export LD_LIBRARY_PATH="$HOME/.local/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
 
 # NVM setup
-export NVM_DIR="\$HOME/.nvm"
-[ -s "\$NVM_DIR/nvm.sh" ] && \. "\$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "\$NVM_DIR/bash_completion" ] && \. "\$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-# Gemini CLI specific
+# Gemini CLI specific: so that you can log in to Google to use token in headless environment
 export NO_BROWSER=1
 
-# Source .bash_aliases if it exists
-if [ -f ~/.bash_aliases ]; then
-    . ~/.bash_aliases
-fi
+
 EOF
 
   # Add sourcing line to .bashrc if not already present
   if ! grep -qxF "source \"$ENV_FILE\"" ~/.bash_aliases; then
       echo "" >> ~/.bashrc # Add a newline for separation
       echo "# Source Ubuntu_Scripts_1 environment configuration" >> ~/.bash_aliases
-      echo "source \"$ENV_FILE\"" >> ~/.bash_aliases
+      echo "source \"$ENV_FILE\"" >> ~/.bashrc
       echo "✅ Added sourcing line to ~/.bash_aliases."
   else
       echo "ℹ️ Sourcing line already present in ~/.bash_aliases."
@@ -221,31 +220,6 @@ EOF
   echo
 }
 
-install_core_utilities() {
-  echo "🔧 Installing core utilities..."
-  echo
-  #No warning in GCloud about persistence of apt
-  mkdir -p ~/.cloudshell
-  touch ~/.cloudshell/no-apt-get-warning
-
-  export DEBIAN_FRONTEND=noninteractive
-  
-  export PATH=$PATH:$HOME/.local/bin
-
-  sudo apt update
-  #DEBIAN_FRONTEND=noninteractive sudo apt-get install -y keyboard-configuration
-  # sudo dpkg-reconfigure -f noninteractive keyboard-configuration # Commented out as no graphical environment is installed.
-  sudo apt install -y aptitude plocate ffmpeg aria2
-  sudo apt-get remove --purge -y keyboard-configuration
-  #This takes too much time:
-  #sudo apt upgrade -y 
-  
-# Ensure necessary directories exist:
-mkdir -p $HOME/.local/lib/bin
-mkdir -p $HOME/.local/var/lib/dpkg
-mkdir -p ~/Downloads/GitHub
-  
-}
 
 
 # --- AI Tools ---
@@ -427,31 +401,6 @@ export PATH="$HOME/.npm/bin:$PATH"
 }
  
 
-# --- Sysinfo ---
-display_system_info() {
-  echo "📟 System Info:"
-  #cpufetch
-#No logo: 
-cpufetch --logo-short \
-  | sed -E 's/\x1b\[[0-9;]*m//g' \
-  | sed -E ':a; s/#[^#]*#//g; ta; s/#//g; s/^[^[:alnum:]]+//; /^[[:space:]]*$/d'
-
-echo Trying: 'peakperf  -r 1 -w1'. It fails on GitHub Spaces, so then add: '-b ice_lake' or like, see also 'peakperf --help' then. 
-
-  alias peakperf="peakperf  -r 1 -w1 || peakperf  -r 1 -w1 -b ice_lake"
-
-peakperf  -r 1 -w1  || peakperf  -r 1 -w1 -b ice_lake
-#    neofetch --off || true
-    fastfetch -l none
-
-
-  curl -s https://ipinfo.io/ip || echo "⚠️ IP fetch failed."
-
-echo Changing the status so that the script has been fully executed, via this marker: .installed_basic_set_1
-
-touch ".installed_basic_set_1"
-
-}
 
 # --- LLaMA Build ---
 build_llama() {
@@ -472,7 +421,7 @@ cmake -S llama.cpp -B llama.cpp/build \
   -DCMAKE_INSTALL_PREFIX=$HOME/.local && \
 cmake --build llama.cpp/build --config Release -j8 && \
 cmake --install llama.cpp/build
-cd - # Return to previous directory
+cd  # Return to previous directory
 
 
   
@@ -522,59 +471,6 @@ configure_teamviewer() {
     fi
 }
 
-
-echo
-echo "📌 Starting Ubuntu setup..."
-echo "Version 2.7.2"
-echo  check_dependencies # Perform initial dependency checks  
-echo  To be done one day, but not yet, we busy... 
-echo  We configure_system_resources ...
-
-configure_system_resources
-
-configure_persistent_environment
-echo  Core environment and utilities 
-  install_core_utilities
-
-
-
-echo Modern CMake early, for any builds that require it
-  install_modern_cmake
-
-echo  "System and dev tools (depends on core utilities and CMake)"
-  install_system_tools
-
-  #install_nodejs_nvm
-
-echo AI tools ... 
-  install_ai_tools
-
-
-echo  "LLaMA build (depends on modern CMake and system dev tools)"
-  build_llama 
-
-
-
-echo "Gemini CLI to talk to Gemini AI..."
-  install_gemini_cli
-
-
-echo "Skipping the Remote Desktop stuff for now ... "
-  # Desktop Environment Setup
-  #install_xfce
-  #configure_chrome_remote_desktop
-  #configure_teamviewer
- #configure_xrdp || echo "⚠️ XRDP setup skipped (non-systemd system)."
-
-
-
-  
-echo  "Display system info and performance at the end"
-  display_system_info
-
-  echo "✅ Basic Ubuntu setup complete."
-
-
 # --- Replit Adaptation ---
 replit_adapt() {
     echo "🌀 Adapting setup for Replit environment..."
@@ -608,5 +504,107 @@ replit_adapt() {
 
     echo "✅ Replit adaptation complete."
 }
+
+
+# --- Sysinfo ---
+display_system_info() {
+  echo "📟 System Info:"
+  #cpufetch
+#No logo: 
+cpufetch --logo-short \
+  | sed -E 's/\x1b\[[0-9;]*m//g' \
+  | sed -E ':a; s/#[^#]*#//g; ta; s/#//g; s/^[^[:alnum:]]+//; /^[[:space:]]*$/d'
+
+echo Trying: 'peakperf  -r 1 -w1'. It fails on GitHub Spaces, so then add: '-b ice_lake' or like, see also 'peakperf --help' then. 
+
+  alias peakperf="peakperf  -r 1 -w1 || peakperf  -r 1 -w1 -b ice_lake"
+
+peakperf  -r 1 -w1  || peakperf  -r 1 -w1 -b ice_lake
+#    neofetch --off || true
+    fastfetch -l none
+
+
+  curl -s https://ipinfo.io/ip || echo "⚠️ IP fetch failed."
+
+
+}
+
+
+
+
+echo
+echo "📌 Starting Ubuntu setup..."
+echo "Version 2.8.1"
+
+# Check for marker file to prevent re-execution
+
+
+
+MARKER_FILE="$(pwd)/.installed_basic_set_1" # Marker file in current working directory
+echo "Checking via this marker: $MARKER_FILE if this script has been executed here..."
+
+
+
+if [ -f "$MARKER_FILE" ]; then
+    echo "✅ Script already executed. Remove the marker if you want to rerun it. Exiting."
+    exit 0
+fi
+
+
+echo  Perform initial dependency checks  ...
+check_dependencies 
+
+echo  We configure_system_resources ...
+
+configure_system_resources
+
+
+
+
+echo "Install early the current CMake, for any builds that require it"
+  install_modern_cmake
+
+echo  "System and dev tools (depends on dependencies and CMake)"
+  install_system_tools
+
+#Skipping it for a while:
+  #install_nodejs_nvm
+
+echo AI tools ... 
+  install_ai_tools
+
+
+echo  "LLaMA build (depends on modern CMake and system dev tools)"
+  build_llama 
+
+
+echo "Gemini CLI to talk to Gemini AI..."
+  install_gemini_cli
+
+
+echo "Skipping the Remote Desktop stuff for now ... "
+  # Desktop Environment Setup
+  #install_xfce
+  #configure_chrome_remote_desktop
+  #configure_teamviewer
+ #configure_xrdp || echo "⚠️ XRDP setup skipped (non-systemd system)."
+
+
+configure_persistent_environment
+
+  
+echo  "Display system info and performance at the end"
+  display_system_info
+
+
+
+echo
+echo "We are in $(pwd)."
+echo "Changing the status so that the script has been fully executed, via this marker: $MARKER_FILE"
+
+touch $MARKER_FILE
+
+
+  echo "✅ Basic Ubuntu setup complete."
 
 
