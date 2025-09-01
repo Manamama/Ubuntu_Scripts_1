@@ -184,15 +184,15 @@ configure_persistent_environment() {
 
 # Add local bin directories to PATH
 export PATH="\$HOME/.local/bin:\$PATH"
-export PATH="\$HOME/.npm-global/bin:\$PATH"
+export PATH="\$HOME/.npm/bin:\$PATH"
 # This path is complex and might be slow on every shell start.
 # Consider if it's truly needed on every shell start or if tools are installed elsewhere.
 # For now, including as per original script.
 export PATH="\$PATH:\$HOME/.local/usr/bin:'/\$(python3 -c 'import sysconfig; print(sysconfig.get_config_var("BINDIR"))')'"
 
 # Add local lib directories to LD_LIBRARY_PATH
-export LD_LIBRARY_PATH="\$HOME/.local/lib:\$LD_LIBRARY_PATH"
-export LD_LIBRARY_PATH="/usr/local/lib:\$LD_LIBRARY_PATH" # From bashrc-gcloud.sh
+export LD_LIBRARY_PATH="/$HOME/.local/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" 
 
 # NVM setup
 export NVM_DIR="\$HOME/.nvm"
@@ -209,13 +209,13 @@ fi
 EOF
 
   # Add sourcing line to .bashrc if not already present
-  if ! grep -qxF "source \"$ENV_FILE\"" ~/.bashrc; then
+  if ! grep -qxF "source \"$ENV_FILE\"" ~/.bash_aliases; then
       echo "" >> ~/.bashrc # Add a newline for separation
-      echo "# Source Ubuntu_Scripts_1 environment configuration" >> ~/.bashrc
-      echo "source \"$ENV_FILE\"" >> ~/.bashrc
-      echo "✅ Added sourcing line to ~/.bashrc."
+      echo "# Source Ubuntu_Scripts_1 environment configuration" >> ~/.bash_aliases
+      echo "source \"$ENV_FILE\"" >> ~/.bash_aliases
+      echo "✅ Added sourcing line to ~/.bash_aliases."
   else
-      echo "ℹ️ Sourcing line already present in ~/.bashrc."
+      echo "ℹ️ Sourcing line already present in ~/.bash_aliases."
   fi
   echo "✅ Persistent environment configured."
   echo
@@ -251,7 +251,7 @@ mkdir -p ~/Downloads/GitHub
 # --- AI Tools ---
 install_ai_tools() {
 
-  NPM_CONFIG_PREFIX=~/.npm-global npm install -g rust-just
+  npm install -g rust-just
 
   echo "🧠 Installing AI/ML tools..."
   python -m ensurepip
@@ -316,7 +316,6 @@ sudo dpkg -i gotop_3.0.0_linux_amd64.deb
     # youtube-dl
     python -m pip install -U yt-dlp youtube-dl
 
-    # PeakPerf setup
 # PeakPerf setup
 mkdir -p ~/Downloads/GitHub
 cd ~/Downloads/GitHub
@@ -420,7 +419,7 @@ install_nodejs_nvm() {
     # Ensure NVM loads in future shells
     grep -qxF 'export NVM_DIR="$HOME/.nvm"' ~/.bashrc || echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
     grep -qxF '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' ~/.bashrc || echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> ~/.bashrc
-export PATH="$HOME/.npm-global/bin:$PATH"
+export PATH="$HOME/.npm/bin:$PATH"
 
     echo "✅ Node.js: $(node -v), npm: $(npm -v)"
     cd ~/Downloads/GitHub
@@ -440,8 +439,9 @@ cpufetch --logo-short \
 echo Trying: 'peakperf  -r 1 -w1'. It fails on GitHub Spaces, so then add: '-b ice_lake' or like, see also 'peakperf --help' then. 
 
   alias peakperf="peakperf  -r 1 -w1 || peakperf  -r 1 -w1 -b ice_lake"
-peakperf 
-    neofetch --off || true
+
+peakperf  -r 1 -w1  || peakperf  -r 1 -w1 -b ice_lake
+#    neofetch --off || true
     fastfetch -l none
 
 
@@ -481,9 +481,10 @@ cd - # Return to previous directory
 
 # --- Gemini CLI ---
 install_gemini_cli() {
-  NPM_CONFIG_PREFIX=~/.npm-global npm install -g @google/gemini-cli
+#  NPM_CONFIG_PREFIX=~/.npm npm install -g @google/gemini-cli
+npm install -g @google/gemini-cli
   export NO_BROWSER=1
-  echo "🔮 Run"
+  # echo "🔮 Run"
 } 
 
 # Function to install XFCE desktop environment
@@ -531,8 +532,11 @@ echo  We configure_system_resources ...
 
 configure_system_resources
 
+configure_persistent_environment
 echo  Core environment and utilities 
   install_core_utilities
+
+
 
 echo Modern CMake early, for any builds that require it
   install_modern_cmake
