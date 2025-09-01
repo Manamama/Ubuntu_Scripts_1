@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Check for marker file to prevent re-execution
+MARKER_FILE=".installed_basic_set_1" # Marker file in current working directory
+if [ -f "$MARKER_FILE" ]; then
+    echo "✅ Script already executed. Exiting."
+    exit 0
+fi
+
 # Author: Gemini AI Agent, ChatGPT, Modified by Manamama
 # Description: Installs a robust development and AI environment on Ubuntu/Debian systems.
 
@@ -8,38 +15,40 @@ set -uo pipefail  # keep -u and -o pipefail
 #-u → undefined variables still fail (good safety)
 # -o pipefail → pipelines still propagate errors
 
-export DEBIAN_FRONTEND=noninteractive
-sudo debconf-set-selections <<EOF
-keyboard-configuration keyboard-configuration/layoutcode string us
-keyboard-configuration keyboard-configuration/modelcode string pc105
-keyboard-configuration keyboard-configuration/variant string 
-keyboard-configuration keyboard-configuration/optionscode string
-EOF
+# --- Dependency Checks ---
+check_dependencies() {
+  echo "🔍 Checking essential dependencies..."
+  command -v sudo >/dev/null || { echo "Error: sudo is not installed. This script requires sudo privileges."; exit 1; }
+  command -v apt-get >/dev/null || { echo "Error: apt-get is not installed. This script is for Debian/Ubuntu-based systems."; exit 1; }
+  command -v wget >/dev/null || { echo "Error: wget is not installed. Please install it."; exit 1; }
+  command -v dpkg >/dev/null || { echo "Error: dpkg is not installed. Please install it."; exit 1; }
+  command -v usermod >/dev/null || { echo "Error: usermod is not installed. Please install it."; exit 1; }
+  command -v systemctl >/dev/null || { echo "Error: systemctl is not installed. Please install it."; exit 1; }
 
+  # Node.js and npm specific checks
+  if ! command -v node >/dev/null; then
+    echo "Warning: Node.js is not installed. Node.js dependent installations might fail."
+  fi
+  if ! command -v npm >/dev/null; then
+    echo "Warning: npm is not installed. npm dependent installations might fail."
+  fi
+  echo "✅ Dependency checks complete."
+}
 
-git config --global user.email manamama@github.com
-
-git config --global user.name ManamaMa
-
-
-export CMAKE_INSTALL_PREFIX=/usr/.local
-#But that above does not work at first, as:  
-
-: '
-By default, CMake installs into /usr/local unless told otherwise. That’s why you see -- Installing: /usr/local/lib/....
-
-during regular `make install` without such environmental variables. 
-
-
-The variable that controls this is CMAKE_INSTALL_PREFIX. 
-
-Unless CMake < 3.29 (cloudshell, Ubuntu-ish), like here, because then CMAKE_INSTALL_PREFIX controls nothing. 
-
-So here do not use it, even though cmake be hand updated below by script, as you see. 
-
-'
-
-
+# --- URLs ---
+REPO_URL="https://github.com/Manamama/Ubuntu_Scripts_1/"
+CPUFETCH_REPO_URL="https://github.com/Dr-Noob/cpufetch"
+FASTFETCH_REPO_URL="https://github.com/fastfetch-cli/fastfetch"
+GOTOP_DEB_URL="https://github.com/cjbassi/gotop/releases/download/3.0.0/gotop_3.0.0_linux_amd64.deb"
+PEAKPERF_REPO_URL="https://github.com/Dr-noob/peakperf"
+PLATFORM_TOOLS_URL="https://dl.google.com/android/repository/platform-tools-latest-linux.zip"
+CHARM_APT_KEY_URL="https://repo.charm.sh/apt/gpg.key"
+KITWARE_APT_KEY_URL="https://apt.kitware.com/keys/kitware-archive-latest.asc"
+KITWARE_APT_REPO_BASE_URL="https://apt.kitware.com/ubuntu"
+NVM_REPO_URL="https://github.com/nvm-sh/nvm.git"
+LLAMA_CPP_REPO_URL="https://github.com/ggml-org/llama.cpp"
+CHROME_REMOTE_DESKTOP_BASE_URL="https://dl.google.com/linux/direct/"
+TEAMVIEWER_HOST_BASE_URL="https://download.teamviewer.com/download/linux/"
 
 
 
@@ -78,8 +87,8 @@ install_deb_local() {
     echo "Installation complete."
     echo "Binaries in $LOCALBIN, libraries in $LOCALLIB."
     echo "Add to your environment if needed:"
-    echo "export PATH=\"$LOCALBIN:\$PATH\""
-    echo "export LD_LIBRARY_PATH=\"$LOCALLIB:\$LD_LIBRARY_PATH\""
+    echo "export PATH=\"$LOCALBIN:$PATH\""
+    echo "export LD_LIBRARY_PATH=\"$LOCALLIB:${LD_LIBRARY_PATH:-}\""
 }
 
 
@@ -87,32 +96,134 @@ install_deb_local() {
 # install_deb_local /path/to/gotop_3.0.0_linux_amd64.deb
 
 
+configure_system_resources() {
+  echo "⚙️ Configuring system resources (disk, swap, repo)..."
+
+  local CUR_USER=$(whoami)
+  local CUR_HOME="$HOME"
+  local PYTHON_LIB=$(python -m site --user-site)
+  local PERSISTENT_DEST_BASE="/root/home_extended" # Default for GCloud
+
+  if [ -n "$CODESPACE_NAME" ]; then
+      echo "[INFO] Detected GitHub Codespace: using /tmp for temporary storage"
+      PERSISTENT_DEST_BASE="/tmp"
+  fi
+
+  # --- Python site-packages relocation ---
+  local PYTHON_LIB_DEST="${PYTHON_LIB/$HOME/$PERSISTENT_DEST_BASE}"
+
+  mkdir -p "$PYTHON_LIB"
+  sudo mkdir -p "$PYTHON_LIB_DEST"
+  sudo chown "$CUR_USER:$CUR_USER" "$PYTHON_LIB_DEST"
+
+  while mountpoint -q "$PYTHON_LIB"; do
+      echo "[RESET] Unmounting $PYTHON_LIB ..."
+      sudo umount -l "$PYTHON_LIB"
+  done
+
+  rm -rf "$PYTHON_LIB"
+  mkdir -p "$PYTHON_LIB"
+
+  echo "[ACTION] Binding $PYTHON_LIB_DEST -> $PYTHON_LIB ..."
+  sudo mount --bind "$PYTHON_LIB_DEST" "$PYTHON_LIB"
+  sudo mount -o remount,rw,exec "$PYTHON_LIB"
+  echo "[DONE] Bound with exec: $PYTHON_LIB_DEST -> $PYTHON_LIB"
+
+  # --- Cache relocation ---
+  local CACHE_SRC="$CUR_HOME/.cache"
+  local CACHE_DEST="$PERSISTENT_DEST_BASE/.cache"
+
+  mkdir -p "$CACHE_SRC"
+  sudo mkdir -p "$CACHE_DEST"
+  sudo chown "$CUR_USER:$CUR_USER" "$CACHE_DEST"
+
+  while mountpoint -q "$CACHE_SRC"; do
+      echo "[RESET] Unmounting $CACHE_SRC ..."
+      sudo umount -l "$CACHE_SRC"
+  done
+
+  rm -rf "$CACHE_SRC"
+  mkdir -p "$CACHE_SRC"
+
+  echo "[ACTION] Binding $CACHE_DEST -> $CACHE_SRC ..."
+  sudo mount --bind "$CACHE_DEST" "$CACHE_SRC"
+  sudo mount -o remount,rw,exec "$CACHE_SRC"
+  echo "[DONE] Bound with exec: $CACHE_DEST -> $CACHE_SRC"
+
+  echo
+  echo "Final mount state:"
+  mount | grep /home
+
+  # --- Swap file creation ---
+  echo "Creating 16 GB swap file..."
+  sudo fallocate -l 16G /tmp/swapfile
+  sudo chmod 600 /tmp/swapfile
+  sudo mkswap /tmp/swapfile
+  sudo swapon /tmp/swapfile
+  swapon --show
+  free -h
+
+  echo
+  echo "Space free on /home or /workspace (on the persistent thus too limited storage):"
+  df -h | grep Use%
+  df -h | grep /home
+  df -h | grep /workspace
+
+  
+}
+
+configure_persistent_environment() {
+  echo "📝 Configuring persistent environment variables..."
+
+  local ENV_FILE="/workspaces/Ubuntu_Scripts_1/utils/ubuntu_scripts_env.sh"
+
+  # Create or update the environment file
+  cat <<EOF > "$ENV_FILE"
+# This script sets up environment variables and sources NVM for Ubuntu_Scripts_1 project.
+# It is sourced by ~/.bashrc to ensure persistence across shell sessions.
+
+# Add local bin directories to PATH
+export PATH="\$HOME/.local/bin:\$PATH"
+export PATH="\$HOME/.npm-global/bin:\$PATH"
+# This path is complex and might be slow on every shell start.
+# Consider if it's truly needed on every shell start or if tools are installed elsewhere.
+# For now, including as per original script.
+export PATH="\$PATH:\$HOME/.local/usr/bin:'/\$(python3 -c 'import sysconfig; print(sysconfig.get_config_var("BINDIR"))')'"
+
+# Add local lib directories to LD_LIBRARY_PATH
+export LD_LIBRARY_PATH="\$HOME/.local/lib:\$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="/usr/local/lib:\$LD_LIBRARY_PATH" # From bashrc-gcloud.sh
+
+# NVM setup
+export NVM_DIR="\$HOME/.nvm"
+[ -s "\$NVM_DIR/nvm.sh" ] && \. "\$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "\$NVM_DIR/bash_completion" ] && \. "\$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# Gemini CLI specific
+export NO_BROWSER=1
+
+# Source .bash_aliases if it exists
+if [ -f ~/.bash_aliases ]; then
+    . ~/.bash_aliases
+fi
+EOF
+
+  # Add sourcing line to .bashrc if not already present
+  if ! grep -qxF "source \"$ENV_FILE\"" ~/.bashrc; then
+      echo "" >> ~/.bashrc # Add a newline for separation
+      echo "# Source Ubuntu_Scripts_1 environment configuration" >> ~/.bashrc
+      echo "source \"$ENV_FILE\"" >> ~/.bashrc
+      echo "✅ Added sourcing line to ~/.bashrc."
+  else
+      echo "ℹ️ Sourcing line already present in ~/.bashrc."
+  fi
+  echo "✅ Persistent environment configured."
+  echo
+}
+
 install_core_utilities() {
   echo "🔧 Installing core utilities..."
   echo
-  # --- Verify Critical Mounts ---
-  echo "🔎 Verifying that data directories are correctly relocated..."
-
-  local all_mounts_ok=true
-  local CACHE_SRC="$HOME/.cache"
-  local LIB_SRC="$HOME/.local/lib"
-
-  if ! mount | grep -q "on $CACHE_SRC"; then
-    echo "⚠️ WARNING: $CACHE_SRC is not a bind mount. The relocation logic in .bashrc may have failed."
-    all_mounts_ok=false
-  fi
-
-  if ! mount | grep -q "on $LIB_SRC"; then
-    echo "⚠️ WARNING: $LIB_SRC is not a bind mount. The relocation logic in .bashrc may have failed."
-    all_mounts_ok=false
-  fi
-
-  if [ "$all_mounts_ok" = true ]; then
-    echo "✅ Success: ~/.cache and ~/.local/lib are correctly relocated."
-  fi
-  echo
-  # --- End of Verification ---
-
   #No warning in GCloud about persistence of apt
   mkdir -p ~/.cloudshell
   touch ~/.cloudshell/no-apt-get-warning
@@ -123,17 +234,16 @@ install_core_utilities() {
 
   sudo apt update
   #DEBIAN_FRONTEND=noninteractive sudo apt-get install -y keyboard-configuration
-  sudo dpkg-reconfigure -f noninteractive keyboard-configuration
+  # sudo dpkg-reconfigure -f noninteractive keyboard-configuration # Commented out as no graphical environment is installed.
   sudo apt install -y aptitude plocate ffmpeg aria2
+  sudo apt-get remove --purge -y keyboard-configuration
   #This takes too much time:
   #sudo apt upgrade -y 
   
-#Just in case, never enough:
-mkdir -p /home/codespace/./home/codespace/.local/lib/bin
-mkdir -p 
-  mkdir -p $HOME/.local/var/lib/dpkg
-  mkdir -p ~/Downloads/GitHub 
-cd ~/Downloads/GitHub
+# Ensure necessary directories exist:
+mkdir -p $HOME/.local/lib/bin
+mkdir -p $HOME/.local/var/lib/dpkg
+mkdir -p ~/Downloads/GitHub
   
 }
 
@@ -141,11 +251,11 @@ cd ~/Downloads/GitHub
 # --- AI Tools ---
 install_ai_tools() {
 
-sudo npm install -g rust-just
+  NPM_CONFIG_PREFIX=~/.npm-global npm install -g rust-just
 
   echo "🧠 Installing AI/ML tools..."
   python -m ensurepip
-  python -m pip install -U whisperx numpy torch torchvision torchaudio tensorflow-cpu jax jaxlib protobuf --extra-index-url https://download.pytorch.org/whl/cpu
+  python -m pip install --user -U whisperx numpy torch torchvision torchaudio tensorflow-cpu jax jaxlib protobuf --extra-index-url https://download.pytorch.org/whl/cpu
   # python -m pip install git+https://github.com/openai/whisper.git
 }
 
@@ -177,20 +287,27 @@ cd ~/Downloads/GitHub
 
 
         echo "ℹ️ cpufetch not available via apt, building from source..."
-        git clone https://github.com/Dr-Noob/cpufetch
+        git clone "$CPUFETCH_REPO_URL"
         cd cpufetch
 cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local 
         make install -j8
         cd ..
     fi
-git clone https://github.com/fastfetch-cli/fastfetch
+# Optional: fastfetch
+# Ensure fastfetch is cloned into ~/Downloads/GitHub
+mkdir -p ~/Downloads/GitHub
+cd ~/Downloads/GitHub
+if [ ! -d "fastfetch" ]; then
+    git clone "$FASTFETCH_REPO_URL"
+fi
 cd fastfetch 
 #sudo make install
 cmake -B build -DCMAKE_INSTALL_PREFIX=$HOME/.local
 cmake --build build --target install
+cd - # Return to previous directory
 
     # gotop
-    wget -c https://github.com/cjbassi/gotop/releases/download/3.0.0/gotop_3.0.0_linux_amd64.deb
+    wget -c "$GOTOP_DEB_URL"
 
 #for good measure:
 sudo dpkg -i gotop_3.0.0_linux_amd64.deb
@@ -200,34 +317,42 @@ sudo dpkg -i gotop_3.0.0_linux_amd64.deb
     python -m pip install -U yt-dlp youtube-dl
 
     # PeakPerf setup
+# PeakPerf setup
+mkdir -p ~/Downloads/GitHub
 cd ~/Downloads/GitHub
-    git clone https://github.com/Dr-noob/peakperf
+if [ ! -d "peakperf" ]; then
+    git clone "$PEAKPERF_REPO_URL"
+fi
     cd peakperf
     # Patch CMakeLists.txt to skip SANITY_FLAGS
     sed -i '/set(SANITY_FLAGS/ s/^/#/' CMakeLists.txt
     ./build.sh
     cp  ./peakperf "$HOME/.local/bin/"
-    sudo make install -j8 
+    # Removed: sudo make install -j8 (as it's failing and cp already places the binary)
     #./peakperf
-    cd ..
+    cd - # Return to previous directory
 
     sudo apt clean
     sudo add-apt-repository ppa:danielrichter2007/grub-customizer -y
+    sudo apt update # Update apt cache after adding new PPA
     sudo apt install -y grub-customizer python3-pip scrcpy
 
 # Android Platform Tools
+mkdir -p ~/Downloads/GitHub
 cd ~/Downloads/GitHub
-wget -c https://dl.google.com/android/repository/platform-tools-latest-linux.zip
+wget -c "$PLATFORM_TOOLS_URL"
 unzip -o platform-tools-latest-linux.zip
 sudo cp -r platform-tools/* /$HOME/.local/bin/
+cd - # Return to previous directory
 
 
 sudo mkdir -p /etc/apt/keyrings
 # Use gpg --dearmor safely, overwrite without prompt
-curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor --yes -o /etc/apt/keyrings/charm.gpg
+curl -fsSL "$CHARM_APT_KEY_URL" | sudo gpg --dearmor --yes -o /etc/apt/keyrings/charm.gpg
 # Add repo referencing the keyring
 echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt * *" | sudo tee /etc/apt/sources.list.d/charm.list
 
+sudo apt update # Update apt cache after adding new repo
 sudo apt install -y glow
 
 
@@ -248,12 +373,12 @@ install_modern_cmake() {
     sudo rm -f /usr/share/keyrings/kitware-archive-keyring.gpg
 
     # Add Kitware key
-    wget  -c -qO - https://apt.kitware.com/keys/kitware-archive-latest.asc \
+    wget  -c -qO - "$KITWARE_APT_KEY_URL" \
         | gpg --dearmor \
         | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
 
     # Add the correct Kitware repository for detected Ubuntu version
-    echo "deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu $CODENAME main" \
+    echo "deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] "$KITWARE_APT_REPO_BASE_URL" $CODENAME main" \
         | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
 
     # Update apt and install CMake
@@ -264,22 +389,9 @@ install_modern_cmake() {
 }
 # --- Node.js + NVM ---
 
-install_node_nvm_npm() {
-# Remove the old Node.js + npm first
-sudo apt remove -y nodejs npm
-sudo apt autoremove -y 
 
-# Install Node.js 22.x (latest LTS) from NodeSource
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-sudo apt install -y nodejs
-export PATH="$HOME/.npm-global/bin:$PATH"
 
-# Verify
-node --version   # should print v22.x
-npm --version
-}
-
-install_node_nvm_npm2() {
+install_nodejs_nvm() {
     echo "🕸 Installing Node and npm..."
  
 
@@ -288,7 +400,7 @@ install_node_nvm_npm2() {
 
     # Clone the official NVM repository if not present
     if [ ! -d "$NVM_DIR/.git" ]; then
-        git clone https://github.com/nvm-sh/nvm.git "$NVM_DIR"
+        git clone "$NVM_REPO_URL" "$NVM_DIR"
     fi
 
     cd "$NVM_DIR" || return
@@ -312,6 +424,7 @@ export PATH="$HOME/.npm-global/bin:$PATH"
 
     echo "✅ Node.js: $(node -v), npm: $(npm -v)"
     cd ~/Downloads/GitHub
+    cd - # Return to previous directory
 }
  
 
@@ -336,22 +449,31 @@ peakperf
 
 echo Changing the status so that the script has been fully executed, via this marker: .installed_basic_set_1
 
-touch "$(dirname "$0")/.installed_basic_set_1"
+touch ".installed_basic_set_1"
 
 }
 
 # --- LLaMA Build ---
 build_llama() {
   echo "🦙 Cloning and building llama.cpp..."
+# LLaMA Build
+mkdir -p ~/Downloads/GitHub
 cd ~/Downloads/GitHub
 
-  git clone https://github.com/ggml-org/llama.cpp  || echo "⚠️ llama.cpp already exists, continuing..."
+if [ ! -d "llama.cpp" ]; then
+    git clone "$LLAMA_CPP_REPO_URL"
+else
+    cd llama.cpp && git pull --rebase --autostash
+    cd .. # Return to ~/Downloads/GitHub
+fi
 
 cmake -S llama.cpp -B llama.cpp/build \
   -DBUILD_SHARED_LIBS=ON -DGGML_CUDA=OFF -DLLAMA_CURL=ON \
   -DCMAKE_INSTALL_PREFIX=$HOME/.local && \
 cmake --build llama.cpp/build --config Release -j8 && \
 cmake --install llama.cpp/build
+cd - # Return to previous directory
+
 
   
   
@@ -359,41 +481,82 @@ cmake --install llama.cpp/build
 
 # --- Gemini CLI ---
 install_gemini_cli() {
-  npm install -g @google/gemini-cli
+  NPM_CONFIG_PREFIX=~/.npm-global npm install -g @google/gemini-cli
   export NO_BROWSER=1
-  echo "🔮 Run \`gemini\` to get started."
+  echo "🔮 Run"
+} 
+
+# Function to install XFCE desktop environment
+install_xfce() {
+    echo "Installing Xfce desktop environment..."
+    sudo apt-get update || { echo "Error: Failed to update package lists."; exit 1; }
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xfce4 desktop-base xscreensaver dbus-x11 task-xfce-desktop firefox-esr || { echo "Error: Failed to install Xfce components."; exit 1; }
 }
+
+# Function to install and configure Chrome Remote Desktop
+configure_chrome_remote_desktop() {
+    echo "Installing and configuring Chrome Remote Desktop..."
+    if [[ ! -f "$DOWNLOAD_DIR/$CHROME_REMOTE_DESKTOP_DEB" ]]; then
+        wget -P "$DOWNLOAD_DIR" "$CHROME_REMOTE_DESKTOP_BASE_URL$CHROME_REMOTE_DESKTOP_DEB" || { echo "Error: Failed to download Chrome Remote Desktop package."; return 1; }
+    fi
+    sudo dpkg -i "$DOWNLOAD_DIR/$CHROME_REMOTE_DESKTOP_DEB" || { echo "Error: Failed to install Chrome Remote Desktop package."; return 1; }
+    sudo usermod -a -G chrome-remote-desktop $USER || { echo "Error: Failed to add user to chrome-remote-desktop group."; return 1; }
+    sudo apt-get --fix-broken install -y || { echo "Error: Failed to fix broken dependencies after Chrome Remote Desktop install."; return 1; }
+    sudo service chrome-remote-desktop restart || { echo "Error: Failed to restart Chrome Remote Desktop service."; return 1; }
+}
+
+# Function to install and configure TeamViewer Host
+configure_teamviewer() {
+    echo "Installing and configuring TeamViewer Host..."
+    if command -v teamviewer >/dev/null; then
+        if [[ ! -f "$DOWNLOAD_DIR/$TEAMVIEWER_HOST_DEB" ]]; then
+            wget -P "$DOWNLOAD_DIR" "$TEAMVIEWER_HOST_BASE_URL$TEAMVIEWER_HOST_DEB" || { echo "Error: Failed to download TeamViewer Host package."; return 1; }
+        fi
+        sudo dpkg -i "$DOWNLOAD_DIR/$TEAMVIEWER_HOST_DEB" || { echo "Error: Failed to install TeamViewer Host package."; return 1; }
+        sudo apt-get --fix-broken install -y || { echo "Error: Failed to fix broken dependencies after TeamViewer install."; return 1; }
+        sudo teamviewer --daemon start || { echo "Error: Failed to start TeamViewer daemon."; return 1; }
+        sudo teamviewer --daemon status || { echo "Warning: TeamViewer daemon status check failed."; }
+    else
+        echo "Skipping TeamViewer installation as 'teamviewer' command not found."
+    fi
+}
+
 
 echo
 echo "📌 Starting Ubuntu setup..."
-echo "Version 2.6.1"
-echo  
-# 1️⃣ Core environment and utilities first
-install_core_utilities
+echo "Version 2.7.1"
+echo  check_dependencies # Perform initial dependency checks  
+echo  To be done one day, but not yet, we busy... 
 
-# 2️⃣ Modern CMake early, for any builds that require it
-install_modern_cmake
+  # 1️⃣ Core environment and utilities first
+  install_core_utilities
 
-# 3️⃣ System and dev tools (depends on core utilities and CMake)
-install_system_tools
+  # 2️⃣ Modern CMake early, for any builds that require it
+  install_modern_cmake
 
-install_node_nvm_npm
+  # 3️⃣ System and dev tools (depends on core utilities and CMake)
+  install_system_tools
 
-install_ai_tools
+  #install_nodejs_nvm
 
-install_gemini_cli
+  install_ai_tools
 
-# 6️⃣ LLaMA build (depends on modern CMake and system dev tools)
-build_llama 
+  install_gemini_cli
 
-# 8️⃣ XRDP (optional, non-systemd systems may skip)
-configure_xrdp || echo "⚠️ XRDP setup skipped (non-systemd system)."
+  # Desktop Environment Setup
+  #install_xfce
+  #configure_chrome_remote_desktop
+  #configure_teamviewer
+ #configure_xrdp || echo "⚠️ XRDP setup skipped (non-systemd system)."
 
-# 9️⃣ Display system info at the end
-display_system_info
+  # 6️⃣ LLaMA build (depends on modern CMake and system dev tools)
+  build_llama 
 
-echo "✅ Basic Ubuntu setup complete."
+  
+  # 9️⃣ Display system info at the end
+  display_system_info
 
+  echo "✅ Basic Ubuntu setup complete."
 
 
 # --- Replit Adaptation ---
@@ -412,7 +575,7 @@ replit_adapt() {
 
     # 4️⃣ System/dev tools (nix only, user-space)
     nix profile install \
-        nixpkgs#pciutils nixpkgs#cmake nixpkgs#curl nixpkgs#libcurl nixpkgs#libomp \
+        nixpkgs#pciutils nixpkgs#cmake nixpkgs#libcurl nixpkgs#libomp \
         nixpkgs#openssl nixpkgs#android-tools nixpkgs#neofetch nixpkgs#geoip nixpkgs#ranger \
         nixpkgs#baobab nixpkgs#firefox nixpkgs#scrcpy
 
@@ -429,3 +592,5 @@ replit_adapt() {
 
     echo "✅ Replit adaptation complete."
 }
+
+

@@ -1,7 +1,14 @@
 #!/bin/bash
-
-# config.sh
-# Centralized configuration for Ubuntu_Scripts_1
+#
+# Description: Centralized configuration file for specific environment variables used by various scripts.
+#              This file defines paths for LLM models and sound alerts, primarily for local/mobile environments.
+#              Note: General persistent environment variables are now managed by `utils/ubuntu_scripts_env.sh`.
+#
+# Usage:
+#   This file is typically sourced by other scripts that require these specific configurations.
+#   Example: source /path/to/config.sh
+#
+# Last Modified: August 31, 2025
 
 # LLM Model Paths for image_html_generator.sh
 # These paths are typically found in /storage/emulated/0/LLMs/ on Android/Termux

@@ -1,7 +1,25 @@
 
 
 
-gc1() {
+#!/bin/bash
+#
+# Description: Provides a function to manage Google Cloud Shell login, rclone mounts, and SSHFS mounts.
+#              Primarily designed for use within Termux/Android environments to access Google Cloud resources.
+#
+# Usage:
+#   This script defines the `gc1` function. To use it, source this script in your shell:
+#   source /path/to/GCloud_mount_login.sh
+#   Then, call the function:
+#   gc1
+#
+# Dependencies:
+#   - gcloud CLI (Google Cloud SDK)
+#   - rclone
+#   - sshfs
+#   - lolcat (optional, for colored output)
+#   - Termux environment (for specific paths like /data/data/com.termux)
+#
+# Last Modified: August 31, 2025
     # Ensure SSH folder ownership
     sudo chown -R u0_a278:u0_a278 /data/data/com.termux/files/home/.ssh
 

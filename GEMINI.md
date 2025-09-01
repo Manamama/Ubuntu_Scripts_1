@@ -6,7 +6,7 @@
 ---
 ### **Current Objective**
 
-**Upon starting a new session, the primary objective is to consult the `CLEANUP_PLAN.md` file. This file contains the most current, actionable to-do list for the repository.**
+**The primary objective of cleaning up `install_basic_ubuntu_set_1.sh` has been completed. The `docs/TEST_PLAN.md` file contains the detailed test cases and verification steps for the current state of the script.**
 ---
 
 ## Project Overview
@@ -45,3 +45,4 @@ The scripts are designed to be run in a complex, multi-layered environment:
 ## User Interaction Style
 
 The user prefers a "chatty," conversational, and collaborative interaction style. It is helpful to be descriptive, provide context for actions, and engage in a dialogue about the project.
+---
