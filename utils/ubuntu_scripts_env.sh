@@ -22,8 +22,3 @@ export NVM_DIR="$HOME/.nvm"
 export NO_BROWSER=1
 
 
-# Locale settings to prevent errors with tools like 'man'
-export LANG=en_US.UTF-8
-export LANGUAGE=en_US:en
-export LC_ALL=en_US.UTF-8
-

@@ -468,7 +468,7 @@ install_gemini_cli() {
 # Function to install XFCE desktop environment
 install_xfce() {
 	echo "Installing Xfce desktop environment..."
-	 || {
+sudo update	 || {
 		echo "Error: Failed to update package lists."
 		exit 1
 	}
