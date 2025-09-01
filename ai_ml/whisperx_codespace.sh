@@ -68,14 +68,28 @@ echo "$CODESPACE_NAME" | lolcat
 echo
 
 # ================= Step 4: Upload to Codespace =================
-echo "⬆️  Uploading '$file' to Codespace..."
-if time gh codespace cp -e -c "$CODESPACE_NAME" "$file" "remote:~/Downloads/" | lolcat ; then
-    echo "✅ Upload complete: ~/Downloads/$base_filename"
+echo "  Uploading '$file' to Codespace..."
+remote_path="\$HOME/Downloads/$base_filename"
+
+# Calculate local hash
+local_hash=$(sha256sum "$file" | awk '{print $1}')
+
+# Try to get remote hash (if file exists)
+remote_hash=$(gh codespace ssh -c "$CODESPACE_NAME" -- \
+    "test -f $remote_path && sha256sum $remote_path | awk '{print \$1}'" 2>/dev/null || true)
+
+if [[ -n "$remote_hash" && "$local_hash" == "$remote_hash" ]]; then
+    echo " Skipped (identical file already in Codespace: ~/Downloads/$base_filename)"
 else
-    echo "❌ Upload failed"
-    exit 1
+    if time gh codespace cp -e -c "$CODESPACE_NAME" "$file" "remote:~/Downloads/" | lolcat ; then
+        echo " Upload complete: ~/Downloads/$base_filename"
+    else
+        echo " Upload failed"
+        exit 1
+    fi
 fi
 echo
+
 
 # ================= Step 5: Verify remote file existence =================
 echo "🔍 Verifying remote file existence..."
