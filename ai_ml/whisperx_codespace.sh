@@ -36,7 +36,7 @@ echo "Input file (maybe shared, then path is changed): "
 echo "$file" | lolcat
 echo "You may add: '--model high' and '--diarize' there. Diarize requires your 'HF_TOKEN' env. Extra arguments for WhisperX: "
 echo " $extra_args" | lolcat
-echo "Base filename: $base_filename"
+echo "Base filename: '$base_filename'. "
 echo
 
 # ================= Step 1: Check input file =================
@@ -81,6 +81,7 @@ echo
 
 # ================= Step 5: Upload to Codespace =================
 remote_path="Downloads/$base_filename"
+remote_path="$base_filename"
 
 # Compare hashes
 local_hash=$(sha256sum "$file" | cut -d' ' -f1)
