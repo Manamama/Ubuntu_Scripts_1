@@ -4,7 +4,7 @@ set -euo pipefail
 # ================= Runtime Intro =================
 echo "==================================================================="
 echo "📜 WhisperX Transcription Script (Paranoid Android & gh User Edition)"
-echo "Version 3.1.2"
+echo "Version 3.1.4"
 echo 
 echo "🔐 Mission Brief:"
 echo "  1. Verify input audio file exists (no ghosts allowed)."
@@ -93,9 +93,10 @@ echo "'$remote_home'" | lolcat
 
 remote_path="$remote_home/Downloads/$base_filename"
 
-echo "📤 Checking existence of the remote file: '$remote_path'..."
-if gh codespace ssh -c "$CODESPACE_NAME" "ls -la '$remote_path'" 2>/dev/null; then
-    echo "That remote file exists. 🔎 Comparing the local '$file' with the remote one '$remote_path'..."
+echo "📤 [6/10] Checking the existence of the remote file: '$remote_path' and uploading it if needed..."
+if gh codespace ssh -c "$CODESPACE_NAME" "ls -la '$remote_path'" | lolcat 2>/dev/null; then
+    echo "That remote file exists, so:"
+    echo "🔎 Comparing the local file: '$file' with the remote one: '$remote_path'..."
     local_hash=$(sha256sum "$file" | cut -d' ' -f1)
     remote_hash=$(gh codespace ssh -c "$CODESPACE_NAME" "test -f '$remote_path' && sha256sum '$remote_path' | cut -d' ' -f1" 2>/dev/null || true)
 
@@ -116,17 +117,6 @@ if gh codespace ssh -c "$CODESPACE_NAME" "ls -la '$remote_path'" 2>/dev/null; th
 fi
 echo
 
-# ================= Step 6: Verify remote file existence =================
-echo "🔍 [6/10] Confirming remote file existence: '$remote_path'..."
-if ! gh codespace ssh -c "$CODESPACE_NAME" "ls -la '$remote_home/Downloads'" 2>/dev/null; then
-    echo "⚠️ Failed to list the remote 'Downloads' folder." 
-fi
-if ! gh codespace ssh -c "$CODESPACE_NAME" "test -f '$remote_path'"; then
-    echo "❌ FATAL: Remote file missing: '$remote_path' ." 
-    exit 1
-fi
-echo "✅ Remote file exists: '$remote_path' " 
-echo
 
 # ================= Step 7: Check and install WhisperX =================
 echo "🔍 [7/10] Checking for WhisperX in Codespace..."
@@ -157,7 +147,8 @@ echo
 # ================= Step 8: Run WhisperX in Codespace =================
 echo "🤖 [8/10] Running WhisperX in Codespace with defaults..."
 run_cmd="whisperx --compute_type float32 --model medium '$remote_path' --output_dir '$remote_home/Downloads' --highlight_words True --print_progress True $extra_args"
-echo "📜 Command: $run_cmd" 
+echo "📜 The command that is being run: '$run_cmd' ...:" 
+echo
 
 
 time gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd"
@@ -165,7 +156,7 @@ time gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd"
 : '
 if ! whisperx_output=$(time gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd" 2>&1); then
     echo "❌ FATAL: WhisperX failed: $whisperx_output" 
-    termux-notification -c "Fail: $file_dir/${filename_no_ext}.srt" --title "WhisperX" --vibrate 500,2000,200
+    termux-notification -c " Fail: $file_dir/${filename_no_ext}.srt" --title "WhisperX" --vibrate 500,2000,200
     exit 1
 fi
 
@@ -195,7 +186,7 @@ remote_json="$remote_home/Downloads/${filename_no_ext}.json"
 echo "🔍 [9/10] Verifying remote output files..."
 if ! check_output=$(gh codespace ssh -c "$CODESPACE_NAME" "test -f '$remote_srt' && test -f '$remote_json' " 2>&1); then
     echo "❌ FATAL: Output files missing or empty: $check_output" 
-    termux-notification -c "Fail!: '$base_filename'" --title "WhisperX" --vibrate 500,2000,200
+    termux-notification -c " Fail!: '$base_filename'" --title "WhisperX" --vibrate 500,2000,200
     
     exit 1
 fi
@@ -236,7 +227,7 @@ if ! termux-media-player play "/storage/5951-9E0F/Audio/Funny_Sounds/Quack Quack
 fi
 
 #This is for a watch that may be connected via BLE to the notifications shown by Termux API: 
-termux-notification -c "OK: ${filename_no_ext}.srt" --title "WhisperX" --vibrate 500,1000,200
+termux-notification -c " OK: ${filename_no_ext}.srt" --title "WhisperX" --vibrate 500,1000,200
 echo "✅ Notification sent" 
 echo
 
