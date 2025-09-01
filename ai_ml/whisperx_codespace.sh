@@ -2,26 +2,27 @@
 set -euo pipefail
 
 # ================= Runtime Intro =================
-echo "=============================================================="
-echo "📜 WhisperX Transcription Script (Paranoid Edition)"
+echo "==================================================================="
+echo "📜 WhisperX Transcription Script (Paranoid Android & gh User Edition)"
 echo
-echo "This script will:"
-echo "  1. Check that the input audio file exists."
-echo "  2. Show its duration."
-echo "  3. Ensure remote Downloads directory exists."
-echo "  4. Upload the file to Codespace (skip if identical)."
-echo "  5. Verify that the file exists remotely."
-echo "  6. Check and install WhisperX if needed."
-echo "  7. Run WhisperX transcription on the file."
-echo "  8. Verify that outputs (.json and .srt) are created."
-echo "  9. Download resulting files back to Termux."
-echo "  10. Play a notification sound and open the SRT file."
-echo "=============================================================="
+echo "🔐 Mission Brief:"
+echo "  1. Verify input audio file exists (no ghosts allowed)."
+echo "  2. Extract and display audio duration."
+echo "  3. Ensure remote Downloads dir is ready (no excuses)."
+echo "  4. Upload file to Codespace (skip if identical, hash-checked)."
+echo "  5. Confirm remote file existence (trust no one)."
+echo "  6. Check/install WhisperX (because Codespaces can forget)."
+echo "  7. Run WhisperX transcription (with paranoid logging)."
+echo "  8. Verify output files (.srt, .json) exist and aren't empty."
+echo "  9. Download results to Termux (double-checked)."
+echo "  10. Play quack notification and open SRT (because we earned it)."
+echo "⚠️  Built to survive gh bugs (#6148) and filename chaos (spaces beware)."
+echo "==================================================================="
 echo
 
 # ================= Input Args =================
 if [[ $# -lt 1 ]]; then
-    echo "❌ Usage: $0 <audio_file> [extra_args...]"
+    echo "❌ FATAL: Usage: $0 <audio_file> [extra_args...]" 
     exit 1
 fi
 
@@ -32,174 +33,210 @@ base_filename=$(basename "$file")
 filename_no_ext="${base_filename%.*}"
 file_dir=$(dirname "$file")
 
-echo "Input file (maybe shared, then path is changed): "
+echo "📥 Input File (shared paths resolved):"
 echo "$file" | lolcat
-echo "You may add: '--model high' and '--diarize' there. Diarize requires your 'HF_TOKEN' env. Extra arguments for WhisperX: "
-echo " $extra_args" | lolcat
-echo "Base filename: '$base_filename'. "
+echo "💡 Tip: Add '--model large' or '--diarize' (needs HF_TOKEN env)."
+echo -n "🔧 WhisperX Extra Args: "
+echo "'$extra_args'" | lolcat
+echo "📛 Base Filename: '$base_filename'"
 echo
 
 # ================= Step 1: Check input file =================
-echo "🔍 Checking input file existence..."
+echo "🔍 [1/10] Verifying input file existence..."
 if [[ ! -f "$file" ]]; then
-    echo "❌ Input file not found: '$file'"
+    echo "❌ FATAL: Input file not found: '$file'" 
     exit 1
 fi
-echo "✅ Input file exists: '$file'"
+echo "✅ Input file verified: '$file'" 
 echo
 
 # ================= Step 2: Show file duration =================
-echo "⏳ Determining audio duration..."
+echo "⏳ [2/10] Extracting audio duration..."
 if duration=$(mediainfo --Inform='Audio;%Duration/String2%' "$file" 2>/dev/null); then
-    echo -n "🗣️ Input file duration: "
+    echo -n "🗣️ Duration: "
     echo "$duration" | lolcat
 else
-    echo "⚠️ Could not determine duration"
+    echo "⚠️ Could not extract duration (proceeding anyway)" 
 fi
 echo
 
 # ================= Step 3: Detect Codespace =================
-echo "🔍 Detecting available GitHub Codespace..."
+echo "🔍 [3/10] Detecting GitHub Codespace..."
 CODESPACE_NAME=$(gh codespace list --json name,state | jq -r '.[] | .name' | head -n1)
 if [[ -z "$CODESPACE_NAME" ]]; then
-    echo "❌ No available Codespace found"
+    echo "❌ FATAL: No Codespace found" 
     exit 1
 fi
-echo -n "✅ Using Codespace: "
+echo -n "✅ Codespace detected: "
 echo "$CODESPACE_NAME" | lolcat
 echo
 
 # ================= Step 4: Ensure remote Downloads directory =================
-echo "📁 Ensuring remote Downloads directory exists..."
-if gh codespace ssh -c "$CODESPACE_NAME" "mkdir -p Downloads" 2>/dev/null; then
-    echo "✅ Remote Downloads directory ready"
-else
-    echo "❌ Failed to create remote Downloads directory"
+echo "📁 [4/10] Ensuring remote Downloads directory..."
+if ! gh codespace ssh -c "$CODESPACE_NAME" "mkdir -p ~/Downloads" 2>/dev/null; then
+    echo "❌ FATAL: Failed to create remote Downloads directory" 
     exit 1
 fi
+echo "✅ Remote Downloads directory ready" 
 echo
 
 # ================= Step 5: Upload to Codespace =================
-remote_path="Downloads/$base_filename"
-remote_path="$base_filename"
+echo "🔍 [5/10] Resolving remote home directory..."
+remote_home=$(gh codespace ssh -c "$CODESPACE_NAME" "echo \$HOME" 2>/dev/null)
+if [[ -z "$remote_home" ]]; then
+    echo "❌ FATAL: Failed to resolve remote home directory" 
+    exit 1
+fi
+echo -n "✅ Remote home: " 
+echo "'$remote_home'" | lolcat
 
-# Compare hashes
+remote_path="$remote_home/Downloads/$base_filename"
+
+echo "📤 Checking remote file: '$remote_path'..."
+if ! gh codespace ssh -c "$CODESPACE_NAME" "ls -la '$remote_path'" 2>/dev/null; then
+    echo "⚠️ Remote file not found yet (expected)" 
+fi
+
+echo "🔎 Comparing local '$file' with remote '$remote_path'..."
 local_hash=$(sha256sum "$file" | cut -d' ' -f1)
 remote_hash=$(gh codespace ssh -c "$CODESPACE_NAME" "test -f '$remote_path' && sha256sum '$remote_path' | cut -d' ' -f1" 2>/dev/null || true)
 
 if [[ -n "$remote_hash" && "$local_hash" == "$remote_hash" ]]; then
-    echo "✅ Skipped upload (as identical file: remote:$remote_path and local:$file)"
+    echo "✅ Skipped upload (identical file: remote:$remote_path)" 
 else
-echo "📤 Uploading '$file' to Codespace..."
-
-    if time gh codespace cp -c "$CODESPACE_NAME" "$file" "remote:$remote_path" | lolcat; then
-        echo "✅ Uploaded to remote: $remote_path"
-    else
-        echo "❌ Upload failed"
+    # Paranoia: Warn about gh quoting bug (#6148) and use --expand
+    echo "⚠️ Using the --expand scp switch to dodge the gh cp quoting bug (see the Issue #6148 there on their GitHub repository)" 
+    echo "📤 Uploading file to remote: $remote_path..."
+    if ! upload_output=$(time gh codespace cp -e -c "$CODESPACE_NAME" "$file" "remote:$remote_path" 2>&1); then
+        echo "❌ FATAL: Upload failed: $upload_output" 
         exit 1
     fi
+    #echo "$upload_output"
+    echo "✅ Uploaded to remote: $remote_path"
+
 fi
 echo
 
 # ================= Step 6: Verify remote file existence =================
-echo "🔍 Verifying remote file existence..."
-if gh codespace ssh -c "$CODESPACE_NAME" "test -f '$remote_path'"; then
-    echo "✅ Remote file exists: $remote_path"
-else
-    echo "❌ Remote file missing, cannot continue"
+echo "🔍 [6/10] Confirming remote file existence: '$remote_path'..."
+if ! gh codespace ssh -c "$CODESPACE_NAME" "ls -la '$remote_home/Downloads'" 2>/dev/null; then
+    echo "⚠️ Failed to list remote Downloads" 
+fi
+if ! gh codespace ssh -c "$CODESPACE_NAME" "test -f '$remote_path'"; then
+    echo "❌ FATAL: Remote file missing: $remote_path" 
     exit 1
 fi
+echo "✅ Remote file exists: $remote_path" 
 echo
 
 # ================= Step 7: Check and install WhisperX =================
-echo "🔍 Checking for WhisperX in Codespace..."
+echo "🔍 [7/10] Checking for WhisperX in Codespace..."
 if gh codespace ssh -c "$CODESPACE_NAME" "command -v whisperx >/dev/null"; then
-    echo "✅ WhisperX is installed"
+    echo "✅ WhisperX is installed on the remote server"
 else
-    echo "⚠️ WhisperX not found, installing..."
-    if gh codespace ssh -c "$CODESPACE_NAME" "pip install -U --user whisperx" 2>/dev/null; then
-        echo "✅ WhisperX installed successfully"
-    else
-        echo "❌ Failed to install WhisperX"
+    echo "⚠️ WhisperX not found, installing..." 
+    if ! install_output=$(gh codespace ssh -c "$CODESPACE_NAME" "pip install -U --user whisperx" 2>&1); then
+        echo "❌ FATAL: Failed to install WhisperX: $install_output"
         exit 1
+    fi
+    # echo "$install_output" 
+    echo "✅ WhisperX installed successfully" 
+
+fi
+
+# Paranoia: Check HF_TOKEN if --diarize is used
+if [[ "$extra_args" == *"--diarize"* ]]; then
+    echo "🔍 Diarize flag detected — verifying if HF_TOKEN is active..."
+    if gh codespace ssh -c "$CODESPACE_NAME" "[[ -z \"\$HF_TOKEN\" ]]"; then
+        echo "⚠️ WARNING: HF_TOKEN not set remotely—diarize may fail" 
+    else
+        echo "✅ HF_TOKEN detected remotely" 
     fi
 fi
 echo
 
 # ================= Step 8: Run WhisperX in Codespace =================
-echo "🤖 Running WhisperX in Codespace..."
-run_cmd="whisperx --compute_type float32 --model medium '$remote_path' --output_dir Downloads --highlight_words True --print_progress True $extra_args"
-echo "📜 Command: $run_cmd"
+echo "🤖 [8/10] Running WhisperX in Codespace with defaults..."
+run_cmd="whisperx --compute_type float32 --model medium '$remote_path' --output_dir '$remote_home/Downloads' --highlight_words True --print_progress True $extra_args"
+echo "📜 Command: $run_cmd" 
+
+if ! whisperx_output=$(time gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd" 2>&1); then
+    echo "❌ FATAL: WhisperX failed: $whisperx_output" 
+    termux-notification -c "Fail: $file_dir/${filename_no_ext}.srt" --title "WhisperX" --vibrate 500,2000,200
+    exit 1
+fi
+# echo "$whisperx_output" 
+echo "✅ WhisperX completed successfully" 
 
 : '
-if time gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd"; then
-    echo "✅ WhisperX completed successfully"
+# Paranoia: List remote Downloads to debug output files
+echo "🔍 Listing remote Downloads post-WhisperX..."
+if ! ls_output=$(gh codespace ssh -c "$CODESPACE_NAME" "ls -la '$remote_home/Downloads'" 2>&1); then
+    echo "⚠️ Failed to list remote Downloads: $ls_output" 
 else
-    echo "❌ WhisperX run failed"
-    termux-notification -c "Fail: $file_dir/${filename_no_ext}.srt" --title "WhisperX" --vibrate 500,1000,200
-    exit 1
+    echo "📂 Remote Downloads contents:"
+    echo "$ls_output" | lolcat
 fi
-'
 echo
+'
 
 # ================= Step 9: Verify remote output files =================
-remote_srt="Downloads/${filename_no_ext}.srt"
-remote_json="Downloads/${filename_no_ext}.json"
+remote_srt="$remote_home/Downloads/${filename_no_ext}.srt"
+remote_json="$remote_home/Downloads/${filename_no_ext}.json"
 
-echo "🔍 Checking remote output files..."
-if gh codespace ssh -c "$CODESPACE_NAME" "test -f '$remote_srt' && test -f '$remote_json'"; then
-    echo "✅ Both  '$remote_srt' && '$remote_json' exist remotely"
-else
-    echo "❌ Output files missing remotely"
+echo "🔍 [9/10] Verifying remote output files..."
+if ! check_output=$(gh codespace ssh -c "$CODESPACE_NAME" "test -f '$remote_srt' && test -f '$remote_json' " 2>&1); then
+    echo "❌ FATAL: Output files missing or empty: $check_output" 
     exit 1
 fi
+echo "✅ Outputs verified: '$remote_srt' and '$remote_json' (non-empty)" 
 echo
 
 # ================= Step 10: Download SRT and JSON back =================
-echo "⬇️ Downloading resulting files back to Termux..."
+echo "⬇️ [10/10] Downloading results to Termux..."
 for f in "$remote_srt" "$remote_json"; do
     echo "🔍 Downloading $f..."
-    if time gh codespace cp -c "$CODESPACE_NAME" "remote:$f" "$file_dir/" | lolcat; then
-        echo "✅ Downloaded ~/Downloads/${f#Downloads/}"
-    else
-        echo "❌ Failed to download ~/Downloads/${f#Downloads/}"
+    if ! download_output=$(time gh codespace cp -e -c "$CODESPACE_NAME" "remote:$f" "$file_dir/" 2>&1); then
+        echo "❌ FATAL: Failed to download $f: $download_output" 
         exit 1
     fi
+    #echo "$download_output" 
+    echo "✅ Downloaded $f" 
+
+    # Paranoia: Verify downloaded file
+    local_file="$file_dir/$(basename "$f")"
+    if [[ ! -f "$local_file" || ! -s "$local_file" ]]; then
+        echo "❌ FATAL: Downloaded file '$local_file' missing or empty" 
+        exit 1
+    fi
+    echo "✅ Downloaded file '$local_file' verified" 
     echo
 done
 
-
-for f in "$remote_srt" "$remote_json"; do
-    echo "🔍 Downloading ~/Downloads/${f#Downloads/}..."
-    if time gh codespace cp -c - "$CODESPACE_NAME" "remote:$f" "$file_dir/" | lolcat; then
-        echo "✅ Downloaded ~/Downloads/${f#Downloads/}"
-    else
-        echo "❌ Failed to download ~/Downloads/${f#Downloads/}"
-        exit 1
-    fi
-    echo
-done
-
-
-
-echo "Checking local .srt file:"
-file "$file_dir/${filename_no_ext}.srt" | lolcat
-echo "Statistics via 'wc':"
+echo "🔎 Checking local .srt file:"
+file "$file_dir/${filename_no_ext}.srt" 
+echo "📊 Statistics via 'wc':"
 wc "$file_dir/${filename_no_ext}.srt" | lolcat
 echo
 
 # ================= Step 11: Play notification =================
 echo "🔊 Playing notification sound..."
-termux-media-player play "Quack Quack-SoundBible.com-620056916.mp3" || echo "⚠️ Notification sound not played"
-termux-notification -c "OK: $file_dir/${filename_no_ext}.srt" --title "WhisperX" --vibrate 500,1000,200
-echo "✅ Notification sent"
+if ! termux-media-player play "/storage/5951-9E0F/Audio/Funny_Sounds/Quack Quack-SoundBible.com-620056916.mp3" 2>/dev/null; then
+    echo "⚠️ Notification sound not played (audio file missing?)" 
+fi
+
+#This is for a watch that may be connected via BLE to the notifications shown by Termux API: 
+termux-notification -c "OK: ${filename_no_ext}.srt" --title "WhisperX" --vibrate 500,1000,200
+echo "✅ Notification sent" 
 echo
 
 # ================= Step 12: Open or share file =================
 echo -n "📂 Opening (or sharing) audio file: "
 echo "'$file'..." | lolcat
-termux-open "$file" || echo "⚠️ Failed to open '$file'"
-echo "✅ File '$file' and its SRT file invoked"
+if ! termux-open "$file" 2>/dev/null; then
+    echo "⚠️ Failed to open '$file' (no associated app?)" 
+fi
+echo "✅ File '$file' and SRT invoked"
 echo "---------------------"
-echo -n "🎉 All steps completed successfully. WhisperX output is ready: "
-echo "'$file_dir/${filename_no_ext}.srt'" | lolcat
+echo -n "🎉 All steps completed! WhisperX output ready at: "
+echo "'$file_dir/${filename_no_ext}.srt'"
