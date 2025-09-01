@@ -1,6 +1,3 @@
-
-
-
 #!/bin/bash
 #
 # Description: Provides a function to manage Google Cloud Shell login, rclone mounts, and SSHFS mounts.
@@ -20,6 +17,9 @@
 #   - Termux environment (for specific paths like /data/data/com.termux)
 #
 # Last Modified: August 31, 2025
+
+
+gc1(){
     # Ensure SSH folder ownership
     sudo chown -R u0_a278:u0_a278 /data/data/com.termux/files/home/.ssh
 

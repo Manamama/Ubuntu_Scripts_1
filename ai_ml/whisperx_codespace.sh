@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
+
+whisperx_on_remote() {
 set -euo pipefail
 
 # ================= Runtime Intro =================
-echo "==================================================================="
+echo
+echo "========================================="
 echo "📜 WhisperX Transcription Script (Paranoid Android & gh User Edition)"
 echo "Version 3.1.4"
 echo 
@@ -18,7 +21,7 @@ echo "  8. Trust and so verify the output files (.srt, .json) exist and aren't e
 echo "  9. Download results to Termux (double-checked)."
 echo "  10. Play quack notification and open SRT (because we earned it)."
 echo "⚠️  Built to survive gh bugs (#6148) and filename chaos (spaces beware)."
-echo "==================================================================="
+echo "========================================="
 echo
 
 # ================= Input Args =================
@@ -186,7 +189,7 @@ remote_json="$remote_home/Downloads/${filename_no_ext}.json"
 echo "🔍 [9/10] Verifying remote output files..."
 if ! check_output=$(gh codespace ssh -c "$CODESPACE_NAME" "test -f '$remote_srt' && test -f '$remote_json' " 2>&1); then
     echo "❌ FATAL: Output files missing or empty: $check_output" 
-    termux-notification -c " Fail!: '$base_filename'" --title "WhisperX" --vibrate 500,2000,200
+    termux-notification -c " Fail!: '$base_filename'" --title "WhisperX " --vibrate 500,2000,200
     
     exit 1
 fi
@@ -227,15 +230,13 @@ if ! termux-media-player play "/storage/5951-9E0F/Audio/Funny_Sounds/Quack Quack
 fi
 
 #This is for a watch that may be connected via BLE to the notifications shown by Termux API: 
-termux-notification -c " OK: ${filename_no_ext}.srt" --title "WhisperX" --vibrate 500,1000,200
+termux-notification -c " OK: ${filename_no_ext}.srt" --title "WhisperX " --vibrate 500,1000,200
 echo "✅ Notification sent" 
 echo
 
 # ================= Step 12: Open or share file =================
 echo -n "📂 Opening (or sharing) audio file to play with new SRT subtitles: "
 echo "'$file'..." | lolcat
-echo -n "🗣️ Duration: "
-echo "$duration" | lolcat
 
 if ! termux-open "$file" 2>/dev/null; then
     echo "⚠️ Failed to open '$file' (no associated app?)" 
@@ -244,3 +245,13 @@ echo "✅ File '$file' and SRT invoked"
 echo "---------------------"
 echo -n "🎉 All steps completed! WhisperX output ready at: "
 echo "'$file_dir/${filename_no_ext}.srt'"
+
+echo
+echo -n "🗣️ The source file of duration: "
+echo "$duration" | lolcat
+echo "has taken this long to process:"
+#Total 'time' should display here:
+}
+
+time whisperx_on_remote "$@"
+
