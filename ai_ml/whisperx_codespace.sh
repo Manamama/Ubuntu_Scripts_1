@@ -4,7 +4,8 @@ set -euo pipefail
 # ================= Runtime Intro =================
 echo "==================================================================="
 echo "📜 WhisperX Transcription Script (Paranoid Android & gh User Edition)"
-echo
+echo "Version 3.1.2"
+echo 
 echo "🔐 Mission Brief:"
 echo "  1. Verify input audio file exists (no ghosts allowed)."
 echo "  2. Extract and display audio duration."
@@ -13,7 +14,7 @@ echo "  4. Upload file to Codespace (skip if identical, hash-checked)."
 echo "  5. Confirm remote file existence (trust no one)."
 echo "  6. Check/install WhisperX (because Codespaces can forget)."
 echo "  7. Run WhisperX transcription (with paranoid logging)."
-echo "  8. Verify output files (.srt, .json) exist and aren't empty."
+echo "  8. Trust and so verify the output files (.srt, .json) exist and aren't empty."
 echo "  9. Download results to Termux (double-checked)."
 echo "  10. Play quack notification and open SRT (because we earned it)."
 echo "⚠️  Built to survive gh bugs (#6148) and filename chaos (spaces beware)."
@@ -92,41 +93,39 @@ echo "'$remote_home'" | lolcat
 
 remote_path="$remote_home/Downloads/$base_filename"
 
-echo "📤 Checking remote file: '$remote_path'..."
-if ! gh codespace ssh -c "$CODESPACE_NAME" "ls -la '$remote_path'" 2>/dev/null; then
-    echo "⚠️ Remote file not found yet (expected)" 
-fi
+echo "📤 Checking existence of the remote file: '$remote_path'..."
+if gh codespace ssh -c "$CODESPACE_NAME" "ls -la '$remote_path'" 2>/dev/null; then
+    echo "That remote file exists. 🔎 Comparing the local '$file' with the remote one '$remote_path'..."
+    local_hash=$(sha256sum "$file" | cut -d' ' -f1)
+    remote_hash=$(gh codespace ssh -c "$CODESPACE_NAME" "test -f '$remote_path' && sha256sum '$remote_path' | cut -d' ' -f1" 2>/dev/null || true)
 
-echo "🔎 Comparing local '$file' with remote '$remote_path'..."
-local_hash=$(sha256sum "$file" | cut -d' ' -f1)
-remote_hash=$(gh codespace ssh -c "$CODESPACE_NAME" "test -f '$remote_path' && sha256sum '$remote_path' | cut -d' ' -f1" 2>/dev/null || true)
-
-if [[ -n "$remote_hash" && "$local_hash" == "$remote_hash" ]]; then
-    echo "✅ Skipped upload (identical file: remote:$remote_path)" 
-else
-    # Paranoia: Warn about gh quoting bug (#6148) and use --expand
-    echo "⚠️ Using the --expand scp switch to dodge the gh cp quoting bug (see the Issue #6148 there on their GitHub repository)" 
-    echo "📤 Uploading file to remote: $remote_path..."
-    if ! upload_output=$(time gh codespace cp -e -c "$CODESPACE_NAME" "$file" "remote:$remote_path" 2>&1); then
-        echo "❌ FATAL: Upload failed: $upload_output" 
-        exit 1
+    if [[ -n "$remote_hash" && "$local_hash" == "$remote_hash" ]]; then
+        echo "✅ Skipped the upload, as the local file is identical to the remote one or so says the hash tool." 
+    else
+        echo "⚠️ Remote file not found yet (expected). We shall upload it then. " 
+        # Justified paranoia: Warn about the gh quoting bug (#6148), valid as of AD 2025 and use --expand
+        echo "⚠️ Using the '--expand' switch of 'gh cs cp' to dodge the 'gh cp' quoting bug (see the Issue #6148 on their GitHub repository)" 
+        echo "📤 Uploading the local '$file' to remote: $remote_path..."
+        if ! upload_output=$(time gh codespace cp -e -c "$CODESPACE_NAME" "$file" "remote:$remote_path" 2>&1); then
+            echo "❌ FATAL: Upload failed: $upload_output" 
+            exit 1
+        fi
+        #echo "$upload_output"
+        echo "✅ It should be uploaded to remote: $remote_path"
     fi
-    #echo "$upload_output"
-    echo "✅ Uploaded to remote: $remote_path"
-
 fi
 echo
 
 # ================= Step 6: Verify remote file existence =================
 echo "🔍 [6/10] Confirming remote file existence: '$remote_path'..."
 if ! gh codespace ssh -c "$CODESPACE_NAME" "ls -la '$remote_home/Downloads'" 2>/dev/null; then
-    echo "⚠️ Failed to list remote Downloads" 
+    echo "⚠️ Failed to list the remote 'Downloads' folder." 
 fi
 if ! gh codespace ssh -c "$CODESPACE_NAME" "test -f '$remote_path'"; then
-    echo "❌ FATAL: Remote file missing: $remote_path" 
+    echo "❌ FATAL: Remote file missing: '$remote_path' ." 
     exit 1
 fi
-echo "✅ Remote file exists: $remote_path" 
+echo "✅ Remote file exists: '$remote_path' " 
 echo
 
 # ================= Step 7: Check and install WhisperX =================
@@ -134,7 +133,7 @@ echo "🔍 [7/10] Checking for WhisperX in Codespace..."
 if gh codespace ssh -c "$CODESPACE_NAME" "command -v whisperx >/dev/null"; then
     echo "✅ WhisperX is installed on the remote server"
 else
-    echo "⚠️ WhisperX not found, installing..." 
+    echo "⚠️ WhisperX not found, installing (mind you: by default, it installs the huge GPU edition with NVIDIA drivers, so preinstall the Torch CPU version to avoid it..." 
     if ! install_output=$(gh codespace ssh -c "$CODESPACE_NAME" "pip install -U --user whisperx" 2>&1); then
         echo "❌ FATAL: Failed to install WhisperX: $install_output"
         exit 1
@@ -231,8 +230,11 @@ echo "✅ Notification sent"
 echo
 
 # ================= Step 12: Open or share file =================
-echo -n "📂 Opening (or sharing) audio file: "
+echo -n "📂 Opening (or sharing) audio file to play with new SRT subtitles: "
 echo "'$file'..." | lolcat
+echo -n "🗣️ Duration: "
+echo "$duration" | lolcat
+
 if ! termux-open "$file" 2>/dev/null; then
     echo "⚠️ Failed to open '$file' (no associated app?)" 
 fi
