@@ -159,13 +159,22 @@ echo "🤖 [8/10] Running WhisperX in Codespace with defaults..."
 run_cmd="whisperx --compute_type float32 --model medium '$remote_path' --output_dir '$remote_home/Downloads' --highlight_words True --print_progress True $extra_args"
 echo "📜 Command: $run_cmd" 
 
+
+time gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd"
+
+: '
 if ! whisperx_output=$(time gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd" 2>&1); then
     echo "❌ FATAL: WhisperX failed: $whisperx_output" 
     termux-notification -c "Fail: $file_dir/${filename_no_ext}.srt" --title "WhisperX" --vibrate 500,2000,200
     exit 1
 fi
+
 # echo "$whisperx_output" 
 echo "✅ WhisperX completed successfully" 
+
+
+'
+
 
 : '
 # Paranoia: List remote Downloads to debug output files
@@ -186,6 +195,8 @@ remote_json="$remote_home/Downloads/${filename_no_ext}.json"
 echo "🔍 [9/10] Verifying remote output files..."
 if ! check_output=$(gh codespace ssh -c "$CODESPACE_NAME" "test -f '$remote_srt' && test -f '$remote_json' " 2>&1); then
     echo "❌ FATAL: Output files missing or empty: $check_output" 
+    termux-notification -c "Fail!: '$base_filename'" --title "WhisperX" --vibrate 500,2000,200
+    
     exit 1
 fi
 echo "✅ Outputs verified: '$remote_srt' and '$remote_json' (non-empty)" 
