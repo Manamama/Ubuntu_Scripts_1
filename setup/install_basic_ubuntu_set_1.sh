@@ -524,36 +524,48 @@ configure_teamviewer() {
 
 echo
 echo "📌 Starting Ubuntu setup..."
-echo "Version 2.7.1"
+echo "Version 2.7.2"
 echo  check_dependencies # Perform initial dependency checks  
 echo  To be done one day, but not yet, we busy... 
+echo  We configure_system_resources ...
 
-  # 1️⃣ Core environment and utilities first
+configure_system_resources
+
+echo  Core environment and utilities 
   install_core_utilities
 
-  # 2️⃣ Modern CMake early, for any builds that require it
+echo Modern CMake early, for any builds that require it
   install_modern_cmake
 
-  # 3️⃣ System and dev tools (depends on core utilities and CMake)
+echo  "System and dev tools (depends on core utilities and CMake)"
   install_system_tools
 
   #install_nodejs_nvm
 
+echo AI tools ... 
   install_ai_tools
 
+
+echo  "LLaMA build (depends on modern CMake and system dev tools)"
+  build_llama 
+
+
+
+echo "Gemini CLI to talk to Gemini AI..."
   install_gemini_cli
 
+
+echo "Skipping the Remote Desktop stuff for now ... "
   # Desktop Environment Setup
   #install_xfce
   #configure_chrome_remote_desktop
   #configure_teamviewer
  #configure_xrdp || echo "⚠️ XRDP setup skipped (non-systemd system)."
 
-  # 6️⃣ LLaMA build (depends on modern CMake and system dev tools)
-  build_llama 
+
 
   
-  # 9️⃣ Display system info at the end
+echo  "Display system info and performance at the end"
   display_system_info
 
   echo "✅ Basic Ubuntu setup complete."
