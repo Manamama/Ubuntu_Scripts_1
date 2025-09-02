@@ -304,6 +304,11 @@ install_system_tools() {
 		libomp-dev libssl-dev adb fastboot neofetch geoip-bin ranger baobab firefox python3-pip ncdu mediainfo xdg-utils
 	sudo apt-get install -y npm
 	sudo npm install -g neofetch
+
+#For CUDA stuff:
+sudo apt-get install libcudnn8 libcudnn8-dev
+
+ 
 	# Optional: cpufetch
 	if apt-cache show cpufetch >/dev/null 2>&1; then
 		sudo DEBIAN_FRONTEND=noninteractive apt install -y cpufetch
