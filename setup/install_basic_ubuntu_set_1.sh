@@ -4,6 +4,7 @@
 # Description: Installs a robust development and AI environment on Ubuntu/Debian systems.
 
 set -uo pipefail # keep -u and -o pipefail
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 # do NOT use -e globally. No -e → commands that fail won’t abort the script, letting functions fail naturally.
 #-u → undefined variables still fail (good safety)
 # -o pipefail → pipelines still propagate errors
@@ -112,7 +113,7 @@ configure_system_resources() {
 	local PYTHON_LIB=$(python -m site --user-site)
 	local PERSISTENT_DEST_BASE="/root/home_extended" # Default for GCloud
 
-	if [ -n "$CODESPACE_NAME" ]; then
+	if [ -n "${CODESPACE_NAME-}" ]; then
 		echo "[INFO] Detected GitHub Codespace: using /tmp for temporary storage"
 		PERSISTENT_DEST_BASE="/tmp"
 	fi
@@ -122,7 +123,7 @@ configure_system_resources() {
 		sudo umount -l "$PYTHON_LIB"
 	done
 
-	if [ -n "$CODESPACE_NAME" ]; then
+	if [ -n "${CODESPACE_NAME-}" ]; then
 		echo "[INFO] Detected GitHub Codespace: leaving $PYTHON_LIB in place"
 	else
 
@@ -188,7 +189,7 @@ configure_system_resources() {
 configure_persistent_environment() {
 	echo "📝 Configuring persistent environment variables..."
 
-	local ENV_FILE="/workspaces/Ubuntu_Scripts_1/utils/ubuntu_scripts_env.sh"
+	local ENV_FILE="$SCRIPT_DIR/../utils/ubuntu_scripts_env.sh"
 
 	# Create or update the environment file
 	cat <<'EOF' >"$ENV_FILE"
@@ -294,12 +295,14 @@ configure_xrdp() {
 # --- System and Dev Tools ---
 install_system_tools() {
 	echo "🧰 Installing system and dev tools..."
+	sudo apt-get update
 
 	
 
 	# Core dev tools
-	sudo apt-get install -y pciutils build-essential cmake curl libcurl4-openssl-dev \
-		libomp-dev libssl-dev adb fastboot neofetch geoip-bin ranger baobab firefox python3-pip ncdu mediainfo
+	sudo apt-get install -y pciutils build-essential cmake curl libcurl4-openssl-dev 
+		libomp-dev libssl-dev adb fastboot neofetch geoip-bin ranger baobab firefox python3-pip ncdu mediainfo xdg-utils
+	sudo apt-get install -y npm
 	sudo npm install -g neofetch
 	# Optional: cpufetch
 	if apt-cache show cpufetch >/dev/null 2>&1; then
