@@ -7,7 +7,7 @@ set -euo pipefail
 echo
 echo "========================================="
 echo "📜 WhisperX Transcription Script (Paranoid Android & gh User Edition)"
-echo "Version 3.1.4"
+echo "Version 3.1.7"
 echo 
 echo "🔐 Mission Brief:"
 echo "  1. Verify input audio file exists (no ghosts allowed)."
@@ -72,9 +72,11 @@ if [[ -z "$CODESPACE_NAME" ]]; then
     exit 1
 fi
 echo -n "✅ Codespace detected: "
-echo "$CODESPACE_NAME" | lolcat
+#echo "$CODESPACE_NAME" | lolcat
 echo
 
+gh codespace view -c "$CODESPACE_NAME" | lolcat
+echo 
 # ================= Step 4: Ensure remote Downloads directory =================
 echo "📁 [4/10] Ensuring remote Downloads directory..."
 if ! gh codespace ssh -c "$CODESPACE_NAME" "mkdir -p ~/Downloads" 2>/dev/null; then
@@ -93,31 +95,37 @@ if [[ -z "$remote_home" ]]; then
 fi
 echo -n "✅ Remote home: " 
 echo "'$remote_home'" | lolcat
-
+echo
 remote_path="$remote_home/Downloads/$base_filename"
 
-echo "📤 [6/10] Checking the existence of the remote file: '$remote_path' and uploading it if needed..."
-if gh codespace ssh -c "$CODESPACE_NAME" "ls -la '$remote_path'" | lolcat 2>/dev/null; then
+echo "📤 [6/10] Checking the existence of the remote file: '$remote_path'..."
+if gh codespace ssh -c "$CODESPACE_NAME" "test -f '$remote_path'" 2>/dev/null; then
     echo "That remote file exists, so:"
     echo "🔎 Comparing the local file: '$file' with the remote one: '$remote_path'..."
     local_hash=$(sha256sum "$file" | cut -d' ' -f1)
-    remote_hash=$(gh codespace ssh -c "$CODESPACE_NAME" "test -f '$remote_path' && sha256sum '$remote_path' | cut -d' ' -f1" 2>/dev/null || true)
+    remote_hash=$(gh codespace ssh -c "$CODESPACE_NAME" "sha256sum '$remote_path' | cut -d' ' -f1" 2>/dev/null || true)
 
     if [[ -n "$remote_hash" && "$local_hash" == "$remote_hash" ]]; then
-        echo "✅ Skipped the upload, as the local file is identical to the remote one or so says the hash tool." 
+        echo "✅ Skipped the upload, as the local file is identical to the remote one."
     else
-        echo "⚠️ Remote file not found yet (expected). We shall upload it then. " 
-        # Justified paranoia: Warn about the gh quoting bug (#6148), valid as of AD 2025 and use --expand
-        echo "⚠️ Using the '--expand' switch of 'gh cs cp' to dodge the 'gh cp' quoting bug (see the Issue #6148 on their GitHub repository)" 
-        echo "📤 Uploading the local '$file' to remote: $remote_path..."
+        echo "⚠️ File exists but hashes differ → re-uploading."
+        echo "📤 Uploading '$file' → '$remote_path'..."
         if ! upload_output=$(time gh codespace cp -e -c "$CODESPACE_NAME" "$file" "remote:$remote_path" 2>&1); then
-            echo "❌ FATAL: Upload failed: $upload_output" 
+            echo "❌ FATAL: Upload failed: $upload_output"
             exit 1
         fi
-        #echo "$upload_output"
-        echo "✅ It should be uploaded to remote: $remote_path"
+        echo "✅ Uploaded: $remote_path"
     fi
+else
+    echo "⚠️ Remote file not found → uploading."
+    echo "📤 Uploading '$file' → '$remote_path'..."
+    if ! upload_output=$(time gh codespace cp -e -c "$CODESPACE_NAME" "$file" "remote:$remote_path" 2>&1); then
+        echo "❌ FATAL: Upload failed: $upload_output"
+        exit 1
+    fi
+    echo "✅ Uploaded: $remote_path"
 fi
+
 echo
 
 
@@ -140,7 +148,7 @@ fi
 if [[ "$extra_args" == *"--diarize"* ]]; then
     echo "🔍 Diarize flag detected — verifying if HF_TOKEN is active..."
     if gh codespace ssh -c "$CODESPACE_NAME" "[[ -z \"\$HF_TOKEN\" ]]"; then
-        echo "⚠️ WARNING: HF_TOKEN not set remotely—diarize may fail" 
+        echo "⚠️ WARNING: HF_TOKEN not set remotely—diarize may fail. We shall use local HF_TOKEN then, if any." 
     else
         echo "✅ HF_TOKEN detected remotely" 
     fi
@@ -153,21 +161,16 @@ run_cmd="whisperx --compute_type float32 --model medium '$remote_path' --output_
 echo "📜 The command that is being run: '$run_cmd' ...:" 
 echo
 
-
-time gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd"
-
-: '
-if ! whisperx_output=$(time gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd" 2>&1); then
-    echo "❌ FATAL: WhisperX failed: $whisperx_output" 
-    termux-notification -c " Fail: $file_dir/${filename_no_ext}.srt" --title "WhisperX" --vibrate 500,2000,200
+if ! time gh codespace ssh -c "$CODESPACE_NAME"  "HF_TOKEN=$HF_TOKEN $run_cmd"; then
+    echo "❌ FATAL: WhisperX execution failed (non-zero exit status)" 
+    echo "⚠️ Check logs above — likely diarization/HF_TOKEN issue or remote crash."
+    termux-notification -c " Fail remote: '$base_filename'" \
+        --title "WhisperX " --vibrate 500,2000,200
     exit 1
 fi
 
-# echo "$whisperx_output" 
-echo "✅ WhisperX completed successfully" 
-
-
-'
+echo "✅ WhisperX completed (exit status OK)"
+echo
 
 
 : '
