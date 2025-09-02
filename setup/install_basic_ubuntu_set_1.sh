@@ -457,8 +457,9 @@ build_llama() {
 		cd .. # Return to ~/Downloads/GitHub
 	fi
 
+#We are building with CUDA after all as Google Collab also has terminal nowadays
 	cmake -S llama.cpp -B llama.cpp/build \
-		-DBUILD_SHARED_LIBS=ON -DGGML_CUDA=OFF -DLLAMA_CURL=ON \
+		-DBUILD_SHARED_LIBS=ON -DGGML_CUDA=ON -DLLAMA_CURL=ON \
 		-DCMAKE_INSTALL_PREFIX=$HOME/.local &&
 		cmake --build llama.cpp/build --config Release -j8 &&
 		cmake --install llama.cpp/build
