@@ -280,7 +280,12 @@ install_ai_tools() {
 
 	echo "🧠 Installing AI/ML tools..."
 	python -m ensurepip
-	python -m pip install --user -U whisperx numpy torch torchvision torchaudio tensorflow-cpu jax jaxlib protobuf --extra-index-url https://download.pytorch.org/whl/cpu
+
+ #Huge with CUDA:
+ python -m pip install --user -U whisperx numpy torch torchvision torchaudio tensorflow jax jaxlib protobuf 
+
+ #CPU only: 
+	#python -m pip install --user -U whisperx numpy torch torchvision torchaudio tensorflow-cpu jax jaxlib protobuf --extra-index-url https://download.pytorch.org/whl/cpu
 	# python -m pip install git+https://github.com/openai/whisper.git
 }
 
