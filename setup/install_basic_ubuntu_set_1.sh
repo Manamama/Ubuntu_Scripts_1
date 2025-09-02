@@ -62,7 +62,7 @@ NVM_REPO_URL="https://github.com/nvm-sh/nvm.git"
 LLAMA_CPP_REPO_URL="https://github.com/ggml-org/llama.cpp"
 CHROME_REMOTE_DESKTOP_BASE_URL="https://dl.google.com/linux/direct/"
 TEAMVIEWER_HOST_BASE_URL="https://download.teamviewer.com/download/linux/"
-
+LOCALLIB="$HOME/.local/lib"
 install_deb_local() {
 	local DEB="$1"
 	local TMPROOT
@@ -112,6 +112,7 @@ configure_system_resources() {
 	local CUR_HOME="$HOME"
 	local PYTHON_LIB=$(python -m site --user-site)
 	local PERSISTENT_DEST_BASE="/root/home_extended" # Default for GCloud
+ export LD_LIBRARY_PATH=$LOCALLIB:$LD_LIBRARY_PATH
 
 	if [ -n "${CODESPACE_NAME-}" ]; then
 		echo "[INFO] Detected GitHub Codespace: using /tmp for temporary storage"
