@@ -462,9 +462,10 @@ build_llama() {
 		cd .. # Return to ~/Downloads/GitHub
 	fi
 
-#We are building with CUDA after all as Google Collab also has terminal nowadays
+#We may be building with CUDA after all as Google Collab also has terminal nowadays
+#But we need to detect it so leaving off, as it takes hours:
 	cmake -S llama.cpp -B llama.cpp/build \
-		-DBUILD_SHARED_LIBS=ON -DGGML_CUDA=ON -DLLAMA_CURL=ON \
+		-DBUILD_SHARED_LIBS=ON -DGGML_CUDA=OFF -DLLAMA_CURL=ON \
 		-DCMAKE_INSTALL_PREFIX=$HOME/.local &&
 		cmake --build llama.cpp/build --config Release -j8 &&
 		cmake --install llama.cpp/build
@@ -557,7 +558,7 @@ replit_adapt() {
 
 	# 2️⃣ AI/ML tools (user-space)
 	python -m ensurepip
-	python -m pip install --user -U whisperx numpy torch torchvision torchaudio tensorflow-cpu jax jaxlib protobuf --extra-index-url https://download.pytorch.org/whl/cpu
+	python -m pip install --user -U whisperx numpy torch torchvision torchaudio pip install "huggingface_hub[cli]" tensorflow-cpu jax jaxlib protobuf --extra-index-url https://download.pytorch.org/whl/cpu
 
 	# 3️⃣ Node.js (skip NVM, assume latest Node already present)
 	echo "ℹ️ Using Node.js provided by Replit: $(node -v), npm: $(npm -v)"
