@@ -311,7 +311,7 @@ install_system_tools() {
 	sudo apt-get install -y npm
 	sudo npm install -g neofetch
 
-#For CUDA stuff:
+#For CUDA NVIDIA stuff:
 sudo apt-get install libcudnn8 libcudnn8-dev
 
  
