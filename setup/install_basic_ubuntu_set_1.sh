@@ -307,7 +307,7 @@ install_system_tools() {
 
 	# Core dev tools
 	sudo apt-get install -y pciutils build-essential cmake curl libcurl4-openssl-dev 
-		libomp-dev libssl-dev adb fastboot neofetch geoip-bin ranger baobab firefox python3-pip ncdu mediainfo xdg-utils
+		libomp-dev libssl-dev adb fastboot neofetch geoip-bin ranger mc baobab firefox python3-pip ncdu mediainfo xdg-utils
 	sudo apt-get install -y npm
 	sudo npm install -g neofetch
 
@@ -372,7 +372,7 @@ sudo apt-get install libcudnn8 libcudnn8-dev
 	sudo apt clean
 	sudo add-apt-repository ppa:danielrichter2007/grub-customizer -y
 	sudo apt update # Update apt cache after adding new PPA
-	sudo DEBIAN_FRONTEND=noninteractive apt install -y grub-customizer python3-pip scrcpy
+	sudo DEBIAN_FRONTEND=noninteractive apt install -y grub-customizer python3-pip scrcpy 
 
 	# Android Platform Tools
 	mkdir -p ~/Downloads/GitHub
