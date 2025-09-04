@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # unhyphenate.py
-# Version 1.3
+# Version 2.0
 # Author: Gemini AI Agent
 # Description: Unhyphenates text from a file using the 'dehyphen' library, with configurable language.
 # See: https://github.com/pd3f/dehyphen/issues/7 for why it is needed and what for. 
@@ -8,25 +8,17 @@
 import sys
 import os
 import argparse
+from typing import List
 from dehyphen import FlairScorer, text_to_format
 
-def flatten_list(nested_list):
-    """Recursively flatten a nested list into a single list while preserving EOLs at the middle level."""
-    flat_list = []
+def main(input_file: str, lang: str) -> None:
+    """
+    Unhyphenates text from a given file and saves it to a new file.
 
-    # Outer loop for the first level
-    for outer_item in nested_list:
-        # Middle loop for the second level
-        flat_list.append("\n")  # Add a single EOL for separation
-        for middle_item in outer_item:                
-            
-            # Innermost loop for the third level
-            for word in middle_item:
-                flat_list.append(word)  # Append each word to the flat list
-
-    return flat_list
-
-def main(input_file, lang):
+    Args:
+        input_file (str): The path to the input text file.
+        lang (str): The language code for dehyphenation (e.g., 'en', 'pl').
+    """
     # Initialize the scorer for the language
     scorer = FlairScorer(lang=lang)
 
@@ -39,10 +31,16 @@ def main(input_file, lang):
 
     # Remove hyphens from the text
     fixed_hyphens = scorer.dehyphen(special_format)
-    # Flatten the nested list of characters into a single string
+
+    # Reconstruct the text from the nested list structure
     if isinstance(fixed_hyphens, list):
-        flat_output = flatten_list(fixed_hyphens)
-        flattened_text = ' '.join(flat_output)
+        # The output is a list of paragraphs, where each paragraph is a list of sentences,
+        # and each sentence is a list of words.
+        paragraphs = []
+        for paragraph in fixed_hyphens:
+            sentences = [' '.join(sentence) for sentence in paragraph]
+            paragraphs.append(' '.join(sentences))
+        flattened_text = '\n\n'.join(paragraphs)
     else:
         flattened_text = fixed_hyphens
 
@@ -63,4 +61,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args.input_file, args.lang)
-

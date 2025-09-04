@@ -1,48 +1,64 @@
 # GEMINI.md - AI Context File
 
 **Author:** Gemini AI Agent
-**Purpose:** This document provides context for AI assistants interacting with the `Ubuntu_Scripts_1` repository. It is intended to be a summary of the project's state, goals, and environment, not a user-facing README.
+**Purpose:** This document provides context for AI assistants interacting with the `Ubuntu_Scripts_1` repository. It outlines the current cleanup and refactoring objectives.
 
 ---
-### **Current Objective**
+### **Project Status**
 
-**The primary objective of cleaning up `install_basic_ubuntu_set_1.sh` has been completed. The `docs/TEST_PLAN.md` file contains the detailed test cases and verification steps for the current state of the script.**
+The initial, large-scale refactoring of the main `install_basic_ubuntu_set_1.sh` script is complete. The repository has been organized into thematic modules (`ai_ml`, `doc_processing`, `utils`, etc.). The `docs/TEST_PLAN.legacy.md` file contains the test plan for the completed first phase.
+
 ---
+### **Current Objective: Modular Cleanup**
 
-## Project Overview
+The next phase of this project is to refactor and improve the individual scripts within each module. The focus is on improving code quality, consistency, and maintainability.
 
-This repository is a collection of scripts and tools for setting up and managing a highly customized development environment. The project is a "bespoke mess," as the user describes it, resulting from years of experimentation and the merging of different ideas. The primary focus is on shell scripting for automation, with Python used for specific data processing tasks.
-
-The overarching goal of the current interaction is to clean up, organize, and streamline this "mess" into a more modular and maintainable system. The `CLEANUP_PLAN.md` file is the primary roadmap for this effort.
-
-## Key Components (The "Rooms")
-
-The project can be broken down into four main areas:
-
-1.  **Environment Setup & Installation:**
-    *   **Core Scripts:** `install_basic_ubuntu_set_1.sh`, `install_xfce_google_RDP.sh`
-    *   **Description:** These are large, comprehensive shell scripts for setting up an Ubuntu/Debian environment from scratch. They install a wide range of software, including core utilities, developer tools, AI libraries, and a full graphical remote desktop environment (XFCE, XRDP, Chrome Remote Desktop). They employ various installation methods (`apt`, `pip`, `npm`, `nvm`, `cmake`, custom functions).
-
-2.  **AI & Machine Learning Utilities:**
-    *   **Core Scripts:** `whisperx_me.sh`, `build_llama` (function in `install_basic_ubuntu_set_1.sh`)
-    *   **Description:** These are wrapper scripts and functions for interacting with AI/ML models like WhisperX (speech recognition) and LLaMA. They often include complex logic for handling different environments and user-friendly output.
-
-3.  **Text & Document Processing:**
-    *   **Core Scripts:** `unhyphenate.py`, `wiki_feed_html_renderer.py`, `docling_processor.sh`, `image_html_generator.sh`
-    *   **Description:** A collection of Python and shell scripts for various text and document manipulation tasks, such as removing hyphens, rendering HTML, and processing documents.
-
-4.  **System Utilities & Customization:**
-    *   **Core Scripts:** `config.sh`, `ansi_tests/` directory
-    *   **Description:** This category includes configuration files (`config.sh`) for centralizing settings, as well as scripts for terminal customization and flair (e.g., the "Matrix effect" script).
-
-## Operating Environment
-
-The scripts are designed to be run in a complex, multi-layered environment:
-*   **Primary OS:** Debian-based Linux (Ubuntu).
-*   **Development Environment:** Visual Studio Codespaces.
-*   **Mobile Environment:** Termux on Android, with `proot-distro` used to run a Debian environment within Termux. This is important context for scripts that reference Android file paths (`/storage/emulated/0/`) or use Termux-specific commands.
-
-## User Interaction Style
-
-The user prefers a "chatty," conversational, and collaborative interaction style. It is helpful to be descriptive, provide context for actions, and engage in a dialogue about the project.
 ---
+## Cleanup Plan by Module
+
+### 1. `ai_ml/` - AI & Machine Learning Utilities
+
+This module contains scripts for interacting with AI/ML models.
+
+*   **`whisperx_me.sh`**:
+    *   **Goal:** Refactor this complex script for clarity and robustness.
+    *   **Tasks:**
+        *   Break down large functions into smaller, single-purpose ones.
+        *   Parameterize hardcoded paths (e.g., `~/Downloads/`).
+        *   Add more robust error handling and user feedback.
+        *   Improve comments to explain the script's logic.
+*   **`piperme_function.sh`**:
+    *   **Goal:** Improve this simple function.
+    *   **Tasks:**
+        *   Add comments explaining its purpose and usage.
+        *   Allow the path to the Piper model to be passed as an argument.
+
+### 2. `doc_processing/` - Text & Document Processing
+
+This module contains scripts for text and document manipulation.
+
+*   **`docling_processor.sh`**:
+    *   **Goal:** Improve the clarity and reliability of this processing script.
+    *   **Tasks:**
+        *   Add comments to explain the purpose of the script and the logic of the `sed` and `awk` commands.
+        *   Add error handling to gracefully manage failures from the Python scripts it calls.
+*   **`unhyphenate.py` & `wiki_feed_html_renderer.py`**:
+    *   **Goal:** Bring these Python scripts up to a higher standard of code quality.
+    *   **Tasks:**
+        *   Add type hinting for function arguments and return values.
+        *   Ensure both scripts have clear docstrings and comments.
+
+### 3. `utils/` - System & Development Utilities
+
+This module contains various helper scripts.
+
+*   **`gcloud_mount_login.sh`**:
+    *   **Goal:** Consolidate and improve the GCloud mounting scripts.
+    *   **Tasks:**
+        *   There are multiple similar files (`gcloud_mount_login_test.sh`, `GCloud_mount_login.sh`). These should be reviewed and consolidated into a single, robust script.
+        *   Improve error handling and user feedback messages.
+*   **`git_me.sh`**:
+    *   **Goal:** Make this git helper script more flexible.
+    *   **Tasks:**
+        *   Modify the script to accept a commit message as a command-line argument instead of using a hardcoded one.
+        *   Add checks to ensure it's being run inside a git repository.
