@@ -1,4 +1,8 @@
 # We bootstrap cloning and running the other files herefrom. 
+
+#We go to User's folder, necessary for GitHub Codespaces:
+cd
+#In User's (and not workspace) folder we: 
 mkdir -p Downloads/GitHub 
 cd Downloads/GitHub
 git clone https://github.com/Manamama/Ubuntu_Scripts_1
