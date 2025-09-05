@@ -2,4 +2,5 @@
 mkdir -p Downloads/GitHub 
 cd Downloads/GitHub
 git clone https://github.com/Manamama/Ubuntu_Scripts_1
-bash 
+bash Ubuntu_Scripts_1/blob/main/setup/install_basic_ubuntu_set_1.sh
+
