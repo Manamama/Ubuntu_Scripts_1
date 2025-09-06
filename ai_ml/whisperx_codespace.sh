@@ -234,7 +234,16 @@ fi
 
 #This is for a watch that may be connected via BLE to the notifications shown by Termux API: 
 termux-notification -c " OK: ${filename_no_ext}.srt" --title "WhisperX " --vibrate 500,1000,200
-echo "✅ Notification sent" 
+
+# if you watch does not allow notification from this Twrmux API program, then you can trick it via sending an SMS or via sending an email and so on.
+
+# if you BT bind your watch with your phone and use the audio sink of the watch then the below shall play on the watch:
+termux-media-player play /storage/5951-9E0F/Audio/Funny_Sounds/proximity_bash.mp3
+
+termux-tts-speak "The transcription of file $filename_no_ext has been finished."
+
+
+echo "✅ Notifications sent" 
 echo
 
 # ================= Step 12: Open or share file =================
