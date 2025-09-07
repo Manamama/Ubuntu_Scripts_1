@@ -1,3 +1,5 @@
+ 
+
 #!/usr/bin/env bash
 
 whisperx_on_remote() {
@@ -240,7 +242,7 @@ termux-notification -c " OK: ${filename_no_ext}.srt" --title "WhisperX " --vibra
 # if you BT bind your watch with your phone and use the audio sink of the watch then the below shall play on the watch:
 termux-media-player play /storage/5951-9E0F/Audio/Funny_Sounds/proximity_bash.mp3
 
-termux-tts-speak "The transcription of file $filename_no_ext has been finished."
+termux-tts-speak "Transcription has finished."
 
 
 echo "✅ Notifications sent" 
@@ -266,4 +268,5 @@ echo "has taken this long to process:"
 }
 
 time whisperx_on_remote "$@"
+
 
