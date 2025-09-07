@@ -1,19 +1,20 @@
 # Description: This function automates the process of connecting to a GitHub Codespace,
 #              setting up necessary local mounts, and initiating an interactive SSH session.
-#              It uses the Codespace's native SSH daemon for SFTP, mounting the workspace
-#              locally via rclone FUSE and SSHFS (as a fallback).
+#              It is designed to provide local filesystem access to a remote Codespace
+#              environment, similar to how gcloud_mount_login.sh works for Google Cloud Shell.
 #
 # Expected Logic Flow:
 # 1. List available GitHub Codespaces.
-# 2. Allow the user to choose a specific Codespace to connect to.
+# 2. Allow the user to choose a specific Codespace to connect to (automated choice).
 # 3. Determine the Codespace's workspace path.
-# 4. Establish a local port forward to the Codespace's SSH server (port 22).
-# 5. Set up or update the rclone remote configuration to use the local port forward.
-# 6. Prepare local mount paths for rclone FUSE and SSHFS.
-# 7. Mount the Codespace's workspace locally via rclone FUSE.
-# 8. Mount the Codespace's workspace locally via SSHFS (as a fallback).
-# 9. Initiate an interactive SSH session to the Codespace.
-# 10. Provide reminders for stopping the Codespace.
+# 4. Start an rclone SFTP server within the selected Codespace.
+# 5. Establish a local port forward to tunnel connections to the Codespace's rclone SFTP server.
+# 6. Set up or update the rclone remote configuration to use the local port forward.
+# 7. Prepare local mount paths for rclone FUSE and SSHFS.
+# 8. Mount the Codespace's workspace locally via rclone FUSE.
+# 9. Mount the Codespace's workspace locally via SSHFS (as a fallback or alternative).
+# 10. Initiate an interactive SSH session to the Codespace.
+# 11. Provide reminders for stopping the Codespace.
 #
 # Dependencies:
 #   - gh CLI (GitHub CLI)
@@ -58,13 +59,13 @@ gh_me() {
     fi
     echo "3️⃣ Determine Codespace workspace path"
 
-    WORKSPACE_PATH=$(gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no 'pwd' | tr -d '\r\n')
+    WORKSPACE_PATH=$(gh codespace ssh -c "$CSPACE_NAME" -- 'pwd' | tr -d '\r\n')
     if [ $? -ne 0 ]; then
         echo "❌ Error getting workspace path from codespace '$CSPACE_NAME'." | lolcat
         return 1
     fi
     if [[ "$WORKSPACE_PATH" == "/home/codespace" ]]; then
-        WORKSPACE_PATH=$(gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no 'ls -d /workspaces/* 2>/dev/null | head -n1' | tr -d '\r\n')
+        WORKSPACE_PATH=$(gh codespace ssh -c "$CSPACE_NAME" -- 'ls -d /workspaces/* 2>/dev/null | head -n1' | tr -d '\r\n')
         if [ $? -ne 0 ]; then
             echo "❌ Error getting workspace path from /workspaces/ in codespace '$CSPACE_NAME'." | lolcat
             return 1
@@ -72,7 +73,7 @@ gh_me() {
     fi
     echo "Workspace path: $WORKSPACE_PATH"
 
-    REMOTE_IP=$(gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no "curl ifconfig.me")
+    REMOTE_IP=$(gh codespace ssh -c "$CSPACE_NAME" -- "curl ifconfig.me")
     if [ $? -ne 0 ]; then
         echo "❌ Error getting remote IP from codespace '$CSPACE_NAME'." | lolcat
         return 1
@@ -81,12 +82,17 @@ gh_me() {
     echo "REMOTE_IP is: $REMOTE_IP" | lolcat
     echo
 
+    echo "4️⃣ Start rclone SFTP server"
+    REMOTE_PORT=2223
+    gh codespace ssh -c "$CSPACE_NAME" -- "nohup rclone serve sftp $WORKSPACE_PATH --addr :$REMOTE_PORT >/dev/null 2>&1 &"
+    if [ $? -ne 0 ]; then
+        echo "❌ Error starting rclone SFTP server in codespace '$CSPACE_NAME'." | lolcat
+        return 1
+    fi
+    LOCAL_PORT=2222
+    PID_FILE="/tmp/gh_codespace_forward_${CSPACE_NAME}_${LOCAL_PORT}.pid"
 
-REMOTE_PORT=2223
-        LOCAL_PORT=2222
-    echo "4️⃣ Start local port $LOCAL_PORT forward to Codespace SSH $REMOTE_PORT"
-    
-    PID_FILE="$HOME/.cache/gh_codespace_forward_${CSPACE_NAME}_${LOCAL_PORT}.pid"
+    echo "5️⃣ Check and manage local port forward"
 
     if [ -f "$PID_FILE" ]; then
         OLD_PID=$(cat "$PID_FILE")
@@ -95,30 +101,25 @@ REMOTE_PORT=2223
             FORWARD_PID="$OLD_PID"
         else
             echo "Stale PID file found. Cleaning up..." | lolcat
-            rm -f "$PID_FILE"
+            rm "$PID_FILE"
         fi
     fi
 
     if [ -z "$FORWARD_PID" ]; then
-        # Check if port is in use (fallback to netstat for Termux)
-        if command -v netstat >/dev/null && netstat -tuln | grep -q ":$LOCAL_PORT\s"; then
+        # Check if port is in use by another process
+        if lsof -tiTCP:"$LOCAL_PORT" -sTCP:LISTEN > /dev/null; then
             echo "⚠️ Local port $LOCAL_PORT is already in use by another process. Please free it up manually." | lolcat
             return 1
         fi
 
-        echo "Starting port forward (LOCAL_PORT $LOCAL_PORT → REMOTE_PORT 22)"
-        gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no -L  $LOCAL_PORT:localhost:$REMOTE_PORT -N &
-            FORWARD_PID=$!
-        sleep 0.5
-        if ! ps -p "$FORWARD_PID" > /dev/null; then
-            echo "❌ Port forwarding failed to start (PID $FORWARD_PID)." | lolcat
-            return 1
-        fi
+        echo "6️⃣ Start fresh port forward (LOCAL_PORT → REMOTE_PORT)"
+        gh codespace ssh -c "$CSPACE_NAME" -- -L $LOCAL_PORT:localhost:$REMOTE_PORT -N &
+        FORWARD_PID=$!
         echo "$FORWARD_PID" > "$PID_FILE"
+        sleep 0.5
         echo "🔌 Port forward started (PID $FORWARD_PID)" | lolcat
     fi
-
-    echo "5️⃣ Setup rclone remote"
+    echo "7️⃣ Setup rclone remote"
     RCLONE_REMOTE="GH_01"
     if ! rclone listremotes | grep -qx "${RCLONE_REMOTE}:"; then
         rclone config create "$RCLONE_REMOTE" sftp \
@@ -126,44 +127,34 @@ REMOTE_PORT=2223
     fi
     rclone config update "$RCLONE_REMOTE" host 127.0.0.1 port $LOCAL_PORT >/dev/null
 
-    echo "6️⃣ Prepare mount paths"
-    MOUNT_PATH="$HOME/storage/GitHub_Codespace_rclone_$CSPACE_NAME"
-    SSHFS_MOUNT="$HOME/storage/GitHub_Codespace_sshfs_$CSPACE_NAME"
+    echo "8️⃣ Prepare mount paths"
+    MOUNT_PATH=~/storage/GitHub_Codespace_rclone_$CSPACE_NAME
+    SSHFS_MOUNT=~/storage/GitHub_Codespace_sshfs_$CSPACE_NAME
     mkdir -p "$MOUNT_PATH" "$SSHFS_MOUNT"
     sudo umount "$MOUNT_PATH" 2>/dev/null
     sudo umount "$SSHFS_MOUNT" 2>/dev/null
-
-    echo "7️⃣ Mount via rclone FUSE if not already mounted"
+    echo "9️⃣ Mount via rclone FUSE if not already mounted"
     if ! mountpoint -q "$MOUNT_PATH"; then
         echo "Mounting Codespace $CSPACE_NAME userspace $WORKSPACE_PATH via rclone on $MOUNT_PATH..."
         sudo rclone mount "$RCLONE_REMOTE:/$WORKSPACE_PATH" "$MOUNT_PATH" \
             --config ~/.config/rclone/rclone.conf --allow-other --vfs-cache-mode writes &
-        MOUNT_PID=$!
-        sleep 1
-        if ! ps -p "$MOUNT_PID" > /dev/null; then
-            echo "❌ rclone mount failed to start." | lolcat
-            return 1
-        fi
     else
         echo "✅ Already mounted at $MOUNT_PATH"
     fi
 
-    echo "8️⃣ SSHFS fallback mount"
+    echo "🔟 SSHFS fallback mount"
     KEY_PATH=~/.ssh/id_rsa
     if ! mountpoint -q "$SSHFS_MOUNT"; then
         echo "Mounting via SSHFS fallback on $SSHFS_MOUNT..."
         sudo sshfs codespace@127.0.0.1:"$WORKSPACE_PATH" "$SSHFS_MOUNT" -p $LOCAL_PORT \
             -oIdentityFile="$KEY_PATH" -oStrictHostKeyChecking=no -o reconnect \
             -o ServerAliveInterval=5 -o ServerAliveCountMax=3 -o TCPKeepAlive=yes -o allow_other
-        if [ $? -ne 0 ]; then
-            echo "⚠️ SSHFS mount failed, proceeding to SSH session anyway..." | lolcat
-        fi
     fi
 
-    echo "9️⃣ Entering the interactive session"
-    echo "At end, try to use **gh codespace stop**. By default, Codespaces automatically stops after ~30 minutes of inactivity."
+    echo "1️⃣1️⃣ Entering the interactive session"
+    echo "At end do try to use **gh codespace stop**. By default, Codespaces automatically stops after ~30 minutes of inactivity."
     echo "👉 Starting Codespace SSH session..."
-    gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no
+    gh codespace ssh -c "$CSPACE_NAME"
     if [ $? -ne 0 ]; then
         echo "❌ Error starting interactive SSH session to codespace '$CSPACE_NAME'." | lolcat
         return 1
