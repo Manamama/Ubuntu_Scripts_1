@@ -42,9 +42,35 @@ whisperx_codespace_url(){
         exit 1
     fi
 
-    echo "✅ Downloaded: $remote_audio"
-    filename_no_ext=$(basename "$remote_audio" .mp3)
+
+
+echo "✅ Downloaded: $remote_audio"
+
+
+filename_no_ext=$(basename "$remote_audio" .mp3)
+
+# run_cmd="ls -la $remote_audio    "
+echo Trying: $run_cmd :
+# gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd" | lolcat
+
+run_cmd="mediainfo --Inform='Audio;%Duration/String2%' $remote_audio "
+
+# here we were testing the escape quotes for a while; in short do not use for file names: 
+# echo Trying: $run_cmd :
+ gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd" | lolcat
+
+echo "⏳ [2/10] Extracting audio duration..."
+if duration=$(gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd" ); then
+    echo -n "🗣️ Duration: "
+    echo "$duration" | lolcat
+else
+    echo "⚠️ Could not extract duration (proceeding anyway)" 
+fi
+
+    
     remote_srt="~/Downloads/${filename_no_ext}.srt"
+remote_txt="~/Downloads/${filename_no_ext}.txt"
+
 echo
 echo "The remote file name should look like this: $remote_srt"
 
@@ -58,15 +84,23 @@ echo "The remote file name should look like this: $remote_srt"
 
     # ================= Step 5: Run WhisperX =================
     echo "🤖 Running WhisperX transcription..."
-  #  run_cmd="whisperx --compute_type float32 --model medium '$remote_audio'  --output_dir ~/Downloads --highlight_words True --print_progress True $extra_args"
+   run_cmd="whisperx --compute_type float32 --model medium '$remote_audio'  --output_dir ~/Downloads --highlight_words True --print_progress True $extra_args"
 
 
 
-#We resigned from highlighting words as it shall be faster.
+# activate the below, should we resigned from highlighting words as it shall be faster.
 
-run_cmd="whisperx --compute_type float32 --model medium '$remote_audio' --output_dir ~/Downloads  --print_progress True $extra_args"
+#run_cmd="whisperx --compute_type float32 --model medium '$remote_audio' --output_dir ~/Downloads  --print_progress True $extra_args"
 
    time gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd"
+
+# ================= Step 6: Return only text =================
+    echo "📜 Fetching transcription text: '$remote_srt'..."   
+
+ #gh codespace ssh -c "$CODESPACE_NAME" "cat $remote_srt" 
+
+gh codespace ssh -c "$CODESPACE_NAME" "cat $remote_txt" | lolcat
+
 
 #echo "🔊 Playing notification sound..."
 
@@ -89,15 +123,17 @@ termux-notification -c " OK: ${filename_no_ext}.srt" --title "WhisperX " --vibra
 
 termux-tts-speak "Transcription from URL has  finished."
 
-
+echo
 echo "✅ Notifications sent" 
 echo
 
-    # ================= Step 6: Return only text =================
-    echo "📜 Fetching transcription text: '$remote_srt'..."   
+    
 
- gh codespace ssh -c "$CODESPACE_NAME" "cat $remote_srt" 
-
+echo
+echo -n "🗣️ The source file of duration: "
+echo "$duration" | lolcat
+echo "has taken this long to process:"
+#Total 'time' should display here:
 
 }
 
