@@ -112,7 +112,13 @@ configure_system_resources() {
 	local CUR_HOME="$HOME"
 	local PYTHON_LIB=$(python -m site --user-site)
 	local PERSISTENT_DEST_BASE="/root/home_extended" # Default for GCloud
- export LD_LIBRARY_PATH=$LOCALLIB:$LD_LIBRARY_PATH
+
+echo "export PATH=\"${LOCALBIN:-/usr/local/bin}:$PATH\""
+echo "export LD_LIBRARY_PATH=\"${LOCALLIB:-/usr/local/lib}:${LD_LIBRARY_PATH:-}\""
+
+
+
+# export LD_LIBRARY_PATH=$LOCALLIB:$LD_LIBRARY_PATH
 
 	if [ -n "${CODESPACE_NAME-}" ]; then
 		echo "[INFO] Detected GitHub Codespace: using /tmp for temporary storage"
