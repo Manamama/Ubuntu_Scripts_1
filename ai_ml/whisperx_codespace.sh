@@ -9,7 +9,7 @@ set -euo pipefail
 echo
 echo "========================================="
 echo "📜 WhisperX Transcription Script (Paranoid Android & gh User Edition)"
-echo "Version 3.1.7"
+echo "Version 3.1.8"
 echo 
 echo "🔐 Mission Brief:"
 echo "  1. Verify input audio file exists (no ghosts allowed)."
@@ -150,7 +150,7 @@ fi
 if [[ "$extra_args" == *"--diarize"* ]]; then
     echo "🔍 Diarize flag detected — verifying if HF_TOKEN is active..."
     if gh codespace ssh -c "$CODESPACE_NAME" "[[ -z \"\$HF_TOKEN\" ]]"; then
-        echo "⚠️ WARNING: HF_TOKEN not set remotely—diarize may fail. We shall use local HF_TOKEN then, if any." 
+        echo "⚠️ WARNING: HF_TOKEN not set remotely — diarize may fail. We shall use local HF_TOKEN then, if any." 
     else
         echo "✅ HF_TOKEN detected remotely" 
     fi

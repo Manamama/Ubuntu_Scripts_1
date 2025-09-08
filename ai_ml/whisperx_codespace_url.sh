@@ -3,6 +3,9 @@
 whisperx_codespace_url(){
     set -euo pipefail
 
+echo "📜 WhisperX Transcription from URL (Paranoid Android & gh User Edition)"
+echo "Version 1.2.3"
+
     if [[ $# -lt 1 ]]; then
         echo "❌ Usage: $0 <youtube_url> [extra_args...]"
         exit 1
@@ -17,6 +20,9 @@ whisperx_codespace_url(){
     echo "🔧 Extra WhisperX Args: '$extra_args'"
     echo
 
+
+
+
     # ================= Step 1: Detect Codespace =================
     echo "🔍 Detecting GitHub Codespace..."
     CODESPACE_NAME=$(gh codespace list --json name,state | jq -r '.[] | .name' | head -n1)
@@ -24,8 +30,20 @@ whisperx_codespace_url(){
         echo "❌ FATAL: No Codespace found"
         exit 1
     fi
-    echo "✅ Codespace detected: $CODESPACE_NAME"
+    echo - n "✅ Codespace detected:"
+echo "$CODESPACE_NAME" | lolcat
     echo
+
+# Paranoia: Check HF_TOKEN if --diarize is used
+if [[ "$extra_args" == *"--diarize"* ]]; then
+    echo "🔍 Diarize flag detected — verifying if HF_TOKEN is active..."
+    if gh codespace ssh -c "$CODESPACE_NAME" "[[ -z \"\$HF_TOKEN\" ]]"; then
+        echo "⚠️ WARNING: HF_TOKEN not set remotely — diarize may fail. We shall use local HF_TOKEN then, if any." 
+    else
+        echo "✅ HF_TOKEN detected remotely" 
+    fi
+fi
+echo
 
     # ================= Step 2: Ensure remote Downloads directory =================
     echo "📁 Ensuring remote Downloads directory..."
@@ -49,15 +67,16 @@ echo "✅ Downloaded: $remote_audio"
 
 filename_no_ext=$(basename "$remote_audio" .mp3)
 
+# here we were sanity checking the file size and the file name.
 # run_cmd="ls -la $remote_audio    "
-echo Trying: $run_cmd :
+#echo Trying: $run_cmd :
 # gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd" | lolcat
 
 run_cmd="mediainfo --Inform='Audio;%Duration/String2%' $remote_audio "
 
 # here we were testing the escape quotes for a while; in short do not use for file names: 
 # echo Trying: $run_cmd :
- gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd" | lolcat
+# gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd" | lolcat
 
 echo "⏳ [2/10] Extracting audio duration..."
 if duration=$(gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd" ); then
@@ -72,7 +91,7 @@ fi
 remote_txt="~/Downloads/${filename_no_ext}.txt"
 
 echo
-echo "The remote file name should look like this: $remote_srt"
+#echo "The remote file name should look like this: $remote_srt"
 
     # ================= Step 4: Check/install WhisperX =================
     echo "🔍 Checking WhisperX..."
@@ -84,7 +103,11 @@ echo "The remote file name should look like this: $remote_srt"
 
     # ================= Step 5: Run WhisperX =================
     echo "🤖 Running WhisperX transcription..."
-   run_cmd="whisperx --compute_type float32 --model medium '$remote_audio'  --output_dir ~/Downloads --highlight_words True --print_progress True $extra_args"
+
+# ' --verbose False' supresses  the transcription progress information and we do not want it.
+#  --highlight_words True,  the default value is false. This adds words underlining, which can be colorized later on, but increases the size significantly.
+
+   run_cmd="whisperx --compute_type float32 --model medium '$remote_audio'  --output_dir ~/Downloads --print_progress True  $extra_args"
 
 
 
@@ -92,7 +115,7 @@ echo "The remote file name should look like this: $remote_srt"
 
 #run_cmd="whisperx --compute_type float32 --model medium '$remote_audio' --output_dir ~/Downloads  --print_progress True $extra_args"
 
-   time gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd"
+   time gh codespace ssh -c "$CODESPACE_NAME" HF_TOKEN=$HF_TOKEN "$run_cmd"
 
 # ================= Step 6: Return only text =================
     echo "📜 Fetching transcription text: '$remote_srt'..."   
