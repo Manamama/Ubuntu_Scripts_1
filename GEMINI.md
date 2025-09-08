@@ -62,3 +62,38 @@ This module contains various helper scripts.
     *   **Tasks:**
         *   Modify the script to accept a commit message as a command-line argument instead of using a hardcoded one.
         *   Add checks to ensure it's being run inside a git repository.
+---
+### **User-Specific Context**
+
+*   **Home Directory (`~`):** The user's home directory (`/home/codespace`) contains relevant files, including audio files in the `Downloads` subdirectory. The user has indicated that this directory should be considered accessible for operations.
+*   **FunASR Repository:** The `FunASR` speech recognition toolkit has been cloned to `~/Github/FunASR`.
+---
+
+---
+### **FunASR Speech Recognition Toolkit**
+
+*   **Status:** Successfully tested and confirmed working.
+*   **Basic Syntax:** The command-line interface can be used for quick transcription tasks. The general syntax is:
+    ```bash
+    funasr ++model=<model_name> ++input=<file_path>
+    ```
+*   **Multi-lingual Support:** When using FunASR, it is important to select the appropriate model for the language of the audio. Hardcoding a model for a specific language (e.g., Chinese) will result in incorrect transcriptions for other languages. The `SenseVoice` model is a good option for multi-language ASR.
+*   **Emotion Recognition:** FunASR includes models for speech emotion recognition (e.g., `emotion2vec+large`). This allows for the analysis of emotions in audio and video files, in addition to transcription.
+---
+
+---
+### **Workflow: Analyzing Media from URLs**
+
+*   **Objective:** Analyze the emotional content of an audio or video file from a URL.
+*   **Toolchain:**
+    1.  **Download:** Use the `yt-dlp` command-line tool to download the media. The tool is invoked via `run_shell_command`.
+    2.  **Storage:** Downloaded files should be placed in the `~/Downloads` directory.
+    3.  **Analysis:** Use a temporary Python script with the `funasr` library to perform the emotion recognition. The script should be created in the workspace and then executed.
+*   **Example Command:**
+    ```bash
+    # 1. Download the media
+    yt-dlp -P ~/Downloads <URL>
+
+    # 2. Create and run the analysis script (see previous examples)
+    ```
+---
