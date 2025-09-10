@@ -1788,7 +1788,7 @@ print(media_path.resolve())
     
            
     # Path to the audio file
-    audio_path = "/home/zezen/Music/Timer_and_sounds/Emotion Scores Visualization, for Stage Alignment.wav"
+    audio_path = "~/Music/Timer_and_sounds/Emotion Scores Visualization, for Stage Alignment.wav"
 
     # Play the audio
     #playsound(audio_path)
