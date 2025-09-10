@@ -4,7 +4,7 @@ whisperx_codespace_url(){
     set -euo pipefail
 
 echo "📜 WhisperX Transcription from URL (Paranoid Android & gh User Edition)"
-echo "Version 1.2.3"
+echo "Version 1.3.1"
 
     if [[ $# -lt 1 ]]; then
         echo "❌ Usage: $0 <youtube_url> [extra_args...]"
@@ -51,9 +51,11 @@ echo
 
     # ================= Step 3: Download with yt-dlp =================
     echo "🎬 Downloading audio with yt-dlp on remote..."
+    echo "It uses the '--cookies-from-browser chrome' option. To set up these cookies you need, in very short:"
+    echo "1. Install e.g. google-chrome. 2. Run 'google-chrome  --remote-debugging-port=9222 https://youtube.com' 3. Forward that port in e.g. Visual Studio Code. 4. Log in to your GitHub account to accept forwarding. 5. Log in to the new virgin Google Chrome browser window with your real Google Account (throwaway one, for security). 6. Hope that this works. " 
     # extract best audio, store in ~/Downloads, get clean filename
     remote_audio=$(gh codespace ssh -c "$CODESPACE_NAME" \
-        "cd ~/Downloads && yt-dlp -f 'bestaudio' --no-playlist --extract-audio --audio-format mp3 --restrict-filenames  --trim-filenames 20 --print after_move:filepath '$url'")
+        "cd ~/Downloads && yt-dlp  --cookies-from-browser chrome -f 'bestaudio' --no-playlist --extract-audio --audio-format mp3 --restrict-filenames  --trim-filenames 20 --print after_move:filepath '$url'")
 
     if [[ -z "$remote_audio" ]]; then
         echo "❌ FATAL: yt-dlp did not return a file path"
