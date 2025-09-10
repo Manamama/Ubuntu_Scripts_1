@@ -125,26 +125,30 @@ echo
 gh codespace ssh -c "$CODESPACE_NAME" "cat $remote_txt" | lolcat
 
 
-#echo "🔊 Playing notification sound..."
+# if you BT bind your watch with your phone and use the audio sink of the watch then the below shall play on the watch:
+
+echo "🔊 Playing notification sound..."
 
 
-: '
-if ! termux-media-player play "/storage/5951-9E0F/Audio/Funny_Sounds/Quack Quack-SoundBible.com-620056916.mp3" 2>/dev/null; then
+echo "🔊 Playing notification sound..."
+if [[ ! -f "/storage/5951-9E0F/Audio/Funny_Sounds/proximity_bash.mp3" ]]; then  
     echo "⚠️ Notification sound not played (audio file missing?)" 
+else 
+termux-media-player play "/storage/5951-9E0F/Audio/Funny_Sounds/proximity_bash.mp3"
+
 fi
 
-# termux-media-player play /storage/5951-9E0F/Audio/Funny_Sounds/proximity_bash.mp3
+termux-tts-speak "Transcription from URL has  finished."
 
-'
+
 #This is for a watch that may be connected via BLE to the notifications shown by Termux API: 
 termux-notification -c " OK: ${filename_no_ext}.srt" --title "WhisperX " --vibrate 500,1000,200
 
-# if you watch does not allow notification from this Twrmux API program, then you can trick it via sending an SMS or via sending an email and so on.
-
-# if you BT bind your watch with your phone and use the audio sink of the watch then the below shall play on the watch:
+# if you watch does not allow notification from this Termux API program, then you can trick it via sending an SMS or via sending an email and so on.
 
 
-termux-tts-speak "Transcription from URL has  finished."
+
+
 
 echo
 echo "✅ Notifications sent" 

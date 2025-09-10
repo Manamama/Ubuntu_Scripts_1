@@ -9,7 +9,7 @@ set -euo pipefail
 echo
 echo "========================================="
 echo "📜 WhisperX Transcription Script (Paranoid Android & gh User Edition)"
-echo "Version 3.1.8"
+echo "Version 3.1.9"
 echo 
 echo "🔐 Mission Brief:"
 echo "  1. Verify input audio file exists (no ghosts allowed)."
@@ -21,8 +21,8 @@ echo "  6. Check/install WhisperX (because Codespaces can forget)."
 echo "  7. Run WhisperX transcription (with paranoid logging)."
 echo "  8. Trust and so verify the output files (.srt, .json) exist and aren't empty."
 echo "  9. Download results to Termux (double-checked)."
-echo "  10. Play quack notification and open SRT (because we earned it)."
-echo "⚠️  Built to survive gh bugs (#6148) and filename chaos (spaces beware)."
+echo "  10. Play sound, do notification and open SRT (because we earned it)."
+echo " Built to survive gh bugs (#6148) and filename chaos (spaces beware)."
 echo "========================================="
 echo
 
@@ -41,7 +41,7 @@ file_dir=$(dirname "$file")
 
 echo "📥 Input File (shared paths resolved):"
 echo "$file" | lolcat
-echo "💡 Tip: Add '--model large' or '--diarize' (needs HF_TOKEN env)."
+echo "💡 Tip: Add '--model large' or '--diarize' (needs HF_TOKEN env) or '--highlight_words True' (each word is then underlined for a later colorizing) for variants."
 echo -n "🔧 WhisperX Extra Args: "
 echo "'$extra_args'" | lolcat
 echo "📛 Base Filename: '$base_filename'"
@@ -159,8 +159,10 @@ echo
 
 # ================= Step 8: Run WhisperX in Codespace =================
 echo "🤖 [8/10] Running WhisperX in Codespace with defaults..."
-run_cmd="whisperx --compute_type float32 --model medium '$remote_path' --output_dir '$remote_home/Downloads' --highlight_words True --print_progress True $extra_args"
-echo "📜 The command that is being run: '$run_cmd' ...:" 
+
+# user may add the switches, for example this one: --highlight_words True
+run_cmd="whisperx --compute_type float32 --model medium '$remote_path' --output_dir '$remote_home/Downloads'  --print_progress True $extra_args"
+echo "📜 The command that is being run: '$run_cmd' :" 
 echo
 
 if ! time gh codespace ssh -c "$CODESPACE_NAME"  "HF_TOKEN=$HF_TOKEN $run_cmd"; then
@@ -230,8 +232,11 @@ echo
 
 # ================= Step 11: Play notification =================
 echo "🔊 Playing notification sound..."
-if ! termux-media-player play "/storage/5951-9E0F/Audio/Funny_Sounds/Quack Quack-SoundBible.com-620056916.mp3" 2>/dev/null; then
+if [[ ! -f "/storage/5951-9E0F/Audio/Funny_Sounds/proximity_bash.mp3" ]]; then  
     echo "⚠️ Notification sound not played (audio file missing?)" 
+else 
+termux-media-player play "/storage/5951-9E0F/Audio/Funny_Sounds/proximity_bash.mp3"
+
 fi
 
 #This is for a watch that may be connected via BLE to the notifications shown by Termux API: 
@@ -240,7 +245,7 @@ termux-notification -c " OK: ${filename_no_ext}.srt" --title "WhisperX " --vibra
 # if you watch does not allow notification from this Twrmux API program, then you can trick it via sending an SMS or via sending an email and so on.
 
 # if you BT bind your watch with your phone and use the audio sink of the watch then the below shall play on the watch:
-termux-media-player play /storage/5951-9E0F/Audio/Funny_Sounds/proximity_bash.mp3
+
 
 termux-tts-speak "Transcription has finished."
 

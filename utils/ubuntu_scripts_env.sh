@@ -22,3 +22,30 @@ export NVM_DIR="$HOME/.nvm"
 export NO_BROWSER=1
 
 
+# this one below is somehow needed either each time or now and then:
+	# --- Cache relocation ---
+	local CACHE_SRC="$CUR_HOME/.cache"
+	local CACHE_DEST="$PERSISTENT_DEST_BASE/.cache"
+
+	mkdir -p "$CACHE_SRC"
+	sudo mkdir -p "$CACHE_DEST"
+	sudo chown "$CUR_USER:$CUR_USER" "$CACHE_DEST"
+
+	while mountpoint -q "$CACHE_SRC"; do
+		echo "[RESET] Unmounting $CACHE_SRC ..."
+		sudo umount -l "$CACHE_SRC"
+	done
+
+	rm -rf "$CACHE_SRC"
+	mkdir -p "$CACHE_SRC"
+
+	echo "[ACTION] Binding $CACHE_DEST -> $CACHE_SRC ..."
+	sudo mount --bind "$CACHE_DEST" "$CACHE_SRC"
+	sudo mount -o remount,rw,exec "$CACHE_SRC"
+	echo "[DONE] Bound with exec: $CACHE_DEST -> $CACHE_SRC"
+
+	echo
+	echo "Final mount state:"
+	mount | grep /home
+
+

@@ -169,3 +169,5 @@ REMOTE_PORT=2223
         return 1
     fi
 }
+
+echo This script does nothing apart from creating a function called gh_me. Source me then. 
