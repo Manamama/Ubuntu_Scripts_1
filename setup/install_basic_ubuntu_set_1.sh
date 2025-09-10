@@ -286,8 +286,10 @@ install_system_tools() {
 	
 
 	# Core dev tools
-	sudo apt-get install -y pciutils build-essential cmake curl libcurl4-openssl-dev meson libomp-dev libssl-dev adb fastboot neofetch geoip-bin ranger mc baobab firefox python3-pip ncdu mediainfo xdg-utils
-	sudo apt-get install -y npm
+	sudo apt-get install -y pciutils build-essential cmake curl  adb fastboot neofetch geoip-bin ranger mc baobab firefox python3-pip ncdu mediainfo xdg-utils
+sudo apt install -y libcurl4-openssl-dev meson libtre-dev libomp-dev libssl-dev	
+sudo apt install -y bison flex 
+ sudo apt-get install -y npm
 	sudo npm install -g neofetch
 
 #For CUDA NVIDIA stuff:
