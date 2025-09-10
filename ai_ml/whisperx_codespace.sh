@@ -9,7 +9,7 @@ set -euo pipefail
 echo
 echo "========================================="
 echo "📜 WhisperX Transcription Script (Paranoid Android & gh User Edition)"
-echo "Version 3.1.9"
+echo "Version 3.1.11"
 echo 
 echo "🔐 Mission Brief:"
 echo "  1. Verify input audio file exists (no ghosts allowed)."
@@ -44,7 +44,7 @@ echo "$file" | lolcat
 echo "💡 Tip: Add '--model large' or '--diarize' (needs HF_TOKEN env) or '--highlight_words True' (each word is then underlined for a later colorizing) for variants."
 echo -n "🔧 WhisperX Extra Args: "
 echo "'$extra_args'" | lolcat
-echo "📛 Base Filename: '$base_filename'"
+#echo "Base Filename: '$base_filename'"
 echo
 
 # ================= Step 1: Check input file =================
