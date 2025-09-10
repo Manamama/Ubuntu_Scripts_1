@@ -274,6 +274,8 @@ cd ~/Downloads/GitHub
  pip install -U  --user FunASR/ 
  echo "If it fails, that is 'funasr' does not run, do force it:"
  echo "pip install -U  --user FunASR/ --force-reinstall"
+ echo
+ echo "Syntax is: 'funasr ++model=paraformer-en ++vad_model="fsmn-vad" ++punc_model="ct-punc" ++input="{audio_filename}' "
 
 }
 
