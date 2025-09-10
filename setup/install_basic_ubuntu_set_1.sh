@@ -266,8 +266,8 @@ install_ai_tools() {
 
  CPU only: 
 	python -m pip install --user -U whisperx pydub numpy torch torchvision torchaudio tensorflow-cpu jax jaxlib protobuf --extra-index-url https://download.pytorch.org/whl/cpu
- python -m pip install --user openai-whisper 
- pip install -U whisperx
+ python -m pip install --user openai-whisper -U 
+ pip install -U whisperx -U 
 
 cd ~/Downloads/GitHub
  git clone https://github.com/modelscope/FunASR
