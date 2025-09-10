@@ -127,7 +127,6 @@ gh codespace ssh -c "$CODESPACE_NAME" "cat $remote_txt" | lolcat
 
 # if you BT bind your watch with your phone and use the audio sink of the watch then the below shall play on the watch:
 
-echo "🔊 Playing notification sound..."
 
 
 echo "🔊 Playing notification sound..."
