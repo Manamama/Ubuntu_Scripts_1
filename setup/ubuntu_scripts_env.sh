@@ -24,8 +24,8 @@ export NO_BROWSER=1
 
 # this one below is somehow needed either each time or now and then:
 	# --- Cache relocation ---
-	local CACHE_SRC="$CUR_HOME/.cache"
-	local CACHE_DEST="$PERSISTENT_DEST_BASE/.cache"
+	 CACHE_SRC="$HOME/.cache"
+ CACHE_DEST="$PERSISTENT_DEST_BASE/.cache"
 
 	mkdir -p "$CACHE_SRC"
 	sudo mkdir -p "$CACHE_DEST"
