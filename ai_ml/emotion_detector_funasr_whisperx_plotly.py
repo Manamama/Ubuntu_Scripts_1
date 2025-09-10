@@ -1,5 +1,5 @@
 #First global variables:
-tool_name_and_version = "Emotion Detector for Media Files: using WhisperX for speech recognition and diarization (detection of the speakers), FunASR for emotion detection, Plotly for visualizing results. Current Version: 5.2.4.2 | Author: ManamaMa"
+tool_name_and_version = "Emotion Detector for Media Files: using WhisperX for speech recognition and diarization (detection of the speakers), FunASR for emotion detection, Plotly for visualizing results. Current Version: 5.3.1 | Author: ManamaMa"
 #Note to self : the extraction for the HTML rendering of the chunks in 'def extract_media_segments' may need fixing: use the SRT files, not the TSV files or check if .bak is same as the new TSV file.
 
 #Select the whisperx_model size here - "medium" runs relatively fast, but crashes Android. "small" does not crash Android, but may be too small. "large" or "large-v3" is best, but the slowest  
