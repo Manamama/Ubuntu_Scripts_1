@@ -108,10 +108,10 @@ install_deb_local() {
 configure_system_resources() {
 	echo "⚙️ Configuring system resources (disk, swap, repo)..."
 
-	local CUR_USER=$(whoami)
-	local CUR_HOME="$HOME"
-	local PYTHON_LIB=$(python -m site --user-site)
-	local PERSISTENT_DEST_BASE="/root/home_extended" # Default for GCloud
+	 CUR_USER=$(whoami)
+	
+	 PYTHON_LIB=$(python -m site --user-site)
+	 PERSISTENT_DEST_BASE="/root/home_extended" # Default for GCloud
 
 echo "export PATH=\"${LOCALBIN:-/usr/local/bin}:$PATH\""
 echo "export LD_LIBRARY_PATH=\"${LOCALLIB:-/usr/local/lib}:${LD_LIBRARY_PATH:-}\""
@@ -135,7 +135,7 @@ echo "export LD_LIBRARY_PATH=\"${LOCALLIB:-/usr/local/lib}:${LD_LIBRARY_PATH:-}\
 	else
 
 		# --- Python site-packages relocation ---
-		local PYTHON_LIB_DEST="${PYTHON_LIB/$HOME/$PERSISTENT_DEST_BASE}"
+		 PYTHON_LIB_DEST="${PYTHON_LIB/$HOME/$PERSISTENT_DEST_BASE}"
 
 		mkdir -p "$PYTHON_LIB"
 		sudo mkdir -p "$PYTHON_LIB_DEST"
@@ -152,8 +152,8 @@ echo "export LD_LIBRARY_PATH=\"${LOCALLIB:-/usr/local/lib}:${LD_LIBRARY_PATH:-}\
 	fi
 
 	# --- Cache relocation ---
-	local CACHE_SRC="$CUR_HOME/.cache"
-	local CACHE_DEST="$PERSISTENT_DEST_BASE/.cache"
+	 CACHE_SRC="$HOME/.cache"
+	 CACHE_DEST="$PERSISTENT_DEST_BASE/.cache"
 
 	mkdir -p "$CACHE_SRC"
 	sudo mkdir -p "$CACHE_DEST"
