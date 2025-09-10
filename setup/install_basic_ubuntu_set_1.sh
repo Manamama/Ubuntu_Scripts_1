@@ -262,11 +262,19 @@ install_ai_tools() {
 	python -m ensurepip
 
  #Huge with CUDA:
- python -m pip install --user -U whisperx numpy torch torchvision torchaudio tensorflow jax jaxlib protobuf 
+ #python -m pip install --user -U whisperx numpy torch torchvision torchaudio tensorflow jax jaxlib protobuf 
 
- #CPU only: 
-	#python -m pip install --user -U whisperx numpy torch torchvision torchaudio tensorflow-cpu jax jaxlib protobuf --extra-index-url https://download.pytorch.org/whl/cpu
-	# python -m pip install git+https://github.com/openai/whisper.git
+ CPU only: 
+	python -m pip install --user -U whisperx numpy torch torchvision torchaudio tensorflow-cpu jax jaxlib protobuf --extra-index-url https://download.pytorch.org/whl/cpu
+ python -m pip install --user openai-whisper 
+ pip install -U whisperx
+
+cd ~/Downloads/GitHub
+ git clone https://github.com/modelscope/FunASR
+ pip install -U  --user FunASR/ 
+ echo "If it fails, that is 'funasr' does not run, do force it:"
+ echo "pip install -U  --user FunASR/ --force-reinstall"
+
 }
 
 # --- XRDP Setup ---
