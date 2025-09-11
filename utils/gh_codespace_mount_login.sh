@@ -35,6 +35,7 @@ gh_me() {
 # Check active user and 'codespace' scope using gh auth status -a, no external tools
 echo -n "1️⃣  Checking 🔍 the active GitHub user and the OAuth token scopes... : "
 
+gh auth status -a | lolcat
 # Get active account output
 AUTH_ACTIVE=$(gh auth status -a 2>&1)
 
@@ -61,7 +62,9 @@ if [ -z "$ACTIVE_USER" ]; then
 fi
 
 #echo -n "✅ Active user: "
-echo "$ACTIVE_USER" | lolcat
+#echo "$ACTIVE_USER" | lolcat
+
+echo Active User must be both : 1. 'ssh' enabled. 2. Scope to codespaces, see: 'gh auth refresh -h github.com -s codespace'
 
 # Check if codespace is in scopes
 if [[ ! "$ACTIVE_SCOPES" =~ codespace ]]; then
