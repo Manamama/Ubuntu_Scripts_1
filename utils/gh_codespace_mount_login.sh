@@ -29,34 +29,78 @@
 #   Then, call the function:
 #   gh_me
 gh_me() {
-    echo "1️⃣ List codespaces:"
+
+# Check if the active account's token has 'codespace' scope using API
+#!/bin/bash
+# Check active user and 'codespace' scope using gh auth status -a, no external tools
+echo "🔍 Checking active user and OAuth token scopes..."
+
+# Get active account output
+AUTH_ACTIVE=$(gh auth status -a 2>&1)
+
+# Extract active user from "Logged in" line
+while IFS= read -r line; do
+  if [[ $line =~ Logged\ in\ to\ github\.com\ account\ ([^ ]*) ]]; then
+    ACTIVE_USER=${BASH_REMATCH[1]}
+    break
+  fi
+done <<< "$AUTH_ACTIVE"
+
+# Extract scopes from "Token scopes" line
+while IFS= read -r line; do
+  if [[ $line =~ Token\ scopes:\ (.*) ]]; then
+    ACTIVE_SCOPES=${BASH_REMATCH[1]//\'/} # Remove single quotes
+    break
+  fi
+done <<< "$AUTH_ACTIVE"
+
+# Check if active user was found
+if [ -z "$ACTIVE_USER" ]; then
+  echo "❌ No active user found. Run 'gh auth login' to authenticate." | lolcat
+  return 1
+fi
+
+echo -n "✅ Active user: "
+echo "$ACTIVE_USER" | lolcat
+
+# Check if codespace is in scopes
+if [[ ! "$ACTIVE_SCOPES" =~ codespace ]]; then
+  echo "❌ Missing 'codespace' scope for '$ACTIVE_USER'. Run 'gh auth refresh -h github.com -s codespace'." | lolcat
+  return 1
+fi
+
+#echo "✅ User '$ACTIVE_USER' has 'codespace' scope."
+
+    echo "1️⃣ Your 'gh' account has the 'codespace' scope, congrats. We are listing available codespaces:"
     CODESPACES=$(gh codespace list --json name,state | jq -r '.[] | .name')
     if [ $? -ne 0 ]; then
         echo "❌ Error listing codespaces. Make sure gh CLI is authenticated and codespaces are available." | lolcat
         return 1
     fi
     if [ -z "$CODESPACES" ]; then
-        echo "No codespaces found. Please create one first." | lolcat
+        echo "No access to codespaces found. Either check your rights (scopes) relating to your codespaces for this account or do create a codespace first." | lolcat
         return 1
     fi
 
     echo "Available Codespaces:"
-    select CSPACE_NAME in $CODESPACES; do
+    select CSPACE_NAME in $CODESPACES ; do
         if [ -n "$CSPACE_NAME" ]; then
-            echo "Selected Codespace: $CSPACE_NAME" | lolcat
+            #echo "Selected Codespace: $CSPACE_NAME" 
+            echo
             break
         else
             echo "Invalid selection. Please try again." | lolcat
         fi
     done
 
-    echo "2️⃣"
-    gh codespace view -c "$CSPACE_NAME"
+    echo "2️⃣ Codespace details:"
+    gh codespace view -c "$CSPACE_NAME" | lolcat
     if [ $? -ne 0 ]; then
         echo "❌ Error viewing codespace '$CSPACE_NAME'." | lolcat
         return 1
     fi
-    echo "3️⃣ Determine Codespace workspace path"
+    echo
+    echo -n "3️⃣ Determining the Codespace workspace path... : "
 
     WORKSPACE_PATH=$(gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no 'pwd' | tr -d '\r\n')
     if [ $? -ne 0 ]; then
@@ -70,21 +114,30 @@ gh_me() {
             return 1
         fi
     fi
-    echo "Workspace path: $WORKSPACE_PATH"
+    #echo -n "Workspace path: "
+    echo "$WORKSPACE_PATH" | lolcat
+
+
+    echo -n "Determining the Codespace reemote IP (for use by e.g. MiXplorer to map share) ... : "
 
     REMOTE_IP=$(gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no "curl ifconfig.me")
     if [ $? -ne 0 ]; then
         echo "❌ Error getting remote IP from codespace '$CSPACE_NAME'." | lolcat
         return 1
     fi
-    echo "Remote IP (for use by e.g. MiXplorer to map share):"
-    echo "REMOTE_IP is: $REMOTE_IP" | lolcat
+    echo "$REMOTE_IP" | lolcat
     echo
 
-
-REMOTE_PORT=2223
-        LOCAL_PORT=2222
-    echo "4️⃣ Start local port $LOCAL_PORT forward to Codespace SSH $REMOTE_PORT"
+#Check it via: 'gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no 'netstat -tuln' ' or similar
+        REMOTE_PORT=2222
+        LOCAL_PORT=2226
+        #Do not use: 
+        #KEY_PATH=~/.ssh/id_rsa
+        #as it is indeed the default one, for ssh and such in Termux, but GitHub Codespace CLI 'gh' default key filename is: '~/.ssh/codespaces.auto' as private and 'codespaces.auto.pub' as public. So we shall use: 
+        KEY_PATH=~/.ssh/codespaces.auto
+        #Note that ~/.config/gh/hosts.yml also plays a role: stores the GitHub CLI’s configuration, but not including the OAuth token used for API calls (e.g., gh codespace list, gh codespace ssh). The "codespace rights" (i.e., the codespace scope) are not properties of the SSH key (~/.ssh/codespaces.auto) at all—they belong to the OAuth token used for GitHub CLI API calls. The key never "lacked codespace rights" in either scenario; it's solely for SSH authentication and doesn't interact with scopes. 'gh auth status' shows it: either https or ssh with codespace scope is needed. So run: ' gh auth refresh -h github.com -s codespace' to add that scope. 
+        
+    echo "4️⃣ Starting the forwarding of the Codespace SSH port: $REMOTE_PORT to the local port: $LOCAL_PORT "
     
     PID_FILE="$HOME/.cache/gh_codespace_forward_${CSPACE_NAME}_${LOCAL_PORT}.pid"
 
@@ -106,7 +159,7 @@ REMOTE_PORT=2223
             return 1
         fi
 
-        echo "Starting port forward (LOCAL_PORT $LOCAL_PORT → REMOTE_PORT 22)"
+        echo "Starting port forward (LOCAL_PORT $LOCAL_PORT → REMOTE_PORT $REMOTE_PORT)"
         gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no -L  $LOCAL_PORT:localhost:$REMOTE_PORT -N &
             FORWARD_PID=$!
         sleep 0.5
@@ -115,29 +168,36 @@ REMOTE_PORT=2223
             return 1
         fi
         echo "$FORWARD_PID" > "$PID_FILE"
-        echo "🔌 Port forward started (PID $FORWARD_PID)" | lolcat
+        echo -n "🔌 Port forward started: "
+        echo "(PID $FORWARD_PID)" | lolcat
     fi
 
-    echo "5️⃣ Setup rclone remote"
+    #Chown it, as some sudo changes to root ownership now and then: 
+
+    sudo chown $(whoami):$(whoami)  /home/zezen/.config/rclone/rclone.conf
+
+    echo "5️⃣ Set up or update the configuration of the rclone remote GitHub Codespace record ... :"
     RCLONE_REMOTE="GH_01"
-    if ! rclone listremotes | grep -qx "${RCLONE_REMOTE}:"; then
-        rclone config create "$RCLONE_REMOTE" sftp \
-            host 127.0.0.1 user codespace key_file ~/.ssh/id_rsa port $LOCAL_PORT >/dev/null
-    fi
-    rclone config update "$RCLONE_REMOTE" host 127.0.0.1 port $LOCAL_PORT >/dev/null
-
-    echo "6️⃣ Prepare mount paths"
+    rclone config update "$RCLONE_REMOTE" host 127.0.0.1 user codespace key_file "$KEY_PATH" port "$LOCAL_PORT" | lolcat 
+    sleep 1 
+ if [ $? -ne 0 ]; then
+    echo "❌ Failed to create rclone remote '$RCLONE_REMOTE'." | lolcat
+    return 1
+   
+  fi
+    #echo "✅ The record of the rclone remote: '$RCLONE_REMOTE' has been updated in configuration."
+    echo "6️⃣ Prepare the mount paths: unmount them ... "
     MOUNT_PATH="$HOME/storage/GitHub_Codespace_rclone_$CSPACE_NAME"
     SSHFS_MOUNT="$HOME/storage/GitHub_Codespace_sshfs_$CSPACE_NAME"
     mkdir -p "$MOUNT_PATH" "$SSHFS_MOUNT"
     sudo umount "$MOUNT_PATH" 2>/dev/null
     sudo umount "$SSHFS_MOUNT" 2>/dev/null
 
-    echo "7️⃣ Mount via rclone FUSE if not already mounted"
+    echo "7️⃣ Mount the paths via rclone FUSE, if not already mounted"
     if ! mountpoint -q "$MOUNT_PATH"; then
         echo "Mounting Codespace $CSPACE_NAME userspace $WORKSPACE_PATH via rclone on $MOUNT_PATH..."
         sudo rclone mount "$RCLONE_REMOTE:/$WORKSPACE_PATH" "$MOUNT_PATH" \
-            --config ~/.config/rclone/rclone.conf --allow-other --vfs-cache-mode writes &
+            --config ~/.config/rclone/rclone.conf --allow-other --vfs-cache-mode writes & 
         MOUNT_PID=$!
         sleep 1
         if ! ps -p "$MOUNT_PID" > /dev/null; then
@@ -145,29 +205,39 @@ REMOTE_PORT=2223
             return 1
         fi
     else
-        echo "✅ Already mounted at $MOUNT_PATH"
+        echo "✅ Already mounted at $MOUNT_PATH"        
     fi
+    echo Checking: "ls $MOUNT_PATH | lolcat" : 
+ls $MOUNT_PATH | lolcat
+
 
     echo "8️⃣ SSHFS fallback mount"
-    KEY_PATH=~/.ssh/id_rsa
     if ! mountpoint -q "$SSHFS_MOUNT"; then
         echo "Mounting via SSHFS fallback on $SSHFS_MOUNT..."
         sudo sshfs codespace@127.0.0.1:"$WORKSPACE_PATH" "$SSHFS_MOUNT" -p $LOCAL_PORT \
             -oIdentityFile="$KEY_PATH" -oStrictHostKeyChecking=no -o reconnect \
-            -o ServerAliveInterval=5 -o ServerAliveCountMax=3 -o TCPKeepAlive=yes -o allow_other
+            -o ServerAliveInterval=5 -o ServerAliveCountMax=3 -o TCPKeepAlive=yes -o allow_other | lolcat
         if [ $? -ne 0 ]; then
             echo "⚠️ SSHFS mount failed, proceeding to SSH session anyway..." | lolcat
         fi
     fi
 
+echo Checking: "ls "$SSHFS_MOUNT" | lolcat " :
+ls "$SSHFS_MOUNT" | lolcat
+
+
     echo "9️⃣ Entering the interactive session"
-    echo "At end, try to use **gh codespace stop**. By default, Codespaces automatically stops after ~30 minutes of inactivity."
+    echo "FYI: by default, Codespaces automatically stops after ~30 minutes of inactivity and gets deleted after 30 days of not logging in again."
     echo "👉 Starting Codespace SSH session..."
     gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no
+    
+    #This errors unduly if control C etc: 
+: '
     if [ $? -ne 0 ]; then
         echo "❌ Error starting interactive SSH session to codespace '$CSPACE_NAME'." | lolcat
         return 1
     fi
+    '
 }
 
 echo This script does nothing apart from creating a function called gh_me. Source me then. 
