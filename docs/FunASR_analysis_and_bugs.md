@@ -42,3 +42,56 @@ The errors you encounter stem from a fundamental mismatch between the design ass
   - Switch models: Use `SenseVoiceSmall` (which supports emotions and transcription, producing `'text'`) with VAD, as it fits the ASR pipeline better.
 
 If you share the audio duration/sample rate or test with a different file, I can refine this further.
+
+# Update from source
+
+Read: https://github.com/ddlBoJack/emotion2vec
+
+## Details:
+
+You can have only `utterance` and `frame`  as units analyzed, not `sentence`: 
+```
+'''
+Using the emotion representation model
+rec_result only contains {'feats'}
+	granularity="utterance": {'feats': [*768]}
+	granularity="frame": {feats: [T*768]}
+'''
+
+from funasr import AutoModel
+
+model_id = "iic/emotion2vec_base"
+model = AutoModel(
+    model=model_id,
+    hub="ms",  # "ms" or "modelscope" for China mainland users; "hf" or "huggingface" for other overseas users
+)
+
+wav_file = f"{model.model_path}/example/test.wav"
+rec_result = model.generate(wav_file, output_dir="./outputs", granularity="utterance")
+print(rec_result)
+```
+
+and
+
+```
+'''
+Using the finetuned emotion recognization model
+
+rec_result contains {'feats', 'labels', 'scores'}
+	extract_embedding=False: 9-class emotions with scores
+	extract_embedding=True: 9-class emotions with scores, along with features
+
+9-class emotions: 
+iic/emotion2vec_plus_seed, iic/emotion2vec_plus_base, iic/emotion2vec_plus_large (May. 2024 release)
+iic/emotion2vec_base_finetuned (Jan. 2024 release)
+    0: angry
+    1: disgusted
+    2: fearful
+    3: happy
+    4: neutral
+    5: other
+    6: sad
+    7: surprised
+    8: unknown
+'''
+```
