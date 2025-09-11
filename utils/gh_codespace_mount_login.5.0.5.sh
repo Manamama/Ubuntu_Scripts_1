@@ -22,7 +22,7 @@
 #   - sshfs
 #   - jq (for JSON parsing)
 #   - $FILTER (optional, for colored output)
-#   - Termux environment (for specific paths like $HOME/storage/)
+#   - Termux environment (for specific paths like ~/storage/)
 #
 # Usage:
 #   Source this script in your shell:
@@ -43,15 +43,14 @@ else
 fi
 
 
-echo Mounting shares and logging into GitHub Codespaces, paranoid edition, version 5.1.1
-#Changed ssh mechanism to port forwards 
+echo Mounting shares and logging into GitHub Codespaces, paranoid edition, version 5.0.5
 echo 
 
 
         #Do not use in Ubuntu: 
-        #KEY_PATH=$HOME/.ssh/id_rsa
-        #as it is indeed the default one, for ssh and such in Termux, but GitHub Codespace CLI 'gh' default key filename is: '$HOME/.ssh/codespaces.auto' as private and 'codespaces.auto.pub' as public. So we shall use: 
-        #KEY_PATH=$HOME/.ssh/codespaces.auto
+        #KEY_PATH=~/.ssh/id_rsa
+        #as it is indeed the default one, for ssh and such in Termux, but GitHub Codespace CLI 'gh' default key filename is: '~/.ssh/codespaces.auto' as private and 'codespaces.auto.pub' as public. So we shall use: 
+        #KEY_PATH=~/.ssh/codespaces.auto
         
     if [ -n "$TERMUX_HOME" ]; then
     echo -n We are in Termux. 
@@ -133,7 +132,7 @@ fi
     gh codespace view -c "$CSPACE_NAME" | $FILTER
     if [ $? -ne 0 ]; then
         echo "❌ Error viewing codespace '$CSPACE_NAME'." | $FILTER
-        #return 1
+        return 1
     fi
     echo
     echo -n "3️⃣  Determining the Codespace workspace path... : "
@@ -141,13 +140,13 @@ fi
     WORKSPACE_PATH=$(gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no 'pwd' | tr -d '\r\n')
     if [ $? -ne 0 ]; then
         echo "❌ Error getting workspace path from codespace '$CSPACE_NAME'." | $FILTER
-        #return 1
+        return 1
     fi
     if [[ "$WORKSPACE_PATH" == "/home/codespace" ]]; then
         WORKSPACE_PATH=$(gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no 'ls -d /workspaces/* 2>/dev/null | head -n1' | tr -d '\r\n')
         if [ $? -ne 0 ]; then
             echo "❌ Error getting workspace path from /workspaces/ in codespace '$CSPACE_NAME'." | $FILTER
-            #return 1
+            return 1
         fi
     fi
     #echo -n "Workspace path: "
@@ -172,79 +171,89 @@ fi
         LOCAL_PORT=3222
         
         
-# Theory: $HOME/.ssh/known_hosts has all IP:ports combination 
-
-
-        #Note that $HOME/.config/gh/hosts.yml also plays a role: stores the GitHub CLI’s configuration, but not including the OAuth token used for API calls (e.g., gh codespace list, gh codespace ssh). The "codespace rights" (i.e., the codespace scope) are not properties of the SSH key ($HOME/.ssh/codespaces.auto) at all—they belong to the OAuth token used for GitHub CLI API calls. The key never "lacked codespace rights" in either scenario; it's solely for SSH authentication and doesn't interact with scopes. 'gh auth status' shows it: either https or ssh with codespace scope is needed. So run: ' gh auth refresh -h github.com -s codespace' to add that scope. 
         
-        #NB. Upon reviewing the GitHub CLI documentation, it's confirmed that the gh codespace ssh command automatically generates a new SSH key pair if one doesn't already exist in the $HOME/.ssh directory. This process is not conditional upon the presence of the codespaces.auto file; rather, it ensures that a valid key pair is available for authentication. 
+# find the next free port, do not kill existing forwards
+while ss -tuln 2>/dev/null | grep -q ":$LOCAL_PORT "; do
+    LOCAL_PORT=$((LOCAL_PORT + 1))
+done
+
+
+
+echo "✅ Using local port $LOCAL_PORT (found free) for forwarding."
+
+echo You must run at least once: sftp  -i $KEY_PATH -P 2226 codespace@127.0.0.1 
+# Theory: ~/.ssh/known_hosts has all IP:ports combination 
+
+
+        #Note that ~/.config/gh/hosts.yml also plays a role: stores the GitHub CLI’s configuration, but not including the OAuth token used for API calls (e.g., gh codespace list, gh codespace ssh). The "codespace rights" (i.e., the codespace scope) are not properties of the SSH key (~/.ssh/codespaces.auto) at all—they belong to the OAuth token used for GitHub CLI API calls. The key never "lacked codespace rights" in either scenario; it's solely for SSH authentication and doesn't interact with scopes. 'gh auth status' shows it: either https or ssh with codespace scope is needed. So run: ' gh auth refresh -h github.com -s codespace' to add that scope. 
+        
+        #NB. Upon reviewing the GitHub CLI documentation, it's confirmed that the gh codespace ssh command automatically generates a new SSH key pair if one doesn't already exist in the ~/.ssh directory. This process is not conditional upon the presence of the codespaces.auto file; rather, it ensures that a valid key pair is available for authentication. 
         #that’s the “Sally Anne” trap in action. I had two mental assumptions baked in:
 
 #Key dependency assumption: I assumed that if the codespaces.auto private key file was missing, gh codespace ssh would fail. In other words, the SSH handshake wouldn’t even start without the pre-existing key. That’s the “Anne thinks Sally still has the marble” error: I imagined the system would behave like a human watching a hidden key.
 
 #No automatic key regeneration assumption: Even if it somehow connected, I assumed gh would never silently recreate the key. I treated SSH keys as immutable artifacts, only generated manually by the user. I didn’t account for the CLI’s internal logic to always ensure credentials exist—even if it has to forge them on-the-fly.
 
-# the gh codespace ssh command does not strictly depend on the local $HOME/.ssh/codespaces.auto key for establishing a connection to the Codespace. Instead, it uses the GitHub API and the OAuth token of the active account (Manamama-Gemini-Cloud-AI-01, with codespace scope) to authenticate and negotiate the SSH session. The gh CLI manages the connection by leveraging cached session material or API-driven authentication
-        echo "4️⃣ Checking/starting forwarding of Codespace SSH port: $REMOTE_PORT to local port: $LOCAL_PORT" | $FILTER
-echo "⚠️ Some steps require sudo privileges. You may be prompted for your password." | $FILTER
+# the gh codespace ssh command does not strictly depend on the local ~/.ssh/codespaces.auto key for establishing a connection to the Codespace. Instead, it uses the GitHub API and the OAuth token of the active account (Manamama-Gemini-Cloud-AI-01, with codespace scope) to authenticate and negotiate the SSH session. The gh CLI manages the connection by leveraging cached session material or API-driven authentication
+        
+    echo "4️⃣  Starting the forwarding of the Codespace SSH port: $REMOTE_PORT to the local port: $LOCAL_PORT "
+    echo "⚠️  Some steps require sudo privileges. You may be prompted for your password."
 
-#This does not work! Do not use any of these versions: 
-#PORTS_JSON=$(gh codespace ports -c "$CSPACE_NAME" --json sourcePort)
+    PID_FILE="$HOME/.cache/gh_codespace_forward_${CSPACE_NAME}_${LOCAL_PORT}.pid"
 
-#!/usr/bin/env bash
-# Usage: REMOTE_PORT=2222 CSPACE_NAME=curly-funicular ./forward.sh
+    if [ -f "$PID_FILE" ]; then
+        OLD_PID=$(cat "$PID_FILE")
+        if ps -p "$OLD_PID" > /dev/null; then
+            echo "✅ Port forward already running with PID $OLD_PID. Reusing existing forward." | $FILTER
+            FORWARD_PID="$OLD_PID"
+        else
+            echo "Stale PID file found. Cleaning up..." | $FILTER
+            rm -f "$PID_FILE"
+        fi
+    fi
 
-DEFAULT_LOCAL=3222
+    if [ -z "$FORWARD_PID" ]; then
+        # Check if port is in use (fallback to netstat for Termux)
+        if command -v netstat >/dev/null && netstat -tuln | grep -q ":$LOCAL_PORT\s"; then
+            echo "⚠️ Local port $LOCAL_PORT is already in use by another process. Please free it up manually." | $FILTER
+            return 1
+        fi
 
-# 1️⃣ Check if remote port is already forwarded locally
-
- ps -eo pid,args     | grep "codespace" 
- echo 
- 
-LOCAL_PORT=$(ps -eo pid,args \
-    | grep "[g]h codespace ports forward ${REMOTE_PORT}:" \
-    | sed -n "s/.*${REMOTE_PORT}:\([0-9]\+\).*/\1/p" \
-    | head -n1)
-
-
-
-# 2️⃣ If unbound, find a free local port and bind once
-if [ -z "$LOCAL_PORT" ]; then
-    LOCAL_PORT=$DEFAULT_LOCAL
-    while ss -tln 2>/dev/null | grep -q ":$LOCAL_PORT "; do
-        LOCAL_PORT=$((LOCAL_PORT + 1))
-    done
-    # Start the forward quietly in background
-    echo "✅ Using local port $LOCAL_PORT (found free) for forwarding... "
-
-    gh codespace ports forward "${REMOTE_PORT}:${LOCAL_PORT}" -c "$CSPACE_NAME"   | lolcat &
-fi
-
-# 3️⃣ Single paranoid print at the end
-echo "🔍 Paranoid check: Remote port $REMOTE_PORT forwarded to local port $LOCAL_PORT."
-
+        echo "Starting port forward (LOCAL_PORT $LOCAL_PORT → REMOTE_PORT $REMOTE_PORT)"
+        gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no -L  $LOCAL_PORT:localhost:$REMOTE_PORT -N &
+            FORWARD_PID=$!
+        sleep 0.5
+        if ! ps -p "$FORWARD_PID" > /dev/null; then
+            echo "❌ Port forwarding failed to start (PID $FORWARD_PID)." | $FILTER
+            return 1
+        fi
+        echo "$FORWARD_PID" > "$PID_FILE"
+        echo -n "🔌 Port forward started: "
+        echo "(PID $FORWARD_PID)" | $FILTER
+    fi
 
 
-echo You must run at least once: sftp  -i $KEY_PATH -P $LOCAL_PORT codespace@127.0.0.1 
-echo Try also: sftp  -i $KEY_PATH -P $REMOTE_PORT codespace@$REMOTE_IP
 
+
+    #Chown it, as some sudo changes to root ownership now and then: 
+
+    sudo chown $(whoami):$(whoami)  ~/.config/rclone/rclone.conf
 # Wait for the forwarded port to become available
-echo "⏳ Waiting for the forwarded port to be ready..."
-for i in {1..20}; do
+echo "⏳ Waiting for the port forward to be ready..."
+for i in {1..10}; do
 
     if ss -tln | grep -q ":$LOCAL_PORT "; then
         echo "✅ Port $LOCAL_PORT is ready."
         break
     fi
-    echo $(date)
-
     sleep 0.5
+    echo date
 done
 
 
 
 echo Applying: "ssh-keyscan -p $LOCAL_PORT 127.0.0.1 " 
-ssh-keyscan -p $LOCAL_PORT 127.0.0.1 >> $HOME/.ssh/known_hosts 2>/dev/null
+ssh-keyscan -p $LOCAL_PORT 127.0.0.1 >> ~/.ssh/known_hosts 2>/dev/null
 
 
     echo "5️⃣  Set up or update the configuration of the rclone remote GitHub Codespace record ... :"
@@ -252,31 +261,29 @@ ssh-keyscan -p $LOCAL_PORT 127.0.0.1 >> $HOME/.ssh/known_hosts 2>/dev/null
     #RCLONE_REMOTE=GH_${CSPACE_NAME}
     # Each run does a rclone config update GH_01 .... That’s fine for one codespace, but if you juggle several, you might want per-codespace remotes (GH_${CSPACE_NAME}).
     #This does not work well: 
+    : '
     RCLONE_REMOTE="GH_${CSPACE_NAME}"
 
 # Check if remote exists
 if ! rclone config show | grep -q "^\[$RCLONE_REMOTE\]"; then
     echo "Creating new rclone remote '$RCLONE_REMOTE' (type = sftp)"
     rclone config create "$RCLONE_REMOTE" sftp \
-        host 127.0.0.1 user codespace key_file "$KEY_PATH" port "$LOCAL_PORT" | $FILTER 
+        host 127.0.0.1 user codespace key_file "$KEY_PATH" port "$LOCAL_PORT"
 else
-    echo "Updating existing rclone remote: '$RCLONE_REMOTE'"
+    echo "Updating existing rclone remote '$RCLONE_REMOTE'"
     rclone config update "$RCLONE_REMOTE" \
-        host 127.0.0.1 user codespace key_file "$KEY_PATH" port "$LOCAL_PORT" | $FILTER 
+        host 127.0.0.1 user codespace key_file "$KEY_PATH" port "$LOCAL_PORT"
 fi
 
+'
 
-
-    #rclone config update "$RCLONE_REMOTE" host 127.0.0.1 user codespace key_file "$KEY_PATH" port "$LOCAL_PORT" | $FILTER 
-    #sleep 1 
+    rclone config update "$RCLONE_REMOTE" host 127.0.0.1 user codespace key_file "$KEY_PATH" port "$LOCAL_PORT" | $FILTER 
+    sleep 1 
  if [ $? -ne 0 ]; then
     echo "❌ Failed to create rclone remote '$RCLONE_REMOTE'." | $FILTER
     return 1
    
   fi
-  
-  
-  
     #echo "✅ The record of the rclone remote: '$RCLONE_REMOTE' has been updated in configuration."
     echo "6️⃣  Prepare the mount paths: unmount them ... "
     MOUNT_PATH="$HOME/storage/GitHub_Codespace_rclone_$CSPACE_NAME"
@@ -294,16 +301,9 @@ fi
         echo -n " via a rclone local mount on: "  
         echo -n $MOUNT_PATH | $FILTER
 
-
-    #Chown it, as some sudo changes to root ownership now and then: 
-
-    sudo chown $(whoami):$(whoami)  $HOME/.config/rclone/rclone.conf
-    
 #The port may change so we add: -o StrictHostKeyChecking=no 
-# Sudo does not work somehow, we use the trick of changing: 'usermount3: option allow_other only allowed if 'user_allow_other' is set in /etc/fuse.conf' 
-        #sudo 
         sudo rclone mount "$RCLONE_REMOTE:/$WORKSPACE_PATH" "$MOUNT_PATH" \
-            --config $HOME/.config/rclone/rclone.conf --allow-other  --vfs-cache-mode writes --vfs-cache-max-size 100M & 
+            --config ~/.config/rclone/rclone.conf --allow-other -o StrictHostKeyChecking=no  --vfs-cache-mode writes --vfs-cache-max-size 100M & 
         MOUNT_PID=$!
         sleep 1
         if ! ps -p "$MOUNT_PID" > /dev/null; then
@@ -319,14 +319,9 @@ ls $MOUNT_PATH | $FILTER
 
 
 
-    #Chown it, as some sudo changes to root ownership now and then: 
-
-    sudo chown $(whoami):$(whoami)  $HOME/.config/rclone/rclone.conf
-    
-
     if ! mountpoint -q "$SSHFS_MOUNT"; then
         echo -n "8️⃣  Mounting via SSHFS on:"
-        echo "$SSHFS_MOUNT" | $FILTER
+        echo "$SSHFS_MOUNT..." | $FILTER
         sudo sshfs codespace@127.0.0.1:"$WORKSPACE_PATH" "$SSHFS_MOUNT" -p $LOCAL_PORT \
             -oIdentityFile="$KEY_PATH" -oStrictHostKeyChecking=no -o reconnect \
             -o ServerAliveInterval=5 -o ServerAliveCountMax=3 -o TCPKeepAlive=yes -o allow_other | $FILTER
