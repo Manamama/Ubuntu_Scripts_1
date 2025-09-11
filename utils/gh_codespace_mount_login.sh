@@ -53,7 +53,7 @@ echo
         #as it is indeed the default one, for ssh and such in Termux, but GitHub Codespace CLI 'gh' default key filename is: '$HOME/.ssh/codespaces.auto' as private and 'codespaces.auto.pub' as public. So we shall use: 
         #KEY_PATH=$HOME/.ssh/codespaces.auto
         
-    if [ -n "$TERMUX_HOME" ]; then
+    if [ -n "$TERMUX__HOME" ]; then
     echo -n We are in Termux. 
         KEY_PATH="$HOME/.ssh/id_rsa"
     else
