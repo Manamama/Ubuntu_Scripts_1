@@ -52,19 +52,21 @@ echo
         #KEY_PATH=$HOME/.ssh/id_rsa
         #as it is indeed the default one, for ssh and such in Termux, but GitHub Codespace CLI 'gh' default key filename is: '$HOME/.ssh/codespaces.auto' as private and 'codespaces.auto.pub' as public. So we shall use: 
         #KEY_PATH=$HOME/.ssh/codespaces.auto
+
+echo -n "1️⃣  Checking the OS: " 
         
     if [ -n "$TERMUX__HOME" ]; then
-    echo -n We are in Termux. 
+    echo -n "📲  We are in Termux.  " 
         KEY_PATH="$HOME/.ssh/id_rsa"
     else
         echo -n We are not in Termux. 
         KEY_PATH="$HOME/.ssh/codespaces.auto"
     fi
-echo -n We are using this KEY_PATH with ssh keys: 
+echo -n So we are using this KEY_PATH with ssh keys: 
 echo $KEY_PATH | $FILTER
+echo 
 
-
-echo -n "1️⃣  Checking 🔍 the active GitHub user and the OAuth token scopes... : "
+echo -n "2️⃣  Checking 🔍 the active GitHub user and the OAuth token scopes... : "
 
 gh auth status -a | $FILTER
 # Get active account output
@@ -107,7 +109,7 @@ fi
 #echo "✅ User '$ACTIVE_USER' has 'codespace' scope."
 
     echo " Your 'gh' account has the 'codespace' scope, congrats."
-    echo "2️⃣  Select one from the available codespaces:"
+    echo "⇛  Select one from the available codespaces:"
     CODESPACES=$(gh codespace list --json name,state | jq -r '.[] | .name')
     if [ $? -ne 0 ]; then
         echo "❌ Error listing codespaces. Make sure gh CLI is authenticated and codespaces are available." | $FILTER
@@ -185,8 +187,9 @@ fi
 #No automatic key regeneration assumption: Even if it somehow connected, I assumed gh would never silently recreate the key. I treated SSH keys as immutable artifacts, only generated manually by the user. I didn’t account for the CLI’s internal logic to always ensure credentials exist—even if it has to forge them on-the-fly.
 
 # the gh codespace ssh command does not strictly depend on the local $HOME/.ssh/codespaces.auto key for establishing a connection to the Codespace. Instead, it uses the GitHub API and the OAuth token of the active account (Manamama-Gemini-Cloud-AI-01, with codespace scope) to authenticate and negotiate the SSH session. The gh CLI manages the connection by leveraging cached session material or API-driven authentication
-        echo "4️⃣ Checking/starting forwarding of Codespace SSH port: $REMOTE_PORT to local port: $LOCAL_PORT" | $FILTER
-echo "⚠️ Some steps require sudo privileges. You may be prompted for your password." | $FILTER
+        echo -n "4️⃣ Checking/starting forwarding of Codespace SSH port: $REMOTE_PORT to local port: "
+        echo "$LOCAL_PORT" | $FILTER
+echo "(Some steps require sudo privileges. You may be prompted for your password.)" 
 
 #This does not work! Do not use any of these versions: 
 #PORTS_JSON=$(gh codespace ports -c "$CSPACE_NAME" --json sourcePort)
@@ -198,6 +201,7 @@ DEFAULT_LOCAL=3222
 
 # 1️⃣ Check if remote port is already forwarded locally
 
+echo "The processes related to 'codespace' here:" 
  ps -eo pid,args     | grep "codespace" 
  echo 
  
@@ -232,7 +236,7 @@ echo Try also: sftp  -i $KEY_PATH -P $REMOTE_PORT codespace@$REMOTE_IP
 echo "⏳ Waiting for the forwarded port to be ready..."
 for i in {1..20}; do
 
-    if ss -tln | grep -q ":$LOCAL_PORT "; then
+    if sudo ss -tln | grep -q ":$LOCAL_PORT "; then
         echo "✅ Port $LOCAL_PORT is ready."
         break
     fi
