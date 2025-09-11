@@ -43,7 +43,7 @@ else
 fi
 
 
-echo Mounting shares and logging into GitHub Codespaces, paranoid edition, version 5.1.1
+echo Mounting shares and logging into GitHub Codespaces, paranoid edition, version 5.1.2
 #Changed ssh mechanism to port forwards 
 echo 
 
