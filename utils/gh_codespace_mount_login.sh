@@ -33,6 +33,9 @@ gh_me() {
 # Check if the active account's token has 'codespace' scope using API
 #!/bin/bash
 # Check active user and 'codespace' scope using gh auth status -a, no external tools
+
+echo Mounting shares and logging into GitHub Codespaces, paranoid edition, version 5.0.1
+echo 
 echo -n "1️⃣  Checking 🔍 the active GitHub user and the OAuth token scopes... : "
 
 gh auth status -a | lolcat
@@ -64,7 +67,7 @@ fi
 #echo -n "✅ Active user: "
 #echo "$ACTIVE_USER" | lolcat
 
-echo Active User must be both : 1. 'ssh' enabled. 2. Scope to codespaces, see: 'gh auth refresh -h github.com -s codespace'
+echo The Active User account above must be both : 1. Git operations protocol: 'ssh' enabled. 2. Have Token scopes: 'codespaces', see: 'gh auth refresh -h github.com -s codespace'
 
 # Check if codespace is in scopes
 if [[ ! "$ACTIVE_SCOPES" =~ codespace ]]; then
@@ -136,10 +139,18 @@ fi
 #Check it via: 'gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no 'netstat -tuln' ' or similar
         REMOTE_PORT=2222
         LOCAL_PORT=2226
-        #Do not use: 
+        #Do not use in Ubuntu: 
         #KEY_PATH=~/.ssh/id_rsa
         #as it is indeed the default one, for ssh and such in Termux, but GitHub Codespace CLI 'gh' default key filename is: '~/.ssh/codespaces.auto' as private and 'codespaces.auto.pub' as public. So we shall use: 
-        KEY_PATH=~/.ssh/codespaces.auto
+        #KEY_PATH=~/.ssh/codespaces.auto
+        
+    if [ -n "$TERMUX_HOME" ]; then
+        KEY_PATH="$HOME/.ssh/id_rsa"
+    else
+        KEY_PATH="$HOME/.ssh/codespaces.auto"
+    fi
+
+
         #Note that ~/.config/gh/hosts.yml also plays a role: stores the GitHub CLI’s configuration, but not including the OAuth token used for API calls (e.g., gh codespace list, gh codespace ssh). The "codespace rights" (i.e., the codespace scope) are not properties of the SSH key (~/.ssh/codespaces.auto) at all—they belong to the OAuth token used for GitHub CLI API calls. The key never "lacked codespace rights" in either scenario; it's solely for SSH authentication and doesn't interact with scopes. 'gh auth status' shows it: either https or ssh with codespace scope is needed. So run: ' gh auth refresh -h github.com -s codespace' to add that scope. 
         
     echo "4️⃣  Starting the forwarding of the Codespace SSH port: $REMOTE_PORT to the local port: $LOCAL_PORT "
@@ -179,7 +190,7 @@ fi
 
     #Chown it, as some sudo changes to root ownership now and then: 
 
-    sudo chown $(whoami):$(whoami)  /home/zezen/.config/rclone/rclone.conf
+    sudo chown $(whoami):$(whoami)  ~/.config/rclone/rclone.conf
 
     echo "5️⃣  Set up or update the configuration of the rclone remote GitHub Codespace record ... :"
     RCLONE_REMOTE="GH_01"
@@ -200,13 +211,13 @@ fi
 
     echo -n "7️⃣  Mount the paths via rclone FUSE. "
     if ! mountpoint -q "$MOUNT_PATH"; then
-        echo -n "Mounting Codespace" 
+        echo -n "Mounting Codespace: " 
         echo  -n $CSPACE_NAME | lolcat 
-        echo -n userspace 
+        echo -n " the userspace path: " 
         echo -n $WORKSPACE_PATH | lolcat 
-        echo -n  via rclone on 
+        echo -n " via a rclone local mount on: "  
         echo -n $MOUNT_PATH | lolcat
-        echo "..."
+
         sudo rclone mount "$RCLONE_REMOTE:/$WORKSPACE_PATH" "$MOUNT_PATH" \
             --config ~/.config/rclone/rclone.conf --allow-other --vfs-cache-mode writes & 
         MOUNT_PID=$!
