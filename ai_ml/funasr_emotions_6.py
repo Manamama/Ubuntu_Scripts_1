@@ -15,7 +15,8 @@ parser = argparse.ArgumentParser(description="Simplified emotion detection using
 parser.add_argument("media_path", type=str, help="Path to the media file")
 parser.add_argument("--language", type=str, default="", help="Language code (default: autodetect)")
 args = parser.parse_args()
-print(f"Emotions detector via Whisperx (voice activity detection, chunking, transcription) and FunASR, version 4.0.2")
+#Simplified version of: emotion_detector_funasr_whisperx_plotly.py, prepared for GitHub Codespace
+print(f"Emotions detector via Whisperx (voice activity detection, chunking, transcription) and FunASR, version 6.0.2")
 
 
 # Setup paths
