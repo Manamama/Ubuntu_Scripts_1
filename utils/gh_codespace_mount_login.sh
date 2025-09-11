@@ -33,7 +33,7 @@ gh_me() {
 # Check if the active account's token has 'codespace' scope using API
 #!/bin/bash
 # Check active user and 'codespace' scope using gh auth status -a, no external tools
-echo "🔍 Checking active user and OAuth token scopes..."
+echo -n "1️⃣  Checking 🔍 the active GitHub user and the OAuth token scopes... : "
 
 # Get active account output
 AUTH_ACTIVE=$(gh auth status -a 2>&1)
@@ -60,7 +60,7 @@ if [ -z "$ACTIVE_USER" ]; then
   return 1
 fi
 
-echo -n "✅ Active user: "
+#echo -n "✅ Active user: "
 echo "$ACTIVE_USER" | lolcat
 
 # Check if codespace is in scopes
@@ -71,7 +71,8 @@ fi
 
 #echo "✅ User '$ACTIVE_USER' has 'codespace' scope."
 
-    echo "1️⃣ Your 'gh' account has the 'codespace' scope, congrats. We are listing available codespaces:"
+    echo " Your 'gh' account has the 'codespace' scope, congrats."
+    echo "2️⃣  Select one from the available codespaces:"
     CODESPACES=$(gh codespace list --json name,state | jq -r '.[] | .name')
     if [ $? -ne 0 ]; then
         echo "❌ Error listing codespaces. Make sure gh CLI is authenticated and codespaces are available." | lolcat
@@ -82,7 +83,7 @@ fi
         return 1
     fi
 
-    echo "Available Codespaces:"
+    #echo "Available Codespaces:"
     select CSPACE_NAME in $CODESPACES ; do
         if [ -n "$CSPACE_NAME" ]; then
             #echo "Selected Codespace: $CSPACE_NAME" 
@@ -93,14 +94,14 @@ fi
         fi
     done
 
-    echo "2️⃣ Codespace details:"
+    echo "Codespace details:"
     gh codespace view -c "$CSPACE_NAME" | lolcat
     if [ $? -ne 0 ]; then
         echo "❌ Error viewing codespace '$CSPACE_NAME'." | lolcat
         return 1
     fi
     echo
-    echo -n "3️⃣ Determining the Codespace workspace path... : "
+    echo -n "3️⃣  Determining the Codespace workspace path... : "
 
     WORKSPACE_PATH=$(gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no 'pwd' | tr -d '\r\n')
     if [ $? -ne 0 ]; then
@@ -118,13 +119,14 @@ fi
     echo "$WORKSPACE_PATH" | lolcat
 
 
-    echo -n "Determining the Codespace reemote IP (for use by e.g. MiXplorer to map share) ... : "
-
-    REMOTE_IP=$(gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no "curl ifconfig.me")
+    echo  "Determining the Codespace remote IP (for use by e.g. MiXplorer to map share) ... : "
+# Hide somehow that curl, smth like: 2>/dev/null 
+    REMOTE_IP=$(gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no "curl ifconfig.me -s" )
     if [ $? -ne 0 ]; then
         echo "❌ Error getting remote IP from codespace '$CSPACE_NAME'." | lolcat
         return 1
     fi
+    echo -n Remote IP found: 
     echo "$REMOTE_IP" | lolcat
     echo
 
@@ -137,7 +139,7 @@ fi
         KEY_PATH=~/.ssh/codespaces.auto
         #Note that ~/.config/gh/hosts.yml also plays a role: stores the GitHub CLI’s configuration, but not including the OAuth token used for API calls (e.g., gh codespace list, gh codespace ssh). The "codespace rights" (i.e., the codespace scope) are not properties of the SSH key (~/.ssh/codespaces.auto) at all—they belong to the OAuth token used for GitHub CLI API calls. The key never "lacked codespace rights" in either scenario; it's solely for SSH authentication and doesn't interact with scopes. 'gh auth status' shows it: either https or ssh with codespace scope is needed. So run: ' gh auth refresh -h github.com -s codespace' to add that scope. 
         
-    echo "4️⃣ Starting the forwarding of the Codespace SSH port: $REMOTE_PORT to the local port: $LOCAL_PORT "
+    echo "4️⃣  Starting the forwarding of the Codespace SSH port: $REMOTE_PORT to the local port: $LOCAL_PORT "
     
     PID_FILE="$HOME/.cache/gh_codespace_forward_${CSPACE_NAME}_${LOCAL_PORT}.pid"
 
@@ -176,7 +178,7 @@ fi
 
     sudo chown $(whoami):$(whoami)  /home/zezen/.config/rclone/rclone.conf
 
-    echo "5️⃣ Set up or update the configuration of the rclone remote GitHub Codespace record ... :"
+    echo "5️⃣  Set up or update the configuration of the rclone remote GitHub Codespace record ... :"
     RCLONE_REMOTE="GH_01"
     rclone config update "$RCLONE_REMOTE" host 127.0.0.1 user codespace key_file "$KEY_PATH" port "$LOCAL_PORT" | lolcat 
     sleep 1 
@@ -186,16 +188,22 @@ fi
    
   fi
     #echo "✅ The record of the rclone remote: '$RCLONE_REMOTE' has been updated in configuration."
-    echo "6️⃣ Prepare the mount paths: unmount them ... "
+    echo "6️⃣  Prepare the mount paths: unmount them ... "
     MOUNT_PATH="$HOME/storage/GitHub_Codespace_rclone_$CSPACE_NAME"
     SSHFS_MOUNT="$HOME/storage/GitHub_Codespace_sshfs_$CSPACE_NAME"
     mkdir -p "$MOUNT_PATH" "$SSHFS_MOUNT"
     sudo umount "$MOUNT_PATH" 2>/dev/null
     sudo umount "$SSHFS_MOUNT" 2>/dev/null
 
-    echo "7️⃣ Mount the paths via rclone FUSE, if not already mounted"
+    echo -n "7️⃣  Mount the paths via rclone FUSE. "
     if ! mountpoint -q "$MOUNT_PATH"; then
-        echo "Mounting Codespace $CSPACE_NAME userspace $WORKSPACE_PATH via rclone on $MOUNT_PATH..."
+        echo -n "Mounting Codespace" 
+        echo  -n $CSPACE_NAME | lolcat 
+        echo -n userspace 
+        echo -n $WORKSPACE_PATH | lolcat 
+        echo -n  via rclone on 
+        echo -n $MOUNT_PATH | lolcat
+        echo "..."
         sudo rclone mount "$RCLONE_REMOTE:/$WORKSPACE_PATH" "$MOUNT_PATH" \
             --config ~/.config/rclone/rclone.conf --allow-other --vfs-cache-mode writes & 
         MOUNT_PID=$!
@@ -207,13 +215,15 @@ fi
     else
         echo "✅ Already mounted at $MOUNT_PATH"        
     fi
-    echo Checking: "ls $MOUNT_PATH | lolcat" : 
+    sleep 1
+    echo Checking: "ls $MOUNT_PATH" : 
 ls $MOUNT_PATH | lolcat
 
 
-    echo "8️⃣ SSHFS fallback mount"
+
     if ! mountpoint -q "$SSHFS_MOUNT"; then
-        echo "Mounting via SSHFS fallback on $SSHFS_MOUNT..."
+        echo -n "8️⃣  Mounting via SSHFS on:"
+        echo "$SSHFS_MOUNT..." | lolcat
         sudo sshfs codespace@127.0.0.1:"$WORKSPACE_PATH" "$SSHFS_MOUNT" -p $LOCAL_PORT \
             -oIdentityFile="$KEY_PATH" -oStrictHostKeyChecking=no -o reconnect \
             -o ServerAliveInterval=5 -o ServerAliveCountMax=3 -o TCPKeepAlive=yes -o allow_other | lolcat
@@ -222,11 +232,11 @@ ls $MOUNT_PATH | lolcat
         fi
     fi
 
-echo Checking: "ls "$SSHFS_MOUNT" | lolcat " :
+echo Checking: "ls $SSHFS_MOUNT"  :
 ls "$SSHFS_MOUNT" | lolcat
 
 
-    echo "9️⃣ Entering the interactive session"
+    echo "9️⃣  Entering the interactive session"
     echo "FYI: by default, Codespaces automatically stops after ~30 minutes of inactivity and gets deleted after 30 days of not logging in again."
     echo "👉 Starting Codespace SSH session..."
     gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no
