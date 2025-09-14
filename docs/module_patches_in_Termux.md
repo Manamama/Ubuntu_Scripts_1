@@ -1,5 +1,5 @@
 ## Interim tips how to compile Whisperx, Docling and Pytorch from scratch on Termux. 
-Version 2.4
+Version 2.5
 
 Why the below patches are needed? To use `whisperx` for example, which needs recondite library files, ex. distributed PyTorch, so tweaks are needed. Also some modules do run twice faster in pure Termux vs. in prooted OSes. 
 ```
@@ -46,13 +46,21 @@ python3 -m pypdfium2 -v
 ```
 
 * Try just `pip install -U docling -v`.
-* If that fails: `pip install -U docling-parse --no-build-isolation --no-deps -v` etc. Expect some errors. If so, `git clone https://github.com/docling-project/docling` etc. and do muck around in their CMakeList.txt or their .toml files to disable some version checks etc. If anything be missing, do check first if it is not available via the apt package: `apt list | grep scipy` etc . Good luck. If all modules are installed, then: 
+* If that fails:
+  ```
+  python -m pip install numpy torch torchvision torchaudio tensorflow-cpu jax jaxlib protobuf --upgrade --extra-index-url https://download.pytorch.org/whl/cpu
+  #That is needed to avid some weird errors about transformers: https://github.com/docling-project/docling/issues/2261
+  pip install -U transformers
+  pip install -U docling-parse --no-build-isolation --no-deps -v
+  ```
+  *  etc. Expect some errors. If so, `git clone https://github.com/docling-project/docling` etc. and do muck around in their CMakeList.txt or their .toml files to disable some version checks etc. If anything be missing, do check first if it is not available via the apt package: `apt list | grep scipy` etc . Good luck. If all modules are installed, then: 
 * See: https://github.com/docling-project/docling-parse/issues/122#issuecomment-2960123587: `patchelf --add-needed libpython3.12.so.1.0 /data/data/com.termux/files/usr/lib/python3.12/site-packages/docling_parse/pdf_parsers.cpython-312.so`
 
 Nota bene: you must run docling with the `--ocr-engine tesseract` switch so as to avoid the out of memory errors when trying the default `easyocr` engine. 
 
 
 # Whisperx: 
+* Try: `pip install -U transformers` 
 * Remove distributed Pytorch mentions: 
 ```
 sed -i '/import torch.distributed.tensor/c\
