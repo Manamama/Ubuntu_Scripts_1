@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-whisperx_codespace_url(){
     set -euo pipefail
 
 echo "📜 WhisperX Transcription from URL (Paranoid Android & gh User Edition)"
@@ -163,6 +162,4 @@ echo "$duration" | lolcat
 echo "has taken this long to process:"
 #Total 'time' should display here:
 
-}
 
-time whisperx_codespace_url "$@"

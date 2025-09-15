@@ -3,9 +3,7 @@
 
 
 
-piperme () 
-{
-    echo "piperme: Using piper TTS to voice text on Termux. Version 3.0.3"
+    echo "piperme: Using piper TTS to voice text on Termux. Version 3.1.0"
 
     local voice_model_dir="$HOME/.cache/piper"
     local lang_code="en"    # Default language
@@ -114,6 +112,5 @@ echo "Use also: termux-tts-speak [-e engine] [-l language] [-n region] [-v varia
 termux-open "$outfile"
 #play-audio "$outfile"
 
-    
-}
+  
 

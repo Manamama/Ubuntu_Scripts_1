@@ -29,7 +29,7 @@
 #   source /path/to/gh_codespace_mount_login.sh
 #   Then, call the function:
 #   gh_me
-gh_me() {
+# gh_me() {
 #!/bin/bash
 # Check if the active account's token has 'codespace' scope using API
 
@@ -355,6 +355,3 @@ ls "$SSHFS_MOUNT" | $FILTER
         return 1
     fi
     '
-}
-
-echo This script does nothing apart from creating a function called gh_me. Source me then. 

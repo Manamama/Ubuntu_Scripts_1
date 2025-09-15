@@ -19,7 +19,7 @@
 # Last Modified: August 31, 2025
 
 
-gc1(){
+# gc1(){
     # Ensure SSH folder ownership
     sudo chown -R u0_a278:u0_a278 /data/data/com.termux/files/home/.ssh
 
@@ -110,4 +110,4 @@ sudo mount | grep $SSHFS_MOUNT | lolcat
 
 #Tips: && echo && echo && bash ~/install_basic_ubuntu_set_1.sh "  && termux-media-player play "/storage/5951-9E0F/Audio/Funny_Sounds/Quack Quack-SoundBible.com-620056916.mp3"
 
-}
+

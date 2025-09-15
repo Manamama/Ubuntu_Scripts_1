@@ -2,7 +2,7 @@
 
 #!/usr/bin/env bash
 
-whisperx_on_remote() {
+whisperx_codespace() {
 set -euo pipefail
 
 # ================= Runtime Intro =================
