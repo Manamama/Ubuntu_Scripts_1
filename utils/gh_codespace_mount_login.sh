@@ -229,13 +229,13 @@ if [ -z "$LOCAL_PORT" ]; then
 fi
 
 # 3️⃣ Single paranoid print at the end
-echo "🔍 Checking if remote port $REMOTE_PORT is forwarded to local port $LOCAL_PORT..."
+echo "🔍 Checking if remote port $REMOTE_PORT is forwarded to local port $LOCAL_PORT (it requires 'sudo' on Termux)..."
 
 #echo Try also logging directly there: sftp  -i $KEY_PATH -P $REMOTE_PORT codespace@$REMOTE_IP
 
 # Wait for the forwarded port to become available
 #echo "⏳ Waiting for the forwarded port to be ready at $LOCAL_PORT..."
-for i in {1..20}; do
+for i in {1..2}; do
 
 #    if sudo ss -tln | grep -q ":$LOCAL_PORT "; then
    if  ss -tln | grep -q ":$LOCAL_PORT "; then
