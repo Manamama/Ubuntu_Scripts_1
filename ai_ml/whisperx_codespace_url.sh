@@ -3,7 +3,7 @@
     set -euo pipefail
 
 echo "📜 WhisperX Transcription from URL (Paranoid Android & gh User Edition)"
-echo "Version 1.3.3"
+echo "Version 1.3.4"
 
     if [[ $# -lt 1 ]]; then
         echo "❌ Usage: $0 <youtube_url> [extra_args...]"
@@ -23,7 +23,7 @@ echo "Version 1.3.3"
 
 
     # ================= Step 1: Detect Codespace =================
-    echo -n "🔍 Detecting GitHub Codespace... :"
+    echo -n "🔍 Detecting GitHub Codespace... : "
     CODESPACE_NAME=$(gh codespace list --json name,state | jq -r '.[] | .name' | head -n1)
     if [[ -z "$CODESPACE_NAME" ]]; then
         echo "❌ FATAL: No Codespace found"
@@ -49,7 +49,7 @@ echo
     gh codespace ssh -c "$CODESPACE_NAME" "mkdir -p ~/Downloads"
 
     # ================= Step 3: Download with yt-dlp =================
-    echo "🎬 Downloading the audio from media via 'yt-dlp --extract-audio' on remote..."
+    echo "🎬 Downloading the audio from the online media via 'yt-dlp --extract-audio' on the remote machine..."
     echo "It uses the '--cookies-from-browser chrome' option. To create these cookies on the remote machine you need, in very short:"
     echo "1. Install e.g. 'google-chrome' application. 2. Run 'google-chrome  --remote-debugging-port=9222 https://youtube.com' 3. Forward that port in e.g. Visual Studio Code or via 'gh ports forward'. 4. Log in to your GitHub account to accept forwarding. 5. Log in to the new virgin Google Chrome browser window with your active Google Account (a throwaway one, for security). 6. Hope that this all works. " 
     # Extracts audio reliably because it downloads whatever format contains audio (even if embedded in video) and lets --extract-audio + --audio-format mp3 handle conversion, so no assumptions about separate audio streams are needed. Stores in ~/Downloads, get clean filename
@@ -64,7 +64,8 @@ echo
 
 
 
-echo "✅ Downloaded: $remote_audio"
+echo -n "✅ Downloaded: "
+echo "$remote_audio" | lolcat
 
 
 filename_no_ext=$(basename "$remote_audio" .mp3)
@@ -80,9 +81,9 @@ run_cmd="mediainfo --Inform='Audio;%Duration/String2%' $remote_audio "
 # echo Trying: $run_cmd :
 # gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd" | lolcat
 
-echo "⏳ [2/10] Extracting audio duration..."
+#echo " Extracting audio duration..."
 if duration=$(gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd" ); then
-    echo -n "🗣️ Duration: "
+    echo -n "🗣️  Duration of the audio track: "
     echo "$duration" | lolcat
 else
     echo "⚠️ Could not extract duration (proceeding anyway)" 
@@ -96,7 +97,7 @@ echo
 #echo "The remote file name should look like this: $remote_srt"
 
     # ================= Step 4: Check/install WhisperX =================
-    echo "🔍 Checking WhisperX..."
+    echo "🔍 Checking the presence of WhisperX..."
     if ! gh codespace ssh -c "$CODESPACE_NAME" "command -v whisperx >/dev/null"; then
         echo "⚠️ WhisperX not found, installing..."
         gh codespace ssh -c "$CODESPACE_NAME" "pip install -U --user whisperx"
@@ -104,7 +105,7 @@ echo
     fi
 
     # ================= Step 5: Run WhisperX =================
-    echo "🤖 Running WhisperX transcription..."
+    echo "🤖 ⏳ Running WhisperX transcription (lots of warnings shall be displayed, do ignore most of these)... :"
 
 # ' --verbose False' supresses  the transcription progress information and we do not want it.
 #  --highlight_words True,  the default value is false. This adds words underlining, which can be colorized later on, but increases the size significantly.
@@ -158,9 +159,9 @@ echo
     
 
 echo
-echo -n "🗣️ The source file of duration: "
+echo -n "🗣️  The source file of duration: "
 echo "$duration" | lolcat
-echo "has taken this long to process:"
+echo " has taken this long to process:"
 #Total 'time' should display here:
 
 
