@@ -290,9 +290,9 @@ ls "$SSHFS_MOUNT" | lolcat
 echo 
 
 
-    echo "9️⃣  Entering the interactive session..."
+    echo "9️⃣  Entering the interactive session"
     echo "FYI: by default, Codespaces automatically stops after ~30 minutes of inactivity and gets deleted after 30 days of not logging in again."
-    echo "👉 Starting Codespace SSH session..."
+    echo "👉 Starting an SSH session to Codespace $CSPACE_NAME... :"
     echo 
     gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no  
     
