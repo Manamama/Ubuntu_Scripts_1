@@ -54,7 +54,7 @@ echo
     echo "1. Install e.g. 'google-chrome' application. 2. Run 'google-chrome  --remote-debugging-port=9222 https://youtube.com' 3. Forward that port in e.g. Visual Studio Code or via 'gh ports forward'. 4. Log in to your GitHub account to accept forwarding. 5. Log in to the new virgin Google Chrome browser window with your active Google Account (a throwaway one, for security). 6. Hope that this all works. " 
     # Extracts audio reliably because it downloads whatever format contains audio (even if embedded in video) and lets --extract-audio + --audio-format mp3 handle conversion, so no assumptions about separate audio streams are needed. Stores in ~/Downloads, get clean filename
     remote_audio=$(gh codespace ssh -c "$CODESPACE_NAME" \
-    "cd ~/Downloads && yt-dlp --no-playlist --extract-audio --audio-format mp3 --restrict-filenames --trim-filenames 20 --print after_move:filepath '$url'")
+    "cd ~/Downloads && yt-dlp --no-playlist --extract-audio --audio-format mp3 --cookies-from-browser chrome --restrict-filenames --trim-filenames 20 --print after_move:filepath '$url'")
 
 
     if [[ -z "$remote_audio" ]]; then
