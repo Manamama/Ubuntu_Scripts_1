@@ -3,7 +3,7 @@
     set -euo pipefail
 
 echo "📜 WhisperX Transcription from URL (Paranoid Android & gh User Edition)"
-echo "Version 1.3.1"
+echo "Version 1.3.3"
 
     if [[ $# -lt 1 ]]; then
         echo "❌ Usage: $0 <youtube_url> [extra_args...]"
@@ -14,8 +14,8 @@ echo "Version 1.3.1"
     shift
     extra_args="$@"
 
-    echo "📥 Input YouTube URL:"
-    echo "$url"
+    echo -n "📥 Input YouTube URL: "
+    echo "$url" | lolcat
     echo "🔧 Extra WhisperX Args: '$extra_args'"
     echo
 
@@ -29,7 +29,7 @@ echo "Version 1.3.1"
         echo "❌ FATAL: No Codespace found"
         exit 1
     fi
-    echo - n "✅ Codespace detected:"
+    echo -n "✅ Codespace detected:"
 echo "$CODESPACE_NAME" | lolcat
     echo
 
@@ -45,13 +45,13 @@ fi
 echo
 
     # ================= Step 2: Ensure remote Downloads directory =================
-    echo "📁 Ensuring remote Downloads directory..."
+    echo "📁 Ensuring remote Downloads directory exists..."
     gh codespace ssh -c "$CODESPACE_NAME" "mkdir -p ~/Downloads"
 
     # ================= Step 3: Download with yt-dlp =================
-    echo "🎬 Downloading audio with yt-dlp on remote..."
-    echo "It uses the '--cookies-from-browser chrome' option. To set up these cookies you need, in very short:"
-    echo "1. Install e.g. google-chrome. 2. Run 'google-chrome  --remote-debugging-port=9222 https://youtube.com' 3. Forward that port in e.g. Visual Studio Code. 4. Log in to your GitHub account to accept forwarding. 5. Log in to the new virgin Google Chrome browser window with your real Google Account (throwaway one, for security). 6. Hope that this works. " 
+    echo "🎬 Downloading the audio from media via 'yt-dlp --extract-audio' on remote..."
+    echo "It uses the '--cookies-from-browser chrome' option. To create these cookies on the remote machine you need, in very short:"
+    echo "1. Install e.g. 'google-chrome' application. 2. Run 'google-chrome  --remote-debugging-port=9222 https://youtube.com' 3. Forward that port in e.g. Visual Studio Code or via 'gh ports forward'. 4. Log in to your GitHub account to accept forwarding. 5. Log in to the new virgin Google Chrome browser window with your active Google Account (a throwaway one, for security). 6. Hope that this all works. " 
     # Extracts audio reliably because it downloads whatever format contains audio (even if embedded in video) and lets --extract-audio + --audio-format mp3 handle conversion, so no assumptions about separate audio streams are needed. Stores in ~/Downloads, get clean filename
     remote_audio=$(gh codespace ssh -c "$CODESPACE_NAME" \
     "cd ~/Downloads && yt-dlp --no-playlist --extract-audio --audio-format mp3 --restrict-filenames --trim-filenames 20 --print after_move:filepath '$url'")
