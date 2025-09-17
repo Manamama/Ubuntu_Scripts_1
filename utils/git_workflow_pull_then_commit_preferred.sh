@@ -14,7 +14,7 @@ git status
 git pull origin "$BRANCH" # Integrates remote changes via merge
 git add .
 git status # Sanity check: See what has been staged
-git commit -m "Your descriptive commit message"
+git commit -m "Automated commit, probably minor changes"
 git push origin "$BRANCH"
 git status
 
