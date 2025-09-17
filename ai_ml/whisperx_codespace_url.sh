@@ -23,13 +23,13 @@ echo "Version 1.3.3"
 
 
     # ================= Step 1: Detect Codespace =================
-    echo "🔍 Detecting GitHub Codespace..."
+    echo -n "🔍 Detecting GitHub Codespace... :"
     CODESPACE_NAME=$(gh codespace list --json name,state | jq -r '.[] | .name' | head -n1)
     if [[ -z "$CODESPACE_NAME" ]]; then
         echo "❌ FATAL: No Codespace found"
         exit 1
     fi
-    echo -n "✅ Codespace detected:"
+    # echo -n "✅ Codespace detected:"
 echo "$CODESPACE_NAME" | lolcat
     echo
 
