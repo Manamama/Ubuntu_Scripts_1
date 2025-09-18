@@ -42,7 +42,7 @@ echo "No 'locat'! Install lolcat".
 fi
 
 
-echo Mounting shares and logging into GitHub Codespaces, paranoid edition, version 5.3.1
+echo Mounting shares and logging into GitHub Codespaces, paranoid edition, version 5.3.3
 #Changed ssh mechanism to port forwards 
 echo 
 
@@ -54,7 +54,8 @@ echo
 
 echo -n "1️⃣  Checking the OS: " 
         
-    if [ -n "$TERMUX__HOME" ]; then
+
+if [ -n "${TERMUX__HOME-}" ]; then
     echo -n "📲  We are in Termux.  " 
         KEY_PATH="$HOME/.ssh/id_rsa"
     else
@@ -226,6 +227,10 @@ if [ -z "$LOCAL_PORT" ]; then
     echo "✅ Using local port $LOCAL_PORT (found free) for forwarding... "
 
     gh codespace ports forward "${REMOTE_PORT}:${LOCAL_PORT}" -c "$CSPACE_NAME"   | lolcat &
+    
+   gh codespace ports forward "3389:3389" -c "$CSPACE_NAME" | lolcat &
+   
+
 fi
 
 # 3️⃣ Single paranoid print at the end
@@ -240,6 +245,19 @@ for i in {1..2}; do
 #    if sudo ss -tln | grep -q ":$LOCAL_PORT "; then
    if  ss -tln | grep -q ":$LOCAL_PORT "; then
         echo "✅ Port $LOCAL_PORT is ready."
+        break
+    fi
+    echo $(date)
+
+    sleep 0.5
+done
+
+
+for i in {1..2}; do
+
+#    if sudo ss -tln | grep -q ":$LOCAL_PORT "; then
+   if  ss -tln | grep -q ":3389 "; then
+        echo "✅ Port 3389 is ready."
         break
     fi
     echo $(date)
@@ -291,15 +309,17 @@ echo
 
 
     echo "9️⃣  Entering the interactive session"
+    echo "You can start it via: 'ssh codespace@localhost -p 3222' but here we are starting it via '    gh codespace ssh -c "$CSPACE_NAME"', not relying on the forwarded ports, just in case."
     echo "FYI: by default, Codespaces automatically stops after ~30 minutes of inactivity and gets deleted after 30 days of not logging in again."
+    
     echo "👉 Starting an SSH session to Codespace $CSPACE_NAME... :"
     echo 
-    gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no  
+    gh codespace ssh -c "$CSPACE_NAME"
     
     #This errors unduly if control C etc: 
 : '
     if [ $? -ne 0 ]; then
-        echo "❌ Error starting interactive SSH session to codespace '$CSPACE_NAME'." | lolcat
+        echo "❌ Error starting an interactive SSH session to codespace '$CSPACE_NAME'." | lolcat
         return 1
     fi
     '

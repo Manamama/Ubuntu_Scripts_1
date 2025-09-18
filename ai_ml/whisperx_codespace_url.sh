@@ -3,7 +3,7 @@
     set -euo pipefail
 
 echo "📜 WhisperX Transcription from URL (Paranoid Android & gh User Edition)"
-echo "Version 1.3.4"
+echo "Version 1.3.5"
 
     if [[ $# -lt 1 ]]; then
         echo "❌ Usage: $0 <youtube_url> [extra_args...]"
@@ -21,6 +21,14 @@ echo "Version 1.3.4"
 
 
 
+echo -n "Checking the OS: " 
+
+if [ -n "${TERMUX__HOME-}" ]; then
+    echo -n "📲  We are in Termux.  "
+else
+    echo -n "We are not in Termux."
+fi
+
 
     # ================= Step 1: Detect Codespace =================
     echo -n "🔍 Detecting GitHub Codespace... : "
@@ -33,15 +41,22 @@ echo "Version 1.3.4"
 echo "$CODESPACE_NAME" | lolcat
     echo
 
+
+: '
 # Paranoia: Check HF_TOKEN if --diarize is used
+#We skip it as we use the local HF_TOKEN here
+
 if [[ "$extra_args" == *"--diarize"* ]]; then
-    echo "🔍 Diarize flag detected — verifying if HF_TOKEN is active..."
+    echo "🔍 Diarize flag detected — verifying if HF_TOKEN is set remotely..."
     if gh codespace ssh -c "$CODESPACE_NAME" "[[ -z \"\$HF_TOKEN\" ]]"; then
-        echo "⚠️ WARNING: HF_TOKEN not set remotely — diarize may fail. We shall use local HF_TOKEN then, if any." 
+        echo "⚠️  WARNING: HF_TOKEN not set remotely — diarize may fail. We shall use local HF_TOKEN then, if any." 
     else
-        echo "✅ HF_TOKEN detected remotely" 
+        echo "✅  HF_TOKEN detected remotely" 
     fi
 fi
+
+'
+
 echo
 
     # ================= Step 2: Ensure remote Downloads directory =================
@@ -50,7 +65,7 @@ echo
 
     # ================= Step 3: Download with yt-dlp =================
     echo "🎬 Downloading the audio from the online media via 'yt-dlp --extract-audio' on the remote machine..."
-    echo "It uses the '--cookies-from-browser chrome' option. To create these cookies on the remote machine you need, in very short:"
+    echo "Note: The tool uses the '--cookies-from-browser chrome' option. To create these cookies on the remote machine you need, in very short:"
     echo "1. Install e.g. 'google-chrome' application. 2. Run 'google-chrome  --remote-debugging-port=9222 https://youtube.com' 3. Forward that port in e.g. Visual Studio Code or via 'gh ports forward'. 4. Log in to your GitHub account to accept forwarding. 5. Log in to the new virgin Google Chrome browser window with your active Google Account (a throwaway one, for security). 6. Hope that this all works. " 
     # Extracts audio reliably because it downloads whatever format contains audio (even if embedded in video) and lets --extract-audio + --audio-format mp3 handle conversion, so no assumptions about separate audio streams are needed. Stores in ~/Downloads, get clean filename
     remote_audio=$(gh codespace ssh -c "$CODESPACE_NAME" \
@@ -132,19 +147,43 @@ gh codespace ssh -c "$CODESPACE_NAME" "cat $remote_txt" | lolcat
 
 
 
-echo "🔊 Playing notification sound..."
-if [[ ! -f "/storage/5951-9E0F/Audio/Funny_Sounds/proximity_bash.mp3" ]]; then  
-    echo "⚠️ Notification sound not played (audio file missing?)" 
+
+if [ -n "${TERMUX__HOME-}" ]; then
+
+    #Termux, adapt paths: 
+    echo "🔊 Playing notification sound..."
+    if [[ ! -f "/storage/5951-9E0F/Audio/Funny_Sounds/proximity_bash.mp3" ]]; then  
+        echo "⚠️ Notification sound not played (audio file missing?)" 
+    else 
+    termux-media-player play "/storage/5951-9E0F/Audio/Funny_Sounds/proximity_bash.mp3"
+
+    fi
+
+    termux-tts-speak "Transcription from URL has  finished."
+
+    #This is for a watch that may be connected via BLE to the notifications shown by Termux API: 
+    termux-notification -c " OK: ${filename_no_ext}.srt" --title "WhisperX " --vibrate 500,1000,200
+
 else 
-termux-media-player play "/storage/5951-9E0F/Audio/Funny_Sounds/proximity_bash.mp3"
+
+
+    #Ubuntu, adapt the paths: 
+    if [[ ! -f "~/Music/Timer_and_sounds/ping_finished_whispering.wav
+    " ]]; then  
+        echo "⚠️ Notification sound not played (audio file missing?)" 
+    else 
+
+
+
+        aplay "~/Music/Timer_and_sounds/ping_finished_whispering.wav"
+    fi
 
 fi
 
-termux-tts-speak "Transcription from URL has  finished."
 
+#Same but for full Linux: 
+#tts --text "Transcription from URL has  finished."
 
-#This is for a watch that may be connected via BLE to the notifications shown by Termux API: 
-termux-notification -c " OK: ${filename_no_ext}.srt" --title "WhisperX " --vibrate 500,1000,200
 
 # if you watch does not allow notification from this Termux API program, then you can trick it via sending an SMS or via sending an email and so on.
 
@@ -153,10 +192,10 @@ termux-notification -c " OK: ${filename_no_ext}.srt" --title "WhisperX " --vibra
 
 
 echo
-echo "✅ Notifications sent" 
+echo "✅ Notifications executed" 
 echo
 
-    
+  
 
 echo
 echo -n "🗣️  The source file of duration: "

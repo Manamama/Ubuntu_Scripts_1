@@ -275,17 +275,52 @@ cd ~/Downloads/GitHub
  echo "If it fails, that is 'funasr' does not run, do force it:"
  echo "pip install -U  --user FunASR/ --force-reinstall"
  echo
- echo "Syntax is: 'funasr ++model=paraformer-en ++vad_model="fsmn-vad" ++punc_model="ct-punc" ++input="{audio_filename}' "
+ echo "Syntax is: 'funasr ++model=paraformer-en ++vad_model="fsmn-vad" ++punc_model="ct-punc" ++input="{audio_filename}"' "
 
 }
 
 # --- XRDP Setup ---
-configure_xrdp() {
-	echo "🖥️ Configuring XRDP..."
-	sudo DEBIAN_FRONTEND=noninteractive apt install -y xrdp
-	sudo systemctl enable --now xrdp || true
-	sudo adduser xrdp ssl-cert || true
-	sudo systemctl restart xrdp || true
+configure_xrdp() {#!/bin/bash
+
+echo "🖥️ Configuring XRDP..."
+# Install xrdp
+sudo DEBIAN_FRONTEND=noninteractive apt update
+sudo DEBIAN_FRONTEND=noninteractive apt install -y xrdp
+
+# Set KDE Plasma session
+echo "startplasma-x11" > ~/.xrdp.ini
+
+# Restrict xrdp to localhost for security
+sudo sed -i 's/port=3389/port=tcp:\/\/127.0.0.1:3389/' /etc/xrdp/xrdp.ini
+
+# Bypass session chooser
+sudo bash -c 'cat > /etc/xrdp/startwm.sh' << 'EOF'
+#!/bin/sh
+exec /usr/bin/startplasma-x11
+EOF
+sudo chmod +x /etc/xrdp/startwm.sh
+
+
+# Configure PAM for passwordless login for codespace user
+sudo bash -c 'cat > /etc/pam.d/xrdp-sesman' << 'EOF'
+auth sufficient pam_succeed_if.so uid = codespace quiet
+auth required pam_deny.so
+account include xrdp
+session include xrdp
+EOF
+
+# Start xrdp
+sudo service xrdp stop
+sudo service xrdp start
+
+# Verify
+echo "🖥️ XRDP status:"
+sudo service xrdp status
+echo "🖥️ Running processes:"
+ps -ef | grep xrdp
+echo "🖥️ Listening ports:"
+netstat -tuln | grep -E '3389|3350'
+
 }
 
 # --- System and Dev Tools ---
@@ -365,6 +400,8 @@ sudo apt-get install libcudnn8 libcudnn8-dev
 	sudo apt update # Update apt cache after adding new PPA
 	sudo DEBIAN_FRONTEND=noninteractive apt install -y grub-customizer python3-pip scrcpy 
 
+
+
 	# Android Platform Tools
 	mkdir -p ~/Downloads/GitHub
 	mkdir -p "$SRC_DIR"
@@ -382,6 +419,32 @@ sudo apt-get install libcudnn8 libcudnn8-dev
 
 	sudo apt update # Update apt cache after adding new repo
 	sudo DEBIAN_FRONTEND=noninteractive apt install -y glow
+	
+	
+	#Now, the full front end, GUI, for e.g. Google Remote Desktop etc. 
+	#This does not work as no dbus: 
+    #sudo DEBIAN_FRONTEND=noninteractive apt install -y gnome-session dbus-x11 gdm3
+
+# 2. Install KDE Plasma (minimal) and required DBus
+sudo apt update
+sudo apt install -y kde-plasma-desktop dbus-x11
+
+# 3. Set up CRD session script to start Plasma with user-level DBus
+cat > ~/.chrome-remote-desktop-session <<'EOF'
+#!/bin/bash
+# Start user-level DBus session if not running
+if ! pgrep -x "dbus-daemon" > /dev/null; then
+  eval "$(dbus-launch --sh-syntax)"
+  export DBUS_SESSION_BUS_ADDRESS DBUS_SESSION_BUS_PID
+fi
+exec startplasma-x11
+EOF
+chmod +x ~/.chrome-remote-desktop-session
+
+# 4. Restart CRD to load the new session
+/opt/google/chrome-remote-desktop/chrome-remote-desktop --stop
+/opt/google/chrome-remote-desktop/chrome-remote-desktop --start
+    
 
 }
 
@@ -494,15 +557,23 @@ configure_chrome_remote_desktop() {
 			return 1
 		}
 	fi
-	sudo DEBIAN_FRONTEND=noninteractive dpkg -i "$DOWNLOAD_DIR/$CHROME_REMOTE_DESKTOP_DEB" || {
-		echo "Error: Failed to install Chrome Remote Desktop package."
+	
+	sudo DEBIAN_FRONTEND=noninteractive  apt-get --fix-broken install -y || {
+		echo "Error: Failed to fix broken dependencies after Chrome Remote Desktop install."
 		return 1
 	}
+	sudo DEBIAN_FRONTEND=noninteractive   apt install xserver-xorg-video-dummy  xbase-clients python3-psutil python3-xdg -y 
 	sudo usermod -a -G chrome-remote-desktop $USER || {
 		echo "Error: Failed to add user to chrome-remote-desktop group."
 		return 1
 	}
-	sudo DEBIAN_FRONTEND=noninteractive apt-get --fix-broken install -y || {
+	
+		sudo DEBIAN_FRONTEND=noninteractive dpkg -i "$DOWNLOAD_DIR/$CHROME_REMOTE_DESKTOP_DEB" || {
+		echo "Error: Failed to install Chrome Remote Desktop package."
+		return 1
+	}
+
+	sudo DEBIAN_FRONTEND=noninteractive  apt-get --fix-broken install -y || {
 		echo "Error: Failed to fix broken dependencies after Chrome Remote Desktop install."
 		return 1
 	}
@@ -510,6 +581,14 @@ configure_chrome_remote_desktop() {
 		echo "Error: Failed to restart Chrome Remote Desktop service."
 		return 1
 	}
+	
+	echo 
+	echo Now do: 
+	1. Go to: https://remotedesktop.google.com/headless and copy the code 
+	2. Paste snippet in 'gh' machine. Select pin. 
+	3. Then start ' /opt/google/chrome-remote-desktop/start-host --start' 
+	4. In https://remotedesktop.google.com/access/session/12ec807f-446d-4a3f-99e4-d10e904b6308
+	echo 
 }
 
 # Function to install and configure TeamViewer Host
@@ -598,11 +677,11 @@ display_system_info() {
 
 echo
 echo "📌 Starting Ubuntu setup..."
-echo "Version 2.8.3"
+echo "Version 2.8.5"
 
 # Check for marker file to prevent re-execution
 
-MARKER_FILE="~/.installed_basic_set_1" # Marker file in current working directory
+MARKER_FILE="~/.installed_basic_set_1"  # Marker file in HOME directory
 echo "Checking via this marker: $MARKER_FILE if this script has been executed here..."
 
 if [ -f "$MARKER_FILE" ]; then
