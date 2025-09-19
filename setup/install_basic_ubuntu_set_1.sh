@@ -249,8 +249,38 @@ setup_repositories() {
 	# Add repo referencing the keyring
 	echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt * *" | sudo tee /etc/apt/sources.list.d/charm.list
 
+
+
+echo Adding Firefox repository ... 
+# Add Mozilla Team PPA
+sudo add-apt-repository -y ppa:mozillateam/ppa
+
+
+
+	echo "Adding Visual Studio repository..."
+
+	
+	wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+sudo install -o root -g root -m 644 packages.microsoft.gpg /usr/share/keyrings/
+rm packages.microsoft.gpg
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
+
 	# Final update after adding all repos
 	echo "Updating package list after adding repositories..."
+
+sudo apt update
+sudo apt install -y code
+# Install Firefox as deb
+
+sudo mkdir -p /opt && \
+sudo wget -O /opt/firefox.tar.xz "https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US" && \
+sudo tar -C /opt -xf /opt/firefox.tar.xz && \
+sudo rm /opt/firefox.tar.xz && \
+sudo ln -sf /opt/firefox/firefox /usr/local/bin/firefox && \
+hash -r
+
+
+
 	
 }
 

@@ -309,7 +309,7 @@ echo
 
 
     echo "9️⃣  Entering the interactive session"
-    echo "You can start it via: 'ssh codespace@localhost -p 3222' but here we are starting it via '    gh codespace ssh -c "$CSPACE_NAME"', not relying on the forwarded ports, just in case."
+    echo "You can start it via: 'ssh codespace@localhost -p 3222' but here we are starting it via 'gh codespace ssh -c "$CSPACE_NAME"', not relying on the forwarded ports, just in case."
     echo "FYI: by default, Codespaces automatically stops after ~30 minutes of inactivity and gets deleted after 30 days of not logging in again."
     
     echo "👉 Starting an SSH session to Codespace $CSPACE_NAME... :"
