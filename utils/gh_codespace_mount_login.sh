@@ -292,9 +292,11 @@ echo
 
         echo -n "8️⃣  Mounting '$WORKSPACE_PATH' via SSHFS on:"
         echo "$SSHFS_MOUNT" | lolcat
-        sudo sshfs codespace@127.0.0.1:"$WORKSPACE_PATH" "$SSHFS_MOUNT" -p $LOCAL_PORT \
-            -oIdentityFile="$KEY_PATH" -oStrictHostKeyChecking=no -o reconnect \
-            -o ServerAliveInterval=5 -o ServerAliveCountMax=3 -o TCPKeepAlive=yes -o allow_other | lolcat
+#        sudo sshfs codespace@127.0.0.1:"$WORKSPACE_PATH" "$SSHFS_MOUNT" -p $LOCAL_PORT            -oIdentityFile="$KEY_PATH" -oStrictHostKeyChecking=no -o reconnect            -o ServerAliveInterval=5 -o ServerAliveCountMax=3 -o TCPKeepAlive=yes -o allow_other | lolcat
+
+#Let us try it without sudo: 
+        sshfs codespace@127.0.0.1:"$WORKSPACE_PATH" "$SSHFS_MOUNT" -p $LOCAL_PORT            -oIdentityFile="$KEY_PATH" -oStrictHostKeyChecking=no -o reconnect            -o ServerAliveInterval=5 -o ServerAliveCountMax=3 -o TCPKeepAlive=yes -o allow_other | lolcat
+        
         if [ $? -ne 0 ]; then
             echo "⚠️ SSHFS mount failed, proceeding to SSH session anyway..." | lolcat
         fi
