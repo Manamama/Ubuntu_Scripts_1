@@ -26,7 +26,7 @@ echo -n "Checking the OS: "
 if [ -n "${TERMUX__HOME-}" ]; then
     echo -n "📲  We are in Termux.  "
 else
-    echo -n "We are not in Termux."
+    echo  "We are not in Termux."
 fi
 
 
