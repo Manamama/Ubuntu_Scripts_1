@@ -24,11 +24,11 @@ echo "Version 1.3.5"
 echo -n "Checking the OS: " 
 
 if [ -n "${TERMUX__HOME-}" ]; then
-    echo -n "📲  We are in Termux.  "
+    echo  "📲  We are in Termux.  "
 else
     echo  "We are not in Termux."
 fi
-
+echo
 
     # ================= Step 1: Detect Codespace =================
     echo -n "🔍 Detecting GitHub Codespace... : "
