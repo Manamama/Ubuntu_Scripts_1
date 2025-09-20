@@ -473,6 +473,31 @@ chmod +x ~/.chrome-remote-desktop-session
 /opt/google/chrome-remote-desktop/chrome-remote-desktop --stop
 /opt/google/chrome-remote-desktop/chrome-remote-desktop --start
     
+    
+    
+    #!/usr/bin/env bash
+set -euo pipefail
+
+echo "Installing Google Chrome..."
+
+# 1. Add Google’s signing key (keyring file goes to /usr/share/keyrings)
+wget -q -O - https://dl.google.com/linux/linux_signing_key.pub \
+  | gpg --dearmor | sudo tee /usr/share/keyrings/google-linux-signing-keyring.gpg > /dev/null
+
+# 2. Add Google Chrome repo (use signed-by to avoid global trust)
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-linux-signing-keyring.gpg] \
+https://dl.google.com/linux/chrome/deb/ stable main" \
+  | sudo tee /etc/apt/sources.list.d/google-chrome.list > /dev/null
+
+# 3. Update apt cache
+sudo apt-get update
+
+# 4. Install Chrome stable
+sudo apt-get install -y google-chrome-stable
+
+echo "Google Chrome installation completed."
+
+
 
 }
 
@@ -578,6 +603,8 @@ sudo update	 || {
 
 # Function to install and configure Chrome Remote Desktop
 configure_chrome_remote_desktop() {
+
+#See also the Plasma setup above
 	echo "Installing and configuring Chrome Remote Desktop..."
 	if [[ ! -f "$DOWNLOAD_DIR/$CHROME_REMOTE_DESKTOP_DEB" ]]; then
 		wget -P "$DOWNLOAD_DIR" "$CHROME_REMOTE_DESKTOP_BASE_URL$CHROME_REMOTE_DESKTOP_DEB" || {
@@ -742,12 +769,12 @@ build_llama
 echo "Gemini CLI to talk to Gemini AI..."
 install_gemini_cli
 
-echo "Skipping the Remote Desktop stuff for now ... "
+echo "Setting up the Remote Desktop stuff  ... "
 # Desktop Environment Setup
 #install_xfce
-#configure_chrome_remote_desktop
+configure_chrome_remote_desktop
 #configure_teamviewer
-#configure_xrdp || echo "⚠️ XRDP setup skipped (non-systemd system)."
+configure_xrdp || echo "⚠️ XRDP setup skipped (non-systemd system)."
 
 configure_persistent_environment
 
