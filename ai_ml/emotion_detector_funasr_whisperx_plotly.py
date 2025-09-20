@@ -29,7 +29,7 @@ YOUR_HF_TOKEN=os.getenv('HF_TOKEN')
 # List of required packages with specific versions
 required_packages = [
     "playsound==1.2.2",
-    "numpy==1.26.4",
+    "numpy",
     "whisperx",
     "pyannote.audio",
     "moviepy",
@@ -69,11 +69,11 @@ install_system_packages()
 '''
 #You must use : 
 pip install playsound==1.2.2
-# see https://github.com/TaylorSMar	ks/playsound/issues/160 why so. 
+# see https://github.com/TaylorSMarks/playsound/issues/160 why so. 
 
 #You must either 
 #A. install: 
-pip install -U whisperx && pip  install numpy==1.26.4 
+#pip install -U whisperx && pip  install numpy==1.26.4 
 
 #with numpy not over 2.0
 
@@ -1489,6 +1489,8 @@ def process_stage(pass_name):
 
 
 if __name__ == "__main__":
+
+    print("Here we start ...")
     rainbow_text(tool_name_and_version)
 
     #rainbow_text(tool_name_and_version)
