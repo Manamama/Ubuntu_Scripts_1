@@ -310,8 +310,7 @@ cd ~/Downloads/GitHub
 }
 
 # --- XRDP Setup ---
-configure_xrdp() {#!/bin/bash
-
+configure_xrdp() {
 echo "🖥️ Configuring XRDP..."
 # Install xrdp
 sudo DEBIAN_FRONTEND=noninteractive apt update
@@ -461,7 +460,6 @@ sudo apt install -y kde-plasma-desktop dbus-x11
 
 # 3. Set up CRD session script to start Plasma with user-level DBus
 cat > ~/.chrome-remote-desktop-session <<'EOF'
-#!/bin/bash
 # Start user-level DBus session if not running
 if ! pgrep -x "dbus-daemon" > /dev/null; then
   eval "$(dbus-launch --sh-syntax)"
