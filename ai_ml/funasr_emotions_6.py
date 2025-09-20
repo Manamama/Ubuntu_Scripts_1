@@ -61,8 +61,8 @@ for i, seg in enumerate(sentences_data):
     start_ms = int(seg["start"] * 1000)
     end_ms = int(seg["end"] * 1000)
     chunk_audio = full_audio[start_ms:end_ms]
-    chunk_file = output_dir / f"{stem}_segment_{i:03d}.wav"
-    chunk_audio.export(chunk_file, format="wav")
+    chunk_file = output_dir / f"{stem}_segment_{i:03d}.mp3"
+    chunk_audio.export(chunk_file, format="mp3")
     chunks.append(chunk_file)
 
 # Create SCP file for FunASR batch input
