@@ -61,6 +61,7 @@ KITWARE_APT_REPO_BASE_URL="https://apt.kitware.com/ubuntu"
 NVM_REPO_URL="https://github.com/nvm-sh/nvm.git"
 LLAMA_CPP_REPO_URL="https://github.com/ggml-org/llama.cpp"
 CHROME_REMOTE_DESKTOP_BASE_URL="https://dl.google.com/linux/direct/"
+CHROME_REMOTE_DESKTOP_DEB=chrome-remote-desktop_current_amd64.deb
 TEAMVIEWER_HOST_BASE_URL="https://download.teamviewer.com/download/linux/"
 LOCALLIB="$HOME/.local/lib"
 install_deb_local() {
@@ -614,14 +615,10 @@ configure_chrome_remote_desktop() {
 	fi
 	
 	sudo DEBIAN_FRONTEND=noninteractive  apt-get --fix-broken install -y || {
-		echo "Error: Failed to fix broken dependencies after Chrome Remote Desktop install."
+		echo "Error: Failed to fix broken dependencies before Chrome Remote Desktop install."
 		return 1
 	}
-	sudo DEBIAN_FRONTEND=noninteractive   apt install xserver-xorg-video-dummy  xbase-clients python3-psutil python3-xdg -y 
-	sudo usermod -a -G chrome-remote-desktop $USER || {
-		echo "Error: Failed to add user to chrome-remote-desktop group."
-		return 1
-	}
+	
 	
 		sudo DEBIAN_FRONTEND=noninteractive dpkg -i "$DOWNLOAD_DIR/$CHROME_REMOTE_DESKTOP_DEB" || {
 		echo "Error: Failed to install Chrome Remote Desktop package."
@@ -640,9 +637,9 @@ configure_chrome_remote_desktop() {
 	echo 
 	echo Now do: 
 	1. Go to: https://remotedesktop.google.com/headless and copy the code 
-	2. Paste snippet in 'gh' machine. Select pin. 
-	3. Then start ' /opt/google/chrome-remote-desktop/start-host --start' 
-	4. In https://remotedesktop.google.com/access/session/12ec807f-446d-4a3f-99e4-d10e904b6308
+	2. Paste the resulting snippet in 'gh' machine. Select a pin. 
+	3. Then also start manually, for good measure: ' /opt/google/chrome-remote-desktop/chrome-remote-desktop --start' 
+	4. In https://remotedesktop.google.com/access/session/ click the live session host entry. 
 	echo 
 }
 

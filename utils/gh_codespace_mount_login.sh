@@ -42,7 +42,7 @@ echo "No 'locat'! Install lolcat".
 fi
 
 
-echo Mounting shares and logging into GitHub Codespaces, paranoid edition, version 5.3.3
+echo Mounting shares and logging into GitHub Codespaces, paranoid edition, version 5.3.4
 #Changed ssh mechanism to port forwards 
 echo 
 
@@ -52,21 +52,21 @@ echo
         #as it is indeed the default one, for ssh and such in Termux, but GitHub Codespace CLI 'gh' default key filename is: '$HOME/.ssh/codespaces.auto' as private and 'codespaces.auto.pub' as public. So we shall use: 
         #KEY_PATH=$HOME/.ssh/codespaces.auto
 
-echo -n "1️⃣  Checking the OS: " 
+echo -n "1️⃣  Checking the OS:   " 
         
 
 if [ -n "${TERMUX__HOME-}" ]; then
-    echo -n "📲  We are in Termux.  " 
+    echo  "📲  We are in Termux.  " 
         KEY_PATH="$HOME/.ssh/id_rsa"
     else
-        echo -n We are not in Termux. 
+        echo  We are not in Termux. 
         KEY_PATH="$HOME/.ssh/codespaces.auto"
     fi
 echo -n "So we are using this KEY_PATH with ssh keys: "
 echo $KEY_PATH | lolcat
 echo 
 
-echo  "2️⃣  Checking 🔍 the active GitHub user and the OAuth token scopes... : "
+echo  "2️⃣  Checking  🔍  the active GitHub user and the OAuth token scopes... : "
 
 gh auth status -a | lolcat
 # Get active account output
@@ -90,7 +90,7 @@ done <<< "$AUTH_ACTIVE"
 
 # Check if active user was found
 if [ -z "$ACTIVE_USER" ]; then
-  echo "❌ No active user found. Run 'gh auth login' to authenticate." | lolcat
+  echo "❌  No active user found. Run 'gh auth login' to authenticate." | lolcat
   return 1
 fi
 
@@ -101,18 +101,18 @@ echo "The Active User account attributes shown above must have the conjuction of
 
 # Check if codespace is in scopes
 if [[ ! "$ACTIVE_SCOPES" =~ codespace ]]; then
-  echo "❌ Missing 'codespace' scope for '$ACTIVE_USER'. Runing: 'gh auth refresh -h github.com -s codespace'." | lolcat
+  echo "❌  Missing 'codespace' scope for '$ACTIVE_USER'. Runing: 'gh auth refresh -h github.com -s codespace'." | lolcat
   gh auth refresh -h github.com -s codespace
   #return 1
 fi
 
-#echo "✅ User '$ACTIVE_USER' has 'codespace' scope."
+#echo "✅  User '$ACTIVE_USER' has 'codespace' scope."
 
     #echo " Your 'gh' account has the 'codespace' scope, congrats."
     echo "⇛  Select one from the available codespaces:"
     CODESPACES=$(gh codespace list --json name,state | jq -r '.[] | .name')
     if [ $? -ne 0 ]; then
-        echo "❌ Error listing codespaces. Make sure gh CLI is authenticated and codespaces are available." | lolcat
+        echo "❌  Error listing codespaces. Make sure gh CLI is authenticated and codespaces are available." | lolcat
         return 1
     fi
     if [ -z "$CODESPACES" ]; then
@@ -134,7 +134,7 @@ fi
     echo "Codespace details:"
     gh codespace view -c "$CSPACE_NAME" | lolcat
     if [ $? -ne 0 ]; then
-        echo "❌ Error viewing codespace '$CSPACE_NAME'." | lolcat
+        echo "❌  Error viewing codespace '$CSPACE_NAME'." | lolcat
         #return 1
     fi
     echo
@@ -142,14 +142,14 @@ fi
 
     WORKSPACE_PATH=$(gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no 'pwd' | tr -d '\r\n')
     if [ $? -ne 0 ]; then
-        echo "❌ Error getting workspace path from codespace '$CSPACE_NAME'." | lolcat
+        echo "❌  Error getting workspace path from codespace '$CSPACE_NAME'." | lolcat
         return 1
     fi
     #We may have landed at User's home, so we fix it: 
     if [[ "$WORKSPACE_PATH" == "/home/codespace" ]]; then
         WORKSPACE_PATH=$(gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no 'ls -d /workspaces/* 2>/dev/null | head -n1' | tr -d '\r\n')
         if [ $? -ne 0 ]; then
-            echo "❌ Error getting workspace path from /workspaces/ in codespace '$CSPACE_NAME'." | lolcat
+            echo "❌  Error getting workspace path from /workspaces/ in codespace '$CSPACE_NAME'." | lolcat
             return 1
         fi
     fi
@@ -165,7 +165,7 @@ fi
 # Hide somehow that curl, smth like: 2>/dev/null 
     REMOTE_IP=$(gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no "curl ifconfig.me -s" )
     if [ $? -ne 0 ]; then
-        echo "❌ Error getting remote IP from codespace '$CSPACE_NAME'." | lolcat
+        echo "❌  Error getting remote IP from codespace '$CSPACE_NAME'." | lolcat
         return 1
     fi
     echo -n "Remote IP:  "
@@ -204,7 +204,7 @@ fi
 
 DEFAULT_LOCAL=3222
 
-# 1️⃣ Check if remote port is already forwarded locally
+# 1️⃣  Check if remote port is already forwarded locally
 
 echo "The current processes related to the 'codespace' string are listed here:" 
  ps -eo pid,args     | grep "codespace" | lolcat
@@ -217,7 +217,7 @@ LOCAL_PORT=$(ps -eo pid,args \
 
 
 
-# 2️⃣ If unbound, find a free local port and bind once
+# 2️⃣  If unbound, find a free local port and bind once
 if [ -z "$LOCAL_PORT" ]; then
     LOCAL_PORT=$DEFAULT_LOCAL
     while ss -tln 2>/dev/null | grep -q ":$LOCAL_PORT "; do
@@ -233,7 +233,7 @@ if [ -z "$LOCAL_PORT" ]; then
 
 fi
 
-# 3️⃣ Single paranoid print at the end
+# 3️⃣  Single paranoid print at the end
 echo "🔍 Checking if remote port $REMOTE_PORT is forwarded to local port $LOCAL_PORT (it requires 'sudo' on Termux)..."
 
 #echo Try also logging directly there: sftp  -i $KEY_PATH -P $REMOTE_PORT codespace@$REMOTE_IP
@@ -241,12 +241,19 @@ echo "🔍 Checking if remote port $REMOTE_PORT is forwarded to local port $LOCA
 # Wait for the forwarded port to become available
 #echo "⏳ Waiting for the forwarded port to be ready at $LOCAL_PORT..."
 for i in {1..2}; do
+if [ -n "${TERMUX__HOME-}" ]; then
 
-#    if sudo ss -tln | grep -q ":$LOCAL_PORT "; then
-   if  ss -tln | grep -q ":$LOCAL_PORT "; then
-        echo "✅ Port $LOCAL_PORT is ready."
+   if sudo ss -tln | grep -q ":$LOCAL_PORT "; then
+echo "✅  Port $LOCAL_PORT is ready."
         break
     fi
+
+else
+   if  ss -tln | grep -q ":$LOCAL_PORT "; then
+        echo "✅  Port $LOCAL_PORT is ready."
+        break
+    fi
+fi
     echo $(date)
 
     sleep 0.5
@@ -255,11 +262,19 @@ done
 
 for i in {1..2}; do
 
-#    if sudo ss -tln | grep -q ":$LOCAL_PORT "; then
-   if  ss -tln | grep -q ":3389 "; then
-        echo "✅ Port 3389 is ready."
+if [ -n "${TERMUX__HOME-}" ]; then
+   if sudo ss -tln | grep -q ":$LOCAL_PORT "; then
+echo "✅  Port 3389 is ready."
         break
     fi
+else
+
+   if  ss -tln | grep -q ":3389 "; then
+        echo "✅  Port 3389 is ready."
+        break
+    fi
+
+fi
     echo $(date)
 
     sleep 0.5
@@ -290,7 +305,7 @@ echo
     
     if ! mountpoint -q "$SSHFS_MOUNT"; then
 
-        echo -n "8️⃣  Mounting '$WORKSPACE_PATH' via SSHFS on:"
+        echo -n "8️⃣  Mounting '$WORKSPACE_PATH' via SSHFS on:  "
         echo "$SSHFS_MOUNT" | lolcat
 #        sudo sshfs codespace@127.0.0.1:"$WORKSPACE_PATH" "$SSHFS_MOUNT" -p $LOCAL_PORT            -oIdentityFile="$KEY_PATH" -oStrictHostKeyChecking=no -o reconnect            -o ServerAliveInterval=5 -o ServerAliveCountMax=3 -o TCPKeepAlive=yes -o allow_other | lolcat
 
@@ -298,7 +313,7 @@ echo
         sshfs codespace@127.0.0.1:"$WORKSPACE_PATH" "$SSHFS_MOUNT" -p $LOCAL_PORT            -oIdentityFile="$KEY_PATH" -oStrictHostKeyChecking=no -o reconnect            -o ServerAliveInterval=5 -o ServerAliveCountMax=3 -o TCPKeepAlive=yes -o allow_other | lolcat
         
         if [ $? -ne 0 ]; then
-            echo "⚠️ SSHFS mount failed, proceeding to SSH session anyway..." | lolcat
+            echo "⚠️  SSHFS mount failed, proceeding to SSH session anyway..." | lolcat
         fi
     fi
 
@@ -314,14 +329,14 @@ echo
     echo "You can start it via: 'ssh codespace@localhost -p 3222' but here we are starting it via 'gh codespace ssh -c "$CSPACE_NAME"', not relying on the forwarded ports, just in case."
     echo "FYI: by default, Codespaces automatically stops after ~30 minutes of inactivity and gets deleted after 30 days of not logging in again."
     
-    echo "👉 Starting an SSH session to Codespace $CSPACE_NAME... :"
+    echo "👉  Starting an SSH session to Codespace $CSPACE_NAME... :"
     echo 
     gh codespace ssh -c "$CSPACE_NAME"
     
     #This errors unduly if control C etc: 
 : '
     if [ $? -ne 0 ]; then
-        echo "❌ Error starting an interactive SSH session to codespace '$CSPACE_NAME'." | lolcat
+        echo "❌  Error starting an interactive SSH session to codespace '$CSPACE_NAME'." | lolcat
         return 1
     fi
     '
