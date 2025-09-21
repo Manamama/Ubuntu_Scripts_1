@@ -27,7 +27,7 @@ def main():
     parser.add_argument("--language", type=str, default="en", help="Language code (default: en)")
     parser.add_argument("--model", type=str, default="iic/SenseVoiceSmall", help="ASR model (default: SenseVoice)")
     parser.add_argument("--vad-model", type=str, default="fsmn-vad", help="VAD model (default: fsmn-vad)")
-    parser.add_argument("--emotion-model", type=str, default="iic/emotion2vec_plus_large", help="Emotion model (default: emotion2vec_plus_large)")
+    parser.add_argument("--emotion-model", type=str, default="emotion2vec_plus_large", help="Emotion model (default: iic/emotion2vec_plus_large)")
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu", help="Device (default: cuda if available)")
     parser.add_argument("--hf-token", type=str, default="", help="Hugging Face token for pyannote")
     args = parser.parse_args()
