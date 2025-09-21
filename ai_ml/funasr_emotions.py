@@ -74,7 +74,7 @@ result = model.transcribe(audio, batch_size=batch_size, language=args.language i
 
 # Align for word-level timestamps, then aggregate to sentences
 model_a, metadata = whisperx.load_align_model(language_code=result["language"], device=device)
-result = whisperx.align(result["segments"], model_a, metadata, audio, device, return_char_alignments=False, progress=True, diarize=True)
+result = whisperx.align(result["segments"], model_a, metadata, audio, device, return_char_alignments=False, print_progress=True, diarize=True)
 
 # Extract sentence-level segments (start/end in seconds, text)
 sentences_data = []
