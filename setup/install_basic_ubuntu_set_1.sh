@@ -300,13 +300,16 @@ install_ai_tools() {
  CPU only: 
 	python -m pip install --user -U whisperx pydub numpy torch torchvision torchaudio tensorflow-cpu jax jaxlib protobuf --extra-index-url https://download.pytorch.org/whl/cpu
  python -m pip install --user openai-whisper -U 
- pip install -U whisperx -U 
+ pip install -U whisperx  
 
-cd ~/Downloads/GitHub
- git clone https://github.com/modelscope/FunASR
- pip install -U  --user FunASR/ 
- echo "If it fails, that is 'funasr' does not run, do force it:"
- echo "pip install -U  --user FunASR/ --force-reinstall"
+ echo Installing funasr and related ... 
+# cd ~/Downloads/GitHub
+ #git clone https://github.com/modelscope/FunASR
+ #pip install -U  --user FunASR/ 
+ pip install -U funasr
+ pip install -U pydub plotly
+ #echo "If it fails, that is 'funasr' does not run, do force it:"
+ #echo "pip install -U  --user FunASR/ --force-reinstall"
  echo
  echo "Syntax is: 'funasr ++model=paraformer-en ++vad_model="fsmn-vad" ++punc_model="ct-punc" ++input="{audio_filename}"' "
 
