@@ -68,9 +68,10 @@ echo
     echo "Note: The tool uses the '--cookies-from-browser chrome' option. To create these cookies on the remote machine you need, in very short:"
     echo "A. In the remote machine, where this script is running: 1. Install e.g. 'google-chrome' application. 2. Run 'google-chrome  --remote-debugging-port=9222 https://youtube.com' 3. Forward that port in e.g. Visual Studio Code or via 'gh ports forward'. 4. Log in to your GitHub account to accept forwarding. 5. Log in to the new virgin Google Chrome browser window with your active Google Account (a throwaway one, for security). 6. Hope that this all works. " 
     echo "B. Read: https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp . In your local machine, where you are logged into YT etc. 1. Run  'yt-dlp --cookies-from-browser chrome --cookies cookies.txt [url]' 2. Extract the right cookies via 'cat cookies.txt | grep youtube > cookies_yt.txt' 2. Copy the created 'cookies_yt.txt' file over to the remote machine. 3. Use it. " 
+    echo "C. Use 'firefox-esr' instead and then the firefox cookies via '--cookies-from-browser firefox'".  
     # Extracts audio reliably because it downloads whatever format contains audio (even if embedded in video) and lets --extract-audio + --audio-format mp3 handle conversion, so no assumptions about separate audio streams are needed. Stores in ~/Downloads, get clean filename
     remote_audio=$(gh codespace ssh -c "$CODESPACE_NAME" \
-    "cd ~/Downloads && yt-dlp --no-playlist --extract-audio --audio-format mp3 --cookies-from-browser chrome --restrict-filenames --trim-filenames 20 --print after_move:filepath '$url'")
+    "cd ~/Downloads && yt-dlp --no-playlist --extract-audio --audio-format mp3 --cookies-from-browser firefox --restrict-filenames --trim-filenames 20 --print after_move:filepath '$url'")
 
 
     if [[ -z "$remote_audio" ]]; then

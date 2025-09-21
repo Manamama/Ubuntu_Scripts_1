@@ -257,6 +257,7 @@ echo Adding Firefox repository ...
 # Add Mozilla Team PPA
 sudo add-apt-repository -y ppa:mozillateam/ppa
 
+sudo apt install firefox-esr
 
 
 	echo "Adding Visual Studio repository..."
@@ -498,7 +499,7 @@ sudo apt-get update
 sudo apt-get install -y google-chrome-stable
 
 echo "Google Chrome installation completed."
-echo "If Google Chrome crashes, try: ' google-chrome   --disable-gpu  --disable-software-rasterizer  --disable-features=CanvasOopRasterization   --disable-features=UseSkiaRenderer   --js-flags="--no-opt" ' "
+echo "If Google Chrome crashes, try: ' google-chrome   --disable-gpu  --disable-software-rasterizer  --disable-features=CanvasOopRasterization   --disable-features=UseSkiaRenderer   --js-flags="--no-opt" '  or  'dbus-launch --exit-with-session google-chrome https://www.example.com' or redirect port to local machine". Or try 'firefox-esr' instead. 
 
 
 
@@ -732,7 +733,8 @@ display_system_info() {
 
 	peakperf -r 1 -w1 || peakperf -r 1 -w1 -b ice_lake
 	#    neofetch --off || true
-	fastfetch -l none
+	alias fastfetch=	fastfetch -l none
+	fastfetch 
 
 	curl -s https://ipinfo.io/ip || echo "⚠️ IP fetch failed."
 
@@ -740,7 +742,7 @@ display_system_info() {
 
 echo
 echo "📌 Starting Ubuntu setup..."
-echo "Version 2.8.5"
+echo "Version 2.8.6"
 
 # Check for marker file to prevent re-execution
 
