@@ -31,7 +31,7 @@ fi
 echo
 
     # ================= Step 1: Detect Codespace =================
-    echo -n "🔍 Detecting GitHub Codespace... : "
+    echo -n "🔍 Detecting the first GitHub Codespace... : "
     CODESPACE_NAME=$(gh codespace list --json name,state | jq -r '.[] | .name' | head -n1)
     if [[ -z "$CODESPACE_NAME" ]]; then
         echo "❌ FATAL: No Codespace found"
@@ -39,8 +39,8 @@ echo
     fi
     # echo -n "✅ Codespace detected:"
 echo "$CODESPACE_NAME" | lolcat
-    echo
-
+    echo "This codespace should have the right repository: https://github.com/Manamama/Ubuntu_Scripts_1 one. We are logging into it, by default. If the codespace is not the right one, change the order of codespaces or change the code to manually select the right codespace." 
+echo 
 
 : '
 # Paranoia: Check HF_TOKEN if --diarize is used
