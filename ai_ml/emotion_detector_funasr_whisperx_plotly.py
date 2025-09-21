@@ -8,7 +8,7 @@ device = "cpu"
 #Whisperx arguments, see its Github page or help:
 batch_size = 2  # Adjust based on available resources
 compute_type = "float32"  # Adjust based on available resources
-disable_update=True # Disable update of the funasr models. But then they must be downloaded at least once, so set to : False at start. 
+disable_update=False # Disable update of the funasr models. But then they must be downloaded at least once, so set to : False at start. 
 
 #Divisor for the share of the CPU cores to use, e.g. "2" meanas that 4 of the 8 CPU cores shall be available 
 num_cores_divisor=2
