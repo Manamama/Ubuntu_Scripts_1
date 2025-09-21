@@ -70,7 +70,7 @@ model = whisperx.load_model(whisperx_model_size, device, compute_type=compute_ty
 
 # Step 1: Transcribe with WhisperX to get sentence timecodes
 audio = whisperx.load_audio(media_path)
-result = model.transcribe(audio, batch_size=batch_size, language=args.language if args.language else None, diarize=True)
+result = model.transcribe(audio, batch_size=batch_size, language=args.language if args.language else None)
 
 # Align for word-level timestamps, then aggregate to sentences
 model_a, metadata = whisperx.load_align_model(language_code=result["language"], device=device)
