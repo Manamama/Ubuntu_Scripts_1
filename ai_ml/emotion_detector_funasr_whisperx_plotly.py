@@ -44,7 +44,7 @@ required_packages = [
 
 # Function to install packages
 def install_packages(packages):
-import sys
+    import sys
     for package in packages:
         try:
             # Check if the package is already installed
