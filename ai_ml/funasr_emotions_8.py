@@ -20,7 +20,8 @@ parser.add_argument("media_path", type=str, help="Path to the media file")
 parser.add_argument("--language", type=str, default="", help="Language code (default: autodetect)")
 parser.add_argument("--hf_token", type=str, default=os.getenv("HF_TOKEN", ""), help="Hugging Face token for pyannote")
 args = parser.parse_args()
-print(f"Emotions detector via SenseVoice-Small, version 2025, integrated pipeline")
+#print(f"Emotions detector via SenseVoice-Small, version 2025, integrated pipeline" )
+print(f"Emotions detector via SenseVoice-Small (voice activity detection, chunking, transcription) and FunASR, version 8.0.1")
 
 # Setup paths
 media_path = Path(args.media_path)
