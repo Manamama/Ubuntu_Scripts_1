@@ -302,12 +302,14 @@ install_ai_tools() {
  python -m pip install --user openai-whisper -U 
  pip install -U whisperx  
 
- echo Installing funasr and related ... 
-# cd ~/Downloads/GitHub
- #git clone https://github.com/modelscope/FunASR
- #pip install -U  --user FunASR/ 
- pip install -U funasr
- pip install -U pydub plotly
+ echo "Installing funasr and related (better be from git clone) ..." 
+ cd ~/Downloads/GitHub
+ git clone https://github.com/modelscope/FunASR
+ pip install -U  --user FunASR/ 
+ #Or: pip install git+https://github.com/modelscope/FunASR.git
+ #Not: 
+ #pip install -U funasr
+ pip install -U pydub plotly  nemo_toolkit lhotse jiwer webdataset datasets ipython
  #echo "If it fails, that is 'funasr' does not run, do force it:"
  #echo "pip install -U  --user FunASR/ --force-reinstall"
  echo
