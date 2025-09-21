@@ -1246,6 +1246,25 @@ funasr ++model='iic/emotion2vec_base_finetuned' ++vad_model="fsmn-vad"   ++input
             json.dump(current_emotions_list, json_file, ensure_ascii=False, indent=4)
 
         print(f"The above results are also saved as JSON (e.g. for AIs to process) to: \033[94m{output_json_path}\033[0m")
+
+        # Create and save the AI-friendly flattened JSON
+        flattened_data = []
+        for entry in current_emotions_list:
+            new_entry = {
+                "sentence": entry["sentence"],
+                "start_time_s": entry["start_time_s"],
+                "end_time_s": entry["end_time_s"]
+            }
+            for emotion in entry["emotions"]:
+                label = emotion["label"].split("/")[-1].replace("<", "").replace(">", "")
+                new_entry[label] = emotion["score"]
+            flattened_data.append(new_entry)
+        
+        output_ai_json_path = output_dir / (stem + '_' + stage_suffix + '_emotions_ai_friendly.json')
+        with open(output_ai_json_path, 'w', encoding='utf-8') as json_file:
+            json.dump(flattened_data, json_file, ensure_ascii=False, indent=4)
+        
+        print(f"AI-friendly flattened JSON saved to: \033[94m{output_ai_json_path}\033[0m")
         print(f"The above results are also saved as HTML to: \033[94m{output_html_path}\033[0m")
 
         print()

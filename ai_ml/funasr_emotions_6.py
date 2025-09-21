@@ -93,6 +93,25 @@ with open(output_json_path, "w", encoding="utf-8") as f:
     json.dump(emotion_results, f, ensure_ascii=False, indent=4)
 print(f"Results saved as JSON to: {output_json_path}")
 
+# Create and save the AI-friendly flattened JSON
+flattened_data = []
+for entry in emotion_results:
+    new_entry = {
+        "sentence": entry["sentence"],
+        "start_time_s": entry["start_time_s"],
+        "end_time_s": entry["end_time_s"]
+    }
+    for emotion in entry["emotions"]:
+        label = emotion["label"].replace("<", "").replace(">", "")
+        new_entry[label] = emotion["score"]
+    flattened_data.append(new_entry)
+
+output_ai_json_path = output_dir / (stem + "_emotions_ai_friendly.json")
+with open(output_ai_json_path, "w", encoding="utf-8") as f:
+    json.dump(flattened_data, f, ensure_ascii=False, indent=4)
+
+print(f"AI-friendly flattened JSON saved to: {output_ai_json_path}")
+
 # Step 4: Generate HTML with Plotly line graph
 with open(output_html_path, "w", encoding="utf-8") as f:
     f.write('<html><head><meta charset="UTF-8"><title>Emotion Visualization</title>')
