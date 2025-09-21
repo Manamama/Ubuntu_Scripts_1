@@ -1,27 +1,21 @@
-
 import os
 import argparse
 import json
 import re
 import torch
 from funasr import AutoModel
+from funasr.utils.postprocess_utils import rich_transcription_postprocess
 import plotly.graph_objects as go
-import pandas as pd
 import webbrowser
 from pathlib import Path
-from urllib.parse import quote
-
-#Version by Grok AI. https://grok.com/c/734642ab-c01a-4661-8780-dfe09f041d46
-
 
 # Args parser
 parser = argparse.ArgumentParser(description="Integrated emotion detection with SenseVoice")
 parser.add_argument("media_path", type=str, help="Path to the media file")
-parser.add_argument("--language", type=str, default="", help="Language code (default: autodetect)")
-parser.add_argument("--hf_token", type=str, default=os.getenv("HF_TOKEN", ""), help="Hugging Face token for pyannote")
+parser.add_argument("--language", type=str, default="auto", help="Language code (default: auto)")
+parser.add_argument("--hf_token", type=str, default=os.getenv("HF_TOKEN", ""), help="Hugging Face token for pyannote diarization")
 args = parser.parse_args()
-#print(f"Emotions detector via SenseVoice-Small, version 2025, integrated pipeline" )
-print(f"Emotions detector via SenseVoice-Small (voice activity detection, chunking, transcription) and FunASR, version 8.0.1")
+print(f"Emotions detector via SenseVoice-Small, version 2025, integrated pipeline")
 
 # Setup paths
 media_path = Path(args.media_path)
@@ -31,17 +25,24 @@ output_dir.mkdir(exist_ok=True)
 output_html_path = output_dir / (stem + "_emotions.html")
 output_json_path = output_dir / (stem + "_emotions.json")
 
-# SenseVoice setup (no hub specified; defaults to ModelScope)
+# SenseVoice setup with VAD (Chinese model, but functional for English voices)
 model_dir = "iic/SenseVoiceSmall"
 emotion_model = AutoModel(
     model=model_dir,
+    trust_remote_code=True,
+    remote_code="./model.py",  # Fixes 'No module named model' error
     vad_model="fsmn-vad",
     vad_kwargs={"max_single_segment_time": 30000},
-#    device=args.device,
-    disable_update=True  # Suppress update check
+    disable_update=True,  # Suppress update check
+    device="cuda:0" if torch.cuda.is_available() else "cpu"
 )
 
-# Step 1: Process audio with SenseVoice (transcription, timestamps, emotions)
+# Optional diarization if token provided
+if args.hf_token:
+    emotion_model.diarization_model = "pyannote/speaker-diarization-3.1"
+    emotion_model.use_auth_token = args.hf_token
+
+# Step 1: Process audio with SenseVoice (transcription, timestamps, speakers if diarized, emotions)
 results = emotion_model.generate(
     input=str(media_path),
     cache={},
@@ -56,7 +57,7 @@ results = emotion_model.generate(
 # Possible emotion labels from SenseVoice
 possible_labels = ["angry", "happy", "neutral", "sad", "unknown"]
 
-# Step 2: Parse results into structured format
+# Step 2: Parse results into structured format (multiple segments from VAD)
 emotion_results = []
 for res in results:
     text = rich_transcription_postprocess(res["text"])
@@ -69,16 +70,24 @@ for res in results:
     # Create emotions list with score 1.0 for predicted, 0.0 for others
     emotions = [{"label": l, "score": 1.0 if l == emotion_label else 0.0} for l in possible_labels]
     
-    # Get timestamps (SenseVoice provides segment-level via VAD; approximate if needed)
-    start_time = res.get("timestamp", [0.0])[0] if "timestamp" in res else 0.0
-    end_time = res.get("timestamp", [1.0])[-1] if "timestamp" in res else start_time + len(clean_text.split()) * 0.5  # Rough fallback
-    speaker = "Unknown"  # Diarization not native; add pyannote if token provided
+    # Timestamps: Aggregate from word-level CTC alignment (list of [start_ms, end_ms] pairs)
+    if "timestamp" in res and res["timestamp"]:
+        timestamps = res["timestamp"]
+        start_time = timestamps[0][0] / 1000.0  # ms to seconds
+        end_time = timestamps[-1][1] / 1000.0
+    else:
+        # Fallback if no timestamps (rare with VAD)
+        start_time = 0.0
+        end_time = len(clean_text.split()) * 0.5  # Rough estimate
+    
+    # Speaker: From diarization if enabled, else Unknown
+    speaker = res.get("speaker", "Unknown")
     
     emotion_results.append({
         "speaker": speaker,
         "sentence": clean_text,
-        "start_time_s": float(start_time),
-        "end_time_s": float(end_time),
+        "start_time_s": start_time,
+        "end_time_s": end_time,
         "emotions": emotions
     })
 
@@ -123,4 +132,14 @@ with open(output_html_path, "w", encoding="utf-8") as f:
 print(f"Results saved as HTML to: {output_html_path}")
 
 # Open HTML in browser
-webbrowser.open(f"file://{os.path.abspath(output_html_path)}")
+webbrowser.open(f"file://{os.path.abspath(output_html_path)}") 
+
+
+
+
+
+
+
+  
+
+
