@@ -25,7 +25,7 @@ CUR_USER="${CUR_USER:-$(id -un)}"
 SUDO_CMD=""
 [ "$(id -u)" -ne 0 ] && SUDO_CMD="sudo"
 
-# Check if already mounted from correct source
+echo Check if already mounted from correct source
 already_bound=0
 if mountpoint -q "$CACHE_SRC"; then
   mounted_src=$(mount | awk -v target="$CACHE_SRC" '$3==target{print $1; exit}')
@@ -35,10 +35,10 @@ fi
 if [ "$already_bound" -eq 1 ]; then
   echo "[SKIP] $CACHE_SRC already bound to $CACHE_DEST"
 else
-  # If mounted from a different source, unmount
+  echo If mounted from a different source, unmount
   mountpoint -q "$CACHE_SRC" && $SUDO_CMD umount -l "$CACHE_SRC" || true
 
-  # Prepare directories
+  echo Prepare directories
   $SUDO_CMD mkdir -p "$CACHE_DEST"
   $SUDO_CMD chown "$CUR_USER:$CUR_USER" "$CACHE_DEST" 2>/dev/null || true
 
@@ -52,3 +52,5 @@ else
 
   mountpoint -q "$CACHE_SRC" && echo "[DONE] Bound: $CACHE_DEST -> $CACHE_SRC" || echo "[ERROR] Bind failed."
 fi
+
+/opt/google/chrome-remote-desktop/chrome-remote-desktop --restart
