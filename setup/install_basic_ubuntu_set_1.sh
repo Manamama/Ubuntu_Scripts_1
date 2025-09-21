@@ -301,6 +301,7 @@ install_ai_tools() {
 	python -m pip install --user -U whisperx pydub numpy torch torchvision torchaudio tensorflow-cpu jax jaxlib protobuf --extra-index-url https://download.pytorch.org/whl/cpu
  python -m pip install --user openai-whisper -U 
  pip install -U whisperx  
+ pip install -U ipython
 
  echo "Installing funasr and related (better be from git clone) ..." 
  cd ~/Downloads/GitHub
@@ -309,7 +310,8 @@ install_ai_tools() {
  #Or: pip install git+https://github.com/modelscope/FunASR.git
  #Not: 
  #pip install -U funasr
- pip install -U pydub plotly  nemo_toolkit lhotse jiwer webdataset datasets ipython
+ pip install -U pydub plotly pysound moviepy
+ #pip install -U nemo_toolkit lhotse jiwer webdataset datasets ipython
  #echo "If it fails, that is 'funasr' does not run, do force it:"
  #echo "pip install -U  --user FunASR/ --force-reinstall"
  echo
