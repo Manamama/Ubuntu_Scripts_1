@@ -9,18 +9,50 @@ import pandas as pd
 import webbrowser
 from pathlib import Path
 from urllib.parse import quote
+import subprocess
+import sys
 
 # Args parser
 parser = argparse.ArgumentParser(description="Simplified emotion detection using WhisperX and FunASR")
-parser.add_argument("media_path", type=str, help="Path to the media file")
+parser.add_argument("media_path", type=str, help="Path to the media file or a URL to download")
 parser.add_argument("--language", type=str, default="", help="Language code (default: autodetect)")
 args = parser.parse_args()
 #Simplified version of: emotion_detector_funasr_whisperx_plotly.py, prepared for GitHub Codespace
-print(f"Emotions detector via Whisperx (voice activity detection, chunking, transcription) and FunASR, version 6.0.2")
+print(f"Emotions detector via Whisperx (voice activity detection, chunking, transcription) and FunASR, version 6.1.1")
+print("Still the best pipeline in 2025, see https://grok.com/c/734642ab-c01a-4661-8780-dfe09f041d46 or ./Archive folder why so")
 
 
-# Setup paths
-media_path = Path(args.media_path)
+# Setup paths and handle URL downloading
+if args.media_path.startswith("http"):
+    print("URL detected. Attempting to download using yt-dlp.")
+    print("Note: This uses '--cookies-from-browser chrome' and assumes you have Chrome's cookie database available.")
+    download_dir = Path.home() / "Downloads"
+    command = [
+        "yt-dlp",
+        "--cookies-from-browser", "chrome",
+        "--no-playlist",
+        "--extract-audio", "--audio-format", "mp3",
+        "--restrict-filenames", "--trim-filenames", "20",
+        "-P", str(download_dir),
+        "--print", "after_move:filepath",
+        args.media_path
+    ]
+    print(f"Executing download command...")
+    try:
+        result = subprocess.run(command, capture_output=True, text=True, check=True, encoding='utf-8')
+        downloaded_path = result.stdout.strip()
+        if not downloaded_path:
+            raise ValueError("yt-dlp did not return a file path.")
+        media_path = Path(downloaded_path)
+        print(f"✅ Successfully downloaded to: {media_path}")
+    except (subprocess.CalledProcessError, ValueError) as e:
+        print(f"❌ Error downloading URL: {e}", file=sys.stderr)
+        if hasattr(e, 'stderr'):
+            print(f"yt-dlp stderr: {e.stderr}", file=sys.stderr)
+        sys.exit(1)
+else:
+    media_path = Path(args.media_path)
+
 stem = media_path.stem
 output_dir = media_path.parent / (stem + "_emotions_detected")
 output_dir.mkdir(exist_ok=True)

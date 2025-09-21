@@ -1,5 +1,5 @@
 #First global variables:
-tool_name_and_version = "Emotion Detector for Media Files: using WhisperX for speech recognition and diarization (detection of the speakers), FunASR for emotion detection, Plotly for visualizing results. Current Version: 5.3.1 | Author: ManamaMa"
+tool_name_and_version = "Emotion Detector for Media Files: using WhisperX for speech recognition and diarization (detection of the speakers), FunASR for emotion detection, Plotly for visualizing results. Current Version: 5.4.1 | Author: ManamaMa"
 #Note to self : the extraction for the HTML rendering of the chunks in 'def extract_media_segments' may need fixing: use the SRT files, not the TSV files or check if .bak is same as the new TSV file.
 
 #Select the whisperx_model size here - "medium" runs relatively fast, but crashes Android. "small" does not crash Android, but may be too small. "large" or "large-v3" is best, but the slowest  
@@ -1551,7 +1551,36 @@ if __name__ == "__main__":
     
 
     # Initialize necessary variables
-    media_path = Path(args.media_path)  # Convert to Path object
+    if args.media_path.startswith("http"):
+        print("URL detected. Attempting to download using yt-dlp.")
+        print("Note: This uses '--cookies-from-browser chrome' and assumes you have Chrome's cookie database available.")
+        download_dir = Path.home() / "Downloads"
+        command = [
+            "yt-dlp",
+            "--cookies-from-browser", "chrome",
+            "--no-playlist",
+            "--extract-audio", "--audio-format", "mp3",
+            "--restrict-filenames", "--trim-filenames", "20",
+            "-P", str(download_dir),
+            "--print", "after_move:filepath",
+            args.media_path
+        ]
+        print(f"Executing download command...")
+        try:
+            result = subprocess.run(command, capture_output=True, text=True, check=True, encoding='utf-8')
+            downloaded_path = result.stdout.strip()
+            if not downloaded_path:
+                raise ValueError("yt-dlp did not return a file path.")
+            media_path = Path(downloaded_path)
+            print(f"✅ Successfully downloaded to: {media_path}")
+        except (subprocess.CalledProcessError, ValueError) as e:
+            print(f"❌ Error downloading URL: {e}", file=sys.stderr)
+            if hasattr(e, 'stderr'):
+                print(f"yt-dlp stderr: {e.stderr}", file=sys.stderr)
+            sys.exit(1)
+    else:
+        media_path = Path(args.media_path)  # Convert to Path object
+
     stem = media_path.stem  # Extract stem from media path
     original_extension = media_path.suffix  # Extract original file extension
     

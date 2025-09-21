@@ -6,7 +6,7 @@ echo "📜 WhisperX Transcription from URL (Paranoid Android & gh User Edition)"
 echo "Version 1.4.1"
 
     if [[ $# -lt 1 ]]; then
-        echo "❌ Usage: $0 <youtube_url> [extra_args...]"
+        echo "❌ Usage: $0 <url> [extra_args...]"
         exit 1
     fi
 
