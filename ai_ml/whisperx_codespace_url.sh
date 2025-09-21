@@ -71,7 +71,9 @@ echo
     echo "C. Use 'firefox-esr' instead and then the firefox cookies via '--cookies-from-browser firefox'".  
     # Extracts audio reliably because it downloads whatever format contains audio (even if embedded in video) and lets --extract-audio + --audio-format mp3 handle conversion, so no assumptions about separate audio streams are needed. Stores in ~/Downloads, get clean filename
     remote_audio=$(gh codespace ssh -c "$CODESPACE_NAME" \
-    "cd ~/Downloads && yt-dlp --no-playlist --extract-audio --audio-format mp3 --cookies-from-browser firefox --restrict-filenames --trim-filenames 20 --print after_move:filepath '$url'")
+    "cd ~/Downloads && yt-dlp --no-playlist --extract-audio --audio-format mp3  --restrict-filenames --trim-filenames 20 --print after_move:filepath '$url'")
+    
+    #--cookies-from-browser firefox
 
 
     if [[ -z "$remote_audio" ]]; then
