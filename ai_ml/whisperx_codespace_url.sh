@@ -3,7 +3,7 @@
     set -euo pipefail
 
 echo "📜 WhisperX Transcription from URL (Paranoid Android & gh User Edition)"
-echo "Version 1.3.5"
+echo "Version 1.4.1"
 
     if [[ $# -lt 1 ]]; then
         echo "❌ Usage: $0 <youtube_url> [extra_args...]"
@@ -62,18 +62,25 @@ echo
     # ================= Step 2: Ensure remote Downloads directory =================
     echo "📁 Ensuring remote Downloads directory exists..."
     gh codespace ssh -c "$CODESPACE_NAME" "mkdir -p ~/Downloads"
+    
+    #You can check if manual cookies exist: gh codespace ssh -c "$CODESPACE_NAME" "ls -la ~/cookies_yt.txt  && cat ~/cookies_yt.txt && echo "
 
     # ================= Step 3: Download with yt-dlp =================
     echo "🎬 Downloading the audio from the online media via 'yt-dlp --extract-audio' on the remote machine..."
     echo "Note: The tool uses the '--cookies-from-browser chrome' option. To create these cookies on the remote machine you need, in very short:"
-    echo "A. In the remote machine, where this script is running: 1. Install e.g. 'google-chrome' application. 2. Run 'google-chrome  --remote-debugging-port=9222 https://youtube.com' 3. Forward that port in e.g. Visual Studio Code or via 'gh ports forward'. 4. Log in to your GitHub account to accept forwarding. 5. Log in to the new virgin Google Chrome browser window with your active Google Account (a throwaway one, for security). 6. Hope that this all works. " 
-    echo "B. Read: https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp . In your local machine, where you are logged into YT etc. 1. Run  'yt-dlp --cookies-from-browser chrome --cookies cookies.txt [url]' 2. Extract the right cookies via 'cat cookies.txt | grep youtube > cookies_yt.txt' 2. Copy the created 'cookies_yt.txt' file over to the remote machine. 3. Use it. " 
-    echo "C. Use 'firefox-esr' instead and then the firefox cookies via '--cookies-from-browser firefox'".  
+    echo "A. In the remote machine, where this script is running: 1. Install 'google-chrome' application. 2. Run 'google-chrome  --remote-debugging-port=3222 https://youtube.com' , having redirected it via 'gh ports forward'. 3. Log in to the new virgin Google Chrome browser window with your active Google Account (a throwaway one, for security). A file with cookies on the remote machine should be created" 
+    echo "If google-chrome fails: Plan B. Use 'firefox-esr' instead and then the firefox cookies via '--cookies-from-browser firefox' changing this code".  
+    echo "Plan C. Read: https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp . In your local machine, where you are logged into YT etc. 1. Run  'yt-dlp https://www.youtube.com --cookies-from-browser chrome --cookies cookies.txt' 2. Copy the created 'cookies.txt' file over to the remote machine. 3. Use it: '--cookies ~/cookies.txt' changing this code. " 
+
+    # yt-dlp https://www.youtube.com --cookies-from-browser firefox --cookies cookies.txt &&  cat cookies.txt  |  grep youtube > cookies_yt.txt
+    echo
+    echo 
     # Extracts audio reliably because it downloads whatever format contains audio (even if embedded in video) and lets --extract-audio + --audio-format mp3 handle conversion, so no assumptions about separate audio streams are needed. Stores in ~/Downloads, get clean filename
-    remote_audio=$(gh codespace ssh -c "$CODESPACE_NAME" \
-    "cd ~/Downloads && yt-dlp --no-playlist --extract-audio --audio-format mp3  --restrict-filenames --trim-filenames 20 --print after_move:filepath '$url'")
+    remote_audio=$(gh codespace ssh -c "$CODESPACE_NAME"   " cd ~/Downloads && yt-dlp  --cookies-from-browser chrome  --no-playlist --extract-audio --audio-format mp3  --restrict-filenames --trim-filenames 20 --print after_move:filepath '$url'")
     
     #--cookies-from-browser firefox
+    #--cookies-from-browser chrome
+    #--cookies ~/cookies.txt
 
 
     if [[ -z "$remote_audio" ]]; then
