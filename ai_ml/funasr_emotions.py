@@ -181,4 +181,4 @@ with open(output_html_path, "w", encoding="utf-8") as f:
 print(f"Results saved as HTML to: {output_html_path}")
 
 # Open HTML in browser
-webbrowser.open(f"file://{os.path.abspath(output_html_path)}")
+#webbrowser.open(f"file://{os.path.abspath(output_html_path)}")
