@@ -498,6 +498,7 @@ sudo apt-get update
 sudo apt-get install -y google-chrome-stable
 
 echo "Google Chrome installation completed."
+echo "If Google Chrome crashes, try: ' google-chrome   --disable-gpu  --disable-software-rasterizer  --disable-features=CanvasOopRasterization   --disable-features=UseSkiaRenderer   --js-flags="--no-opt" ' "
 
 
 
@@ -620,10 +621,9 @@ configure_chrome_remote_desktop() {
 		return 1
 	}
 	sudo DEBIAN_FRONTEND=noninteractive   apt install xserver-xorg-video-dummy  xbase-clients python3-psutil python3-xdg -y 
-	sudo usermod -a -G chrome-remote-desktop $USER || {
-		echo "Error: Failed to add user to chrome-remote-desktop group."
-		return 1
-	}
+
+	#sudo usermod -a -G chrome-remote-desktop $USER 
+	
 	
 		sudo DEBIAN_FRONTEND=noninteractive dpkg -i "$DOWNLOAD_DIR/$CHROME_REMOTE_DESKTOP_DEB" || {
 		echo "Error: Failed to install Chrome Remote Desktop package."
@@ -634,6 +634,12 @@ configure_chrome_remote_desktop() {
 		echo "Error: Failed to fix broken dependencies after Chrome Remote Desktop install."
 		return 1
 	}
+	
+		 /opt/google/chrome-remote-desktop/chrome-remote-desktop --enable-and-start || {
+		echo "Error: Failed to add user to chrome-remote-desktop group and restart."
+		return 1
+	}
+
 	sudo service chrome-remote-desktop restart || {
 		echo "Error: Failed to restart Chrome Remote Desktop service."
 		return 1

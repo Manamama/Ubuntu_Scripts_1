@@ -53,4 +53,32 @@ else
   mountpoint -q "$CACHE_SRC" && echo "[DONE] Bound: $CACHE_DEST -> $CACHE_SRC" || echo "[ERROR] Bind failed."
 fi
 
-/opt/google/chrome-remote-desktop/chrome-remote-desktop --restart
+
+
+	# --- Swap file creation ---
+	echo "Creating 16 GB swap file..."
+	sudo fallocate -l 16G /tmp/swapfile
+	sudo chmod 600 /tmp/swapfile
+	sudo mkswap /tmp/swapfile
+	sudo swapon /tmp/swapfile
+	swapon --show
+	free -h
+
+	echo
+	echo "Space free on /home or /workspace (on the persistent thus too limited storage):"
+	df -h | grep Use%
+	df -h | grep /home
+	df -h | grep /workspace
+
+
+
+sudo service chrome-remote-desktop start || {
+		echo "Error: Failed to restart Chrome Remote Desktop service."
+		return 1
+	}
+	
+
+
+
+
+	
