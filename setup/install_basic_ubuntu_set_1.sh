@@ -297,7 +297,7 @@ install_ai_tools() {
  #Huge with CUDA:
  #python -m pip install --user -U whisperx numpy torch torchvision torchaudio tensorflow jax jaxlib protobuf 
 
- CPU only: 
+# CPU only: 
 	python -m pip install --user -U whisperx pydub numpy torch torchvision torchaudio tensorflow-cpu jax jaxlib protobuf --extra-index-url https://download.pytorch.org/whl/cpu
  python -m pip install --user openai-whisper -U 
  pip install -U whisperx  
