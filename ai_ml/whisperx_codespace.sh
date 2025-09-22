@@ -1,15 +1,14 @@
- 
-
 #!/usr/bin/env bash
 
-whisperx_codespace() {
+#whisperx_codespace() {
+
 set -euo pipefail
 
 # ================= Runtime Intro =================
 echo
 echo "========================================="
 echo "📜 WhisperX Transcription Script (Paranoid Android & gh User Edition)"
-echo "Version 3.1.11"
+echo "Version 3.1.12"
 echo 
 echo "🔐 Mission Brief:"
 echo "  1. Verify input audio file exists (no ghosts allowed)."
@@ -270,8 +269,8 @@ echo -n "🗣️ The source file of duration: "
 echo "$duration" | lolcat
 echo "has taken this long to process:"
 #Total 'time' should display here:
-}
 
-time whisperx_on_remote "$@"
+
+#time whisperx_codespace "$@"
 
 
