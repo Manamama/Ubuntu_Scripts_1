@@ -65,7 +65,7 @@ LLAMA_CPP_REPO_URL="https://github.com/ggml-org/llama.cpp"
 CHROME_REMOTE_DESKTOP_BASE_URL="https://dl.google.com/linux/direct/"
 TEAMVIEWER_HOST_BASE_URL="https://download.teamviewer.com/download/linux/"
 LOCALLIB="$HOME/.local/lib"
-OWNLOAD_DIR="$HOME/Downloads"
+DOWNLOAD_DIR="$HOME/Downloads"
 
 install_deb_local() {
 	local DEB="$1"
