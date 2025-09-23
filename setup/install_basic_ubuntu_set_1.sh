@@ -485,7 +485,9 @@ chmod +x ~/.chrome-remote-desktop-session
 
 # 4. Restart CRD to load the new session
 #/opt/google/chrome-remote-desktop/chrome-remote-desktop --stop
-/opt/google/chrome-remote-desktop/chrome-remote-desktop --restart
+
+
+echo Then: /opt/google/chrome-remote-desktop/chrome-remote-desktop --start
     
     
     
