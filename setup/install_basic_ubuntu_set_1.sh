@@ -622,7 +622,7 @@ configure_chrome_remote_desktop() {
 #See also the Plasma setup above
 	echo "Installing and configuring Chrome Remote Desktop..."
 	if [[ ! -f "$DOWNLOAD_DIR/$CHROME_REMOTE_DESKTOP_DEB" ]]; then
-		wget -P "$DOWNLOAD_DIR" "https://dl.google.com/linux/direct/CHROME_REMOTE_DESKTOP_DEB$" || {
+		wget -P "$DOWNLOAD_DIR" "https://dl.google.com/linux/direct/$CHROME_REMOTE_DESKTOP_DEB" || {
 			echo "Error: Failed to download Chrome Remote Desktop package."
 			return 1
 		}
