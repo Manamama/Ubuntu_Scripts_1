@@ -307,7 +307,8 @@ install_ai_tools() {
  #cd ~/Downloads/GitHub
  #git clone https://github.com/modelscope/FunASR
  #pip install -U  --user FunASR/ 
- Or: pip install git+https://github.com/modelscope/FunASR.git
+# Or: 
+ pip install git+https://github.com/modelscope/FunASR.git
  #Not: 
  #pip install -U funasr
  pip install -U pydub plotly pysound moviepy
