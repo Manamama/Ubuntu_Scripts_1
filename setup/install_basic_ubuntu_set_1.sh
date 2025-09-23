@@ -746,7 +746,7 @@ display_system_info() {
 
 	peakperf -r 1 -w1 || peakperf -r 1 -w1 -b ice_lake
 	#    neofetch --off || true
-	alias fastfetch=	"fastfetch -l none"
+	alias fastfetch="fastfetch -l none"
 	fastfetch 
 
 	curl -s https://ipinfo.io/ip || echo "⚠️ IP fetch failed."
