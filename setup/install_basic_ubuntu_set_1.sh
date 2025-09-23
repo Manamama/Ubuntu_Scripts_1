@@ -661,10 +661,10 @@ configure_chrome_remote_desktop() {
 	
 	echo 
 	echo Now do: 
-	1. Go to: https://remotedesktop.google.com/headless and copy the code 
-	2. Paste snippet in 'gh' machine. Select pin. 
-	3. Then start ' /opt/google/chrome-remote-desktop/start-host --start' 
-	4. In https://remotedesktop.google.com/access/session/12ec807f-446d-4a3f-99e4-d10e904b6308
+	echo 1. Go to: https://remotedesktop.google.com/headless and copy the code 
+	echo 2. Paste snippet in 'gh' machine. Select pin. 
+	echo 3. Then start ' /opt/google/chrome-remote-desktop/start-host --start' 
+	echo 4. In https://remotedesktop.google.com/access/session/12ec807f-446d-4a3f-99e4-d10e904b6308
 	echo 
 }
 
