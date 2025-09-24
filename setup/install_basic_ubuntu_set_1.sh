@@ -812,6 +812,6 @@ echo "Changing the status so that the script has been fully executed, via this m
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.npm/bin:$PATH"
 
-touch $MARKER_FILE
+#touch $MARKER_FILE
 
 echo "✅ Basic Ubuntu setup complete."
