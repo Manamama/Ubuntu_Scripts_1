@@ -305,6 +305,7 @@ install_ai_tools() {
  python -m pip install --user openai-whisper -U 
  pip install -U whisperx  
  pip install -U ipython
+  pip install -U docling
 
  echo "Installing funasr and related (better be from git clone) ..." 
  #cd ~/Downloads/GitHub
