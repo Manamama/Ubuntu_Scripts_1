@@ -58,14 +58,14 @@ gh auth status -a
     # ================= Step 1: Detect Codespace =================
     echo -n "🔍 Detecting the first GitHub Codespace... : "
     CODESPACE_NAME=$(gh codespace list --json name,state | jq -r '.[] | .name' | head -n1)
-    if [[ -z "$CODESPACE_NAME" ]]; then
+    if [[ -z "$CSPACE_NAME" ]]; then
         echo "❌ FATAL: No Codespace found"
         exit 1
     fi
     
 '    
     # echo -n "✅ Codespace detected:"
-echo "$CODESPACE_NAME" | lolcat
+echo "$CSPACE_NAME" | lolcat
     echo "This codespace should have the right repository: https://github.com/Manamama/Ubuntu_Scripts_1 one. We are logging into it, by default. If the codespace is not the right one, change the order of codespaces or change the code to manually select the right codespace." 
 echo 
 
@@ -75,7 +75,7 @@ echo
 
 if [[ "$extra_args" == *"--diarize"* ]]; then
     echo "🔍 Diarize flag detected — verifying if HF_TOKEN is set remotely..."
-    if gh codespace ssh -c "$CODESPACE_NAME" "[[ -z \"\$HF_TOKEN\" ]]"; then
+    if gh codespace ssh -c "$CSPACE_NAME" "[[ -z \"\$HF_TOKEN\" ]]"; then
         echo "⚠️  WARNING: HF_TOKEN not set remotely — diarize may fail. We shall use local HF_TOKEN then, if any." 
     else
         echo "✅  HF_TOKEN detected remotely" 
@@ -88,9 +88,9 @@ echo
 
     # ================= Step 2: Ensure remote Downloads directory =================
     echo "📁 Ensuring remote Downloads directory exists..."
-    gh codespace ssh -c "$CODESPACE_NAME" "mkdir -p ~/Downloads"
+    gh codespace ssh -c "$CSPACE_NAME" "mkdir -p ~/Downloads"
     
-    #You can check if manual cookies exist: gh codespace ssh -c "$CODESPACE_NAME" "ls -la ~/cookies_yt.txt  && cat ~/cookies_yt.txt && echo "
+    #You can check if manual cookies exist: gh codespace ssh -c "$CSPACE_NAME" "ls -la ~/cookies_yt.txt  && cat ~/cookies_yt.txt && echo "
 
     # ================= Step 3: Download with yt-dlp =================
     echo "🎬 Downloading the audio from the online media via 'yt-dlp --extract-audio' on the remote machine..."
@@ -103,7 +103,7 @@ echo
     echo
     echo 
     # Extracts audio reliably because it downloads whatever format contains audio (even if embedded in video) and lets --extract-audio + --audio-format mp3 handle conversion, so no assumptions about separate audio streams are needed. Stores in ~/Downloads, get clean filename
-    remote_audio=$(gh codespace ssh -c "$CODESPACE_NAME"   " cd ~/Downloads && yt-dlp  --cookies-from-browser chrome  --no-playlist --extract-audio --audio-format mp3  --restrict-filenames --trim-filenames 20 --print after_move:filepath '$url'")
+    remote_audio=$(gh codespace ssh -c "$CSPACE_NAME"   " cd ~/Downloads && yt-dlp  --cookies-from-browser chrome  --no-playlist --extract-audio --audio-format mp3  --restrict-filenames --trim-filenames 20 --print after_move:filepath '$url'")
     
     #--cookies-from-browser firefox
     #--cookies-from-browser chrome
@@ -126,16 +126,16 @@ filename_no_ext=$(basename "$remote_audio" .mp3)
 # here we were sanity checking the file size and the file name.
 # run_cmd="ls -la $remote_audio    "
 #echo Trying: $run_cmd :
-# gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd" | lolcat
+# gh codespace ssh -c "$CSPACE_NAME" "$run_cmd" | lolcat
 
 run_cmd="mediainfo --Inform='Audio;%Duration/String2%' $remote_audio "
 
 # here we were testing the escape quotes for a while; in short do not use for file names: 
 # echo Trying: $run_cmd :
-# gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd" | lolcat
+# gh codespace ssh -c "$CSPACE_NAME" "$run_cmd" | lolcat
 
 #echo " Extracting audio duration..."
-if duration=$(gh codespace ssh -c "$CODESPACE_NAME" "$run_cmd" ); then
+if duration=$(gh codespace ssh -c "$CSPACE_NAME" "$run_cmd" ); then
     echo -n "🗣️  Duration of the audio track: "
     echo "$duration" | lolcat
 else
@@ -151,9 +151,9 @@ echo
 
     # ================= Step 4: Check/install WhisperX =================
     echo "🔍 Checking the presence of WhisperX..."
-    if ! gh codespace ssh -c "$CODESPACE_NAME" "command -v whisperx >/dev/null"; then
+    if ! gh codespace ssh -c "$CSPACE_NAME" "command -v whisperx >/dev/null"; then
         echo "⚠️ WhisperX not found, installing..."
-        gh codespace ssh -c "$CODESPACE_NAME" "pip install -U --user whisperx"
+        gh codespace ssh -c "$CSPACE_NAME" "pip install -U --user whisperx"
         echo "✅ WhisperX installed"
     fi
 
@@ -171,14 +171,14 @@ echo
 
 #run_cmd="whisperx --compute_type float32 --model medium '$remote_audio' --output_dir ~/Downloads  --print_progress True $extra_args"
 
-   time gh codespace ssh -c "$CODESPACE_NAME" HF_TOKEN=$HF_TOKEN "$run_cmd"
+   time gh codespace ssh -c "$CSPACE_NAME" HF_TOKEN=$HF_TOKEN "$run_cmd"
 
 # ================= Step 6: Return only text =================
     echo "📜 Fetching transcription text: '$remote_srt'..."   
 
- #gh codespace ssh -c "$CODESPACE_NAME" "cat $remote_srt" 
+ #gh codespace ssh -c "$CSPACE_NAME" "cat $remote_srt" 
 
-gh codespace ssh -c "$CODESPACE_NAME" "cat $remote_txt" | lolcat
+gh codespace ssh -c "$CSPACE_NAME" "cat $remote_txt" | lolcat
 
 
 # if you BT bind your watch with your phone and use the audio sink of the watch then the below shall play on the watch:
