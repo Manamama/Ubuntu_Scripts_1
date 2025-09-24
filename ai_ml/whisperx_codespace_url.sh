@@ -30,6 +30,31 @@ else
 fi
 echo
 
+
+gh auth status -a
+
+    #echo "Available Codespaces:"
+    select CSPACE_NAME in $CODESPACES ; do
+        if [ -n "$CSPACE_NAME" ]; then
+            #echo "Selected Codespace: $CSPACE_NAME" 
+            echo
+            break
+        else
+            echo "Invalid selection. Please try again." | lolcat
+        fi
+    done
+
+    echo "Codespace details:"
+    gh codespace view -c "$CSPACE_NAME" | lolcat
+    if [ $? -ne 0 ]; then
+        echo "❌  Error viewing codespace '$CSPACE_NAME'." | lolcat
+        #return 1
+    fi
+    echo
+    #echo -n "3️⃣  Determining the Codespace workspace path... : "
+
+
+:'
     # ================= Step 1: Detect Codespace =================
     echo -n "🔍 Detecting the first GitHub Codespace... : "
     CODESPACE_NAME=$(gh codespace list --json name,state | jq -r '.[] | .name' | head -n1)
@@ -37,6 +62,8 @@ echo
         echo "❌ FATAL: No Codespace found"
         exit 1
     fi
+    
+'    
     # echo -n "✅ Codespace detected:"
 echo "$CODESPACE_NAME" | lolcat
     echo "This codespace should have the right repository: https://github.com/Manamama/Ubuntu_Scripts_1 one. We are logging into it, by default. If the codespace is not the right one, change the order of codespaces or change the code to manually select the right codespace." 

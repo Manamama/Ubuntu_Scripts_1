@@ -1,34 +1,16 @@
 #!/bin/bash
-# Description: This function automates the process of connecting to a GitHub Codespace,
+# Description: This automates the process of connecting to a GitHub Codespace,
 #              setting up necessary local mounts, and initiating an interactive SSH session.
-#              It uses the Codespace's native SSH daemon for SFTP, mounting the workspace
-#              locally via rclone FUSE and SSHFS (as a fallback).
-#
-# Expected Logic Flow:
-# 1. List available GitHub Codespaces.
-# 2. Allow the user to choose a specific Codespace to connect to.
-# 3. Determine the Codespace's workspace path.
-# 4. Establish a local port forward to the Codespace's SSH server (port 22).
-# 6. Prepare local mount paths for SSHFS.
-# 8. Mount the Codespace's workspace locally via SSHFS (as a fallback).
-# 9. Initiate an interactive SSH session to the Codespace.
-# 10. Provide reminders for stopping the Codespace.
+#              It uses the Codespace's native SSH daemon for SFTP
+
 #
 # Dependencies:
 #   - gh CLI (GitHub CLI)
 #   - sshfs
 #   - jq (for JSON parsing)
-#   - $FILTER (optional, for colored output)
+#   - lolcat (for colored output)
 #   - Termux environment (for specific paths like $HOME/storage/)
 #
-# Usage:
-#   Source this script in your shell:
-#   source /path/to/gh_codespace_mount_login.sh
-#   Then, call the function:
-#   gh_me
-# gh_me() {
-#!/bin/bash
-# Check if the active account's token has 'codespace' scope using API
 
 # Check active user and 'codespace' scope using gh auth status -a, no external tools
 
