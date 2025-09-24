@@ -375,8 +375,8 @@ install_system_tools() {
 	
 
 	# Core dev tools
-	sudo apt-get install -y pciutils build-essential cmake curl  adb fastboot neofetch geoip-bin ranger mc baobab firefox python3-pip ncdu mediainfo xdg-utils xvfb
-sudo apt install -y libcurl4-openssl-dev meson libtre-dev libomp-dev libssl-dev	
+	sudo apt-get install -y pciutils build-essential cmake curl  adb fastboot neofetch geoip-bin ranger mc baobab firefox python3-pip ncdu mediainfo xdg-utils xvfb ffmpeg
+sudo apt install -y libcurl4-openssl-dev meson libtre-dev libomp-dev libssl-dev	 
 sudo apt install -y bison flex 
  sudo apt-get install -y npm
 	sudo npm install -g neofetch
