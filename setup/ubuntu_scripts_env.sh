@@ -11,7 +11,7 @@ export NVM_DIR="$HOME/.nvm"
 
 export NO_BROWSER=1
 
-alias fastfetch=	fastfetch -l none
+alias fastfetch="fastfetch -l none"
 alias firefox=firefox-esr
 
 alias peakperf="peakperf  -r 1 -w1 || peakperf  -r 1 -w1 -b ice_lake"

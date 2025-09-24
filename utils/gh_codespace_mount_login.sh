@@ -37,7 +37,7 @@
 if command -v $FILTER >/dev/null; then
     FILTER="lolcat"
 else
-echo "No 'locat'! Install lolcat". 
+echo "No 'locat'! Install 'lolcat'. We shall use it anyway."
     FILTER="cat"
 fi
 
@@ -68,7 +68,7 @@ echo
 
 echo  "2️⃣  Checking  🔍  the active GitHub user and the OAuth token scopes... : "
 
-gh auth status -a | lolcat
+gh auth status -a
 # Get active account output
 AUTH_ACTIVE=$(gh auth status -a 2>&1)
 
@@ -106,6 +106,9 @@ if [[ ! "$ACTIVE_SCOPES" =~ codespace ]]; then
   #return 1
 fi
 
+
+gh cs list 
+
 #echo "✅  User '$ACTIVE_USER' has 'codespace' scope."
 
     #echo " Your 'gh' account has the 'codespace' scope, congrats."
@@ -140,6 +143,7 @@ fi
     echo
     #echo -n "3️⃣  Determining the Codespace workspace path... : "
 
+    echo -n "Workspace path: "
     WORKSPACE_PATH=$(gh codespace ssh -c "$CSPACE_NAME" -- -o ForwardX11=no 'pwd' | tr -d '\r\n')
     if [ $? -ne 0 ]; then
         echo "❌  Error getting workspace path from codespace '$CSPACE_NAME'." | lolcat
@@ -153,7 +157,7 @@ fi
             return 1
         fi
     fi
-    echo -n "Workspace path: "
+
     echo "$WORKSPACE_PATH" | lolcat
     #We shall use it to mount as remote later on: 
     WORKSPACE_PATH=""
@@ -206,8 +210,8 @@ DEFAULT_LOCAL=3222
 
 # 1️⃣  Check if remote port is already forwarded locally
 
-echo "The current processes related to the 'codespace' string are listed here:" 
- ps -eo pid,args     | grep "codespace" | lolcat
+echo "The current processes related to the 'gh codespace' string are listed here:" 
+ ps -eo pid,args     | grep "gh codespace" | lolcat
  echo 
  
 LOCAL_PORT=$(ps -eo pid,args \
@@ -244,13 +248,13 @@ for i in {1..2}; do
 if [ -n "${TERMUX__HOME-}" ]; then
 
    if sudo ss -tln | grep -q ":$LOCAL_PORT "; then
-echo "✅  Port $LOCAL_PORT is ready."
+echo "✅  Port $LOCAL_PORT is active."
         break
     fi
 
 else
    if  ss -tln | grep -q ":$LOCAL_PORT "; then
-        echo "✅  Port $LOCAL_PORT is ready."
+        echo "✅  Port $LOCAL_PORT is active."
         break
     fi
 fi
@@ -264,13 +268,13 @@ for i in {1..2}; do
 
 if [ -n "${TERMUX__HOME-}" ]; then
    if sudo ss -tln | grep -q ":$LOCAL_PORT "; then
-echo "✅  Port 3389 is ready."
+echo "✅  Port 3389 is active."
         break
     fi
 else
 
    if  ss -tln | grep -q ":3389 "; then
-        echo "✅  Port 3389 is ready."
+        echo "✅  Port 3389 is active."
         break
     fi
 
