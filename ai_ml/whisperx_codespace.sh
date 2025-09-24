@@ -65,19 +65,6 @@ else
 fi
 echo
 
-: '
-# ================= Step 3: Detect Codespace =================
-echo "🔍 [3/10] Detecting GitHub Codespace..."
-CODESPACE_NAME=$(gh codespace list --json name,state | jq -r '.[] | .name' | head -n1)
-if [[ -z "$CSPACE_NAME" ]]; then
-    echo "❌ FATAL: No Codespace found" 
-    exit 1
-fi
-echo -n "✅ Codespace detected: "
-#echo "$CSPACE_NAME" | lolcat
-echo
-
-'
 
 gh auth status -a
 
