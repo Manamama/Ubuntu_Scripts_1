@@ -65,22 +65,39 @@ else
 fi
 echo
 
+: '
 # ================= Step 3: Detect Codespace =================
 echo "🔍 [3/10] Detecting GitHub Codespace..."
 CODESPACE_NAME=$(gh codespace list --json name,state | jq -r '.[] | .name' | head -n1)
-if [[ -z "$CODESPACE_NAME" ]]; then
+if [[ -z "$CSPACE_NAME" ]]; then
     echo "❌ FATAL: No Codespace found" 
     exit 1
 fi
 echo -n "✅ Codespace detected: "
-#echo "$CODESPACE_NAME" | lolcat
+#echo "$CSPACE_NAME" | lolcat
 echo
 
-gh codespace view -c "$CODESPACE_NAME" | lolcat
+'
+
+gh auth status -a
+
+    #echo "Available Codespaces:"
+    select CSPACE_NAME in $CODESPACES ; do
+        if [ -n "$CSPACE_NAME" ]; then
+            #echo "Selected Codespace: $CSPACE_NAME" 
+            echo
+            break
+        else
+            echo "Invalid selection. Please try again." | lolcat
+        fi
+    done
+    
+    
+gh codespace view -c "$CSPACE_NAME" | lolcat
 echo 
 # ================= Step 4: Ensure remote Downloads directory =================
 echo "📁 [4/10] Ensuring remote Downloads directory..."
-if ! gh codespace ssh -c "$CODESPACE_NAME" "mkdir -p ~/Downloads" 2>/dev/null; then
+if ! gh codespace ssh -c "$CSPACE_NAME" "mkdir -p ~/Downloads" 2>/dev/null; then
     echo "❌ FATAL: Failed to create remote Downloads directory" 
     exit 1
 fi
@@ -89,7 +106,7 @@ echo
 
 # ================= Step 5: Upload to Codespace =================
 echo "🔍 [5/10] Resolving remote home directory..."
-remote_home=$(gh codespace ssh -c "$CODESPACE_NAME" "echo \$HOME" 2>/dev/null)
+remote_home=$(gh codespace ssh -c "$CSPACE_NAME" "echo \$HOME" 2>/dev/null)
 if [[ -z "$remote_home" ]]; then
     echo "❌ FATAL: Failed to resolve remote home directory" 
     exit 1
@@ -100,18 +117,18 @@ echo
 remote_path="$remote_home/Downloads/$base_filename"
 
 echo "📤 [6/10] Checking the existence of the remote file: '$remote_path'..."
-if gh codespace ssh -c "$CODESPACE_NAME" "test -f '$remote_path'" 2>/dev/null; then
+if gh codespace ssh -c "$CSPACE_NAME" "test -f '$remote_path'" 2>/dev/null; then
     echo "That remote file exists, so:"
     echo "🔎 Comparing the local file: '$file' with the remote one: '$remote_path'..."
     local_hash=$(sha256sum "$file" | cut -d' ' -f1)
-    remote_hash=$(gh codespace ssh -c "$CODESPACE_NAME" "sha256sum '$remote_path' | cut -d' ' -f1" 2>/dev/null || true)
+    remote_hash=$(gh codespace ssh -c "$CSPACE_NAME" "sha256sum '$remote_path' | cut -d' ' -f1" 2>/dev/null || true)
 
     if [[ -n "$remote_hash" && "$local_hash" == "$remote_hash" ]]; then
         echo "✅ Skipped the upload, as the local file is identical to the remote one."
     else
         echo "⚠️ File exists but hashes differ → re-uploading."
         echo "📤 Uploading '$file' → '$remote_path'..."
-        if ! upload_output=$(time gh codespace cp -e -c "$CODESPACE_NAME" "$file" "remote:$remote_path" 2>&1); then
+        if ! upload_output=$(time gh codespace cp -e -c "$CSPACE_NAME" "$file" "remote:$remote_path" 2>&1); then
             echo "❌ FATAL: Upload failed: $upload_output"
             exit 1
         fi
@@ -120,7 +137,7 @@ if gh codespace ssh -c "$CODESPACE_NAME" "test -f '$remote_path'" 2>/dev/null; t
 else
     echo "⚠️ Remote file not found → uploading."
     echo "📤 Uploading '$file' → '$remote_path'..."
-    if ! upload_output=$(time gh codespace cp -e -c "$CODESPACE_NAME" "$file" "remote:$remote_path" 2>&1); then
+    if ! upload_output=$(time gh codespace cp -e -c "$CSPACE_NAME" "$file" "remote:$remote_path" 2>&1); then
         echo "❌ FATAL: Upload failed: $upload_output"
         exit 1
     fi
@@ -132,11 +149,11 @@ echo
 
 # ================= Step 7: Check and install WhisperX =================
 echo "🔍 [7/10] Checking for WhisperX in Codespace..."
-if gh codespace ssh -c "$CODESPACE_NAME" "command -v whisperx >/dev/null"; then
+if gh codespace ssh -c "$CSPACE_NAME" "command -v whisperx >/dev/null"; then
     echo "✅ WhisperX is installed on the remote server"
 else
     echo "⚠️ WhisperX not found, installing (mind you: by default, it installs the huge GPU edition with NVIDIA drivers, so preinstall the Torch CPU version to avoid it..." 
-    if ! install_output=$(gh codespace ssh -c "$CODESPACE_NAME" "pip install -U --user whisperx" 2>&1); then
+    if ! install_output=$(gh codespace ssh -c "$CSPACE_NAME" "pip install -U --user whisperx" 2>&1); then
         echo "❌ FATAL: Failed to install WhisperX: $install_output"
         exit 1
     fi
@@ -148,7 +165,7 @@ fi
 # Paranoia: Check HF_TOKEN if --diarize is used
 if [[ "$extra_args" == *"--diarize"* ]]; then
     echo "🔍 Diarize flag detected — verifying if HF_TOKEN is active..."
-    if gh codespace ssh -c "$CODESPACE_NAME" "[[ -z \"\$HF_TOKEN\" ]]"; then
+    if gh codespace ssh -c "$CSPACE_NAME" "[[ -z \"\$HF_TOKEN\" ]]"; then
         echo "⚠️ WARNING: HF_TOKEN not set remotely — diarize may fail. We shall use local HF_TOKEN then, if any." 
     else
         echo "✅ HF_TOKEN detected remotely" 
@@ -164,7 +181,7 @@ run_cmd="whisperx --compute_type float32 --model medium '$remote_path' --output_
 echo "📜 The command that is being run: '$run_cmd' :" 
 echo
 
-if ! time gh codespace ssh -c "$CODESPACE_NAME"  "HF_TOKEN=$HF_TOKEN $run_cmd"; then
+if ! time gh codespace ssh -c "$CSPACE_NAME"  "HF_TOKEN=$HF_TOKEN $run_cmd"; then
     echo "❌ FATAL: WhisperX execution failed (non-zero exit status)" 
     echo "⚠️ Check logs above — likely diarization/HF_TOKEN issue or remote crash."
     termux-notification -c " Fail remote: '$base_filename'" \
@@ -179,7 +196,7 @@ echo
 : '
 # Paranoia: List remote Downloads to debug output files
 echo "🔍 Listing remote Downloads post-WhisperX..."
-if ! ls_output=$(gh codespace ssh -c "$CODESPACE_NAME" "ls -la '$remote_home/Downloads'" 2>&1); then
+if ! ls_output=$(gh codespace ssh -c "$CSPACE_NAME" "ls -la '$remote_home/Downloads'" 2>&1); then
     echo "⚠️ Failed to list remote Downloads: $ls_output" 
 else
     echo "📂 Remote Downloads contents:"
@@ -193,7 +210,7 @@ remote_srt="$remote_home/Downloads/${filename_no_ext}.srt"
 remote_json="$remote_home/Downloads/${filename_no_ext}.json"
 
 echo "🔍 [9/10] Verifying remote output files..."
-if ! check_output=$(gh codespace ssh -c "$CODESPACE_NAME" "test -f '$remote_srt' && test -f '$remote_json' " 2>&1); then
+if ! check_output=$(gh codespace ssh -c "$CSPACE_NAME" "test -f '$remote_srt' && test -f '$remote_json' " 2>&1); then
     echo "❌ FATAL: Output files missing or empty: $check_output" 
     termux-notification -c " Fail!: '$base_filename'" --title "WhisperX " --vibrate 500,2000,200
     
@@ -206,7 +223,7 @@ echo
 echo "⬇️ [10/10] Downloading results to Termux..."
 for f in "$remote_srt" "$remote_json"; do
     echo "🔍 Downloading $f..."
-    if ! download_output=$(time gh codespace cp -e -c "$CODESPACE_NAME" "remote:$f" "$file_dir/" 2>&1); then
+    if ! download_output=$(time gh codespace cp -e -c "$CSPACE_NAME" "remote:$f" "$file_dir/" 2>&1); then
         echo "❌ FATAL: Failed to download $f: $download_output" 
         exit 1
     fi
