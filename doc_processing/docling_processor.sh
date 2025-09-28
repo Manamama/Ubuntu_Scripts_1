@@ -107,7 +107,7 @@ input_path="$1"
 
 
 echo 
-echo "OCR via docling, streamlined, n 2.5.4 | author ManamaMa"
+echo "OCR via docling, streamlined, version 2.5.5 | author ManamaMa"
 echo -e "Usage: \033[94m$(basename $0) <input-file> | <input-folder> | <input-URL> [options] \033[0m"
 echo "Most useful options:"
 echo "  --no-ocr                 
