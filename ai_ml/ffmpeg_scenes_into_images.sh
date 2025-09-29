@@ -1,14 +1,21 @@
 #!/bin/bash
 
-# Check if video path is provided
-if [ $# -ne 1 ]; then
-    echo "Usage: $0 <video_path>"
+# Check if video path is provided and handle optional scene_threshold
+if [ $# -lt 1 ] || [ $# -gt 2 ]; then
+    echo "Usage: $0 <video_path> [scene_threshold]"
+    echo "  <video_path>      : The path to the video file."
+    echo "  [scene_threshold] : Optional. A float value for scene detection sensitivity (e.g., 0.15)."
+    echo "                    Higher values detect more abrupt changes, lower values are more sensitive."
+    echo "                    Defaults to 0.15 if not provided."
     exit 1
 fi
 
 echo "Starting scene detection script..."
 
 VIDEO_PATH="$1"
+SCENE_THRESHOLD=${2:-0.15} # Default to 0.15 if not provided
+
+echo "Using scene detection threshold: $SCENE_THRESHOLD"
 
 # Check if video file exists
 if [ ! -f "$VIDEO_PATH" ]; then
@@ -19,7 +26,7 @@ fi
 # Get video basename and directory
 BASENAME=$(basename "$VIDEO_PATH" | sed 's/\.[^.]*$//')
 VIDEODIR=$(dirname "$VIDEO_PATH")
-OUTPUT_DIR="$VIDEODIR/${BASENAME}_scenes"
+OUTPUT_DIR="$VIDEODIR/${BASENAME}_scenes_${SCENE_THRESHOLD}"
 
 #echo "Video path: $VIDEO_PATH"
 #echo "Basename: $BASENAME"
@@ -51,7 +58,7 @@ echo "Progress will be shown below:"
 # Redirect showinfo output to a log file for parsing
 START_TIME=$(date +%s)
 ffmpeg -nostats -i "$VIDEO_PATH" \
-    -vf "select='gt(scene,0.15)',showinfo" -fps_mode passthrough -f image2 "$OUTPUT_DIR/scene_ffmpeg_%03d.png" \
+    -vf "select='gt(scene,$SCENE_THRESHOLD)',showinfo" -fps_mode passthrough -f image2 "$OUTPUT_DIR/scene_ffmpeg_%03d.png" \
     -progress "$PROGRESS_LOG" 2> "$OUTPUT_DIR/showinfo.log" &
 
 FFMPEG_PID=$!
@@ -80,6 +87,14 @@ echo $((END_TIME - START_TIME))s | lolcat
 
 # Run Python script to parse showinfo.log and generate scene summary
 
+
+# Count the number of generated scene images
+scene_count=$(find "$OUTPUT_DIR" -type f -name 'scene_ffmpeg_*.png' | wc -l)
+
+echo -n  "📸 Number of scene images created: "
+echo "$scene_count" | lolcat
+
+du -h "$OUTPUT_DIR" | lolcat
 echo "Opening the output directory: "
 echo "$OUTPUT_DIR" | lolcat
 termux-open "$OUTPUT_DIR"
