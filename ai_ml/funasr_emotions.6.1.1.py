@@ -3,6 +3,7 @@ import argparse
 import json
 import whisperx
 from funasr import AutoModel
+from pydub import AudioSegment
 import plotly.graph_objects as go
 import pandas as pd
 import webbrowser
@@ -17,7 +18,7 @@ parser.add_argument("media_path", type=str, help="Path to the media file or a UR
 parser.add_argument("--language", type=str, default="", help="Language code (default: autodetect)")
 args = parser.parse_args()
 #Simplified version of: emotion_detector_funasr_whisperx_plotly.py, prepared for GitHub Codespace
-print(f"Emotions detector via Whisperx (voice activity detection, chunking, transcription) and FunASR, version 6.2.2")
+print(f"Emotions detector via Whisperx (voice activity detection, chunking, transcription) and FunASR, version 6.2.1")
 print("Still the best pipeline in 2025, see https://grok.com/c/734642ab-c01a-4661-8780-dfe09f041d46 or ./Archive folder why so")
 
 
@@ -83,40 +84,18 @@ for seg in result["segments"]:
     text = seg["text"]
     sentences_data.append({"start": start, "end": end, "text": text})
 
-# Step 2: Chunk audio based on timestamps using a direct ffmpeg call
-chunks = []
-print("Chunking audio using ffmpeg...")
-for i, seg in enumerate(sentences_data):
-    start_s = seg["start"]
-    end_s = seg["end"]
-    # Revert to mp3, as we are now using a reliable encoder
-    chunk_file = output_dir / f"{stem}_segment_{i:03d}.mp3"
-    
-    command = [
-        "ffmpeg",
-        "-i", str(media_path),
-        "-ss", str(start_s),
-        "-to", str(end_s),
-        "-c:a", "libmp3lame",  # Explicitly use libmp3lame encoder
-        "-vn",                # No video stream
-        "-loglevel", "error", # Suppress verbose output
-        "-y",                 # Overwrite output file if it exists
-        str(chunk_file)
-    ]
-    
-    try:
-        # Using subprocess to call ffmpeg directly is more robust than relying on pydub's wrapper
-        subprocess.run(command, check=True, capture_output=True, text=True)
-        chunks.append(chunk_file)
-    except FileNotFoundError:
-        print("❌ Error: ffmpeg not found. Please install ffmpeg and ensure it is in your system's PATH.", file=sys.stderr)
-        sys.exit(1)
-    except subprocess.CalledProcessError as e:
-        print(f"❌ Error during ffmpeg execution for segment {i}:", file=sys.stderr)
-        print(f"ffmpeg stderr: {e.stderr}", file=sys.stderr)
-        print("Please ensure ffmpeg is installed and the libmp3lame codec is available.", file=sys.stderr)
-        sys.exit(1)
+# Load full audio once for chunking
+full_audio = AudioSegment.from_file(media_path)
 
+# Step 2: Chunk audio based on timestamps
+chunks = []
+for i, seg in enumerate(sentences_data):
+    start_ms = int(seg["start"] * 1000)
+    end_ms = int(seg["end"] * 1000)
+    chunk_audio = full_audio[start_ms:end_ms]
+    chunk_file = output_dir / f"{stem}_segment_{i:03d}.mp3"
+    chunk_audio.export(chunk_file, format="mp3")
+    chunks.append(chunk_file)
 
 # Create SCP file for FunASR batch input
 scp_path = output_dir / (stem + "_chunks.scp")
