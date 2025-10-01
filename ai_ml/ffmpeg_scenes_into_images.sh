@@ -97,6 +97,6 @@ echo "$scene_count" | lolcat
 du -h "$OUTPUT_DIR" | lolcat
 echo "Opening the output directory: "
 echo "$OUTPUT_DIR" | lolcat
-termux-open "$OUTPUT_DIR"
+open "$OUTPUT_DIR"
 
 #python3 parse_ffmpeg_scenes.py "$OUTPUT_DIR/showinfo.log" "$VIDEO_PATH"
