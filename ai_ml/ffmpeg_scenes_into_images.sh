@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Check if video path is provided and handle optional scene_threshold
+# Check if video path is provided and handle optional scene_threshold.
+# Also, if the user gives fewer than 1 argument or more than 2, the script complains.
 if [ $# -lt 1 ] || [ $# -gt 2 ]; then
     echo "Usage: $0 <video_path> [scene_threshold]"
     echo "  <video_path>      : The path to the video file."
@@ -57,9 +58,9 @@ echo "Progress will be shown below:"
 # Run FFmpeg with scene detection, saving PNGs at native resolution
 # Redirect showinfo output to a log file for parsing
 START_TIME=$(date +%s)
-ffmpeg -nostats -i "$VIDEO_PATH" \
-    -vf "select='gt(scene,$SCENE_THRESHOLD)',showinfo" -fps_mode passthrough -f image2 "$OUTPUT_DIR/scene_ffmpeg_%03d.png" \
-    -progress "$PROGRESS_LOG" 2> "$OUTPUT_DIR/showinfo.log" &
+ffmpeg -nostats -i "$VIDEO_PATH"   -vf "select='gt(scene,$SCENE_THRESHOLD)',showinfo" -fps_mode passthrough -f image2 "$OUTPUT_DIR/scene_ffmpeg_%03d.png"  -progress "$PROGRESS_LOG" 2> "$OUTPUT_DIR/showinfo.log" &
+
+#ffmpeg -nostats -i "$VIDEO_PATH"   -vf "select='gt(scene,$SCENE_THRESHOLD)',showinfo" -fps_mode passthrough -f image2 "$OUTPUT_DIR/scene_ffmpeg_%03d.png"  -progress "$PROGRESS_LOG" 
 
 FFMPEG_PID=$!
 
@@ -70,6 +71,7 @@ while kill -0 $FFMPEG_PID 2>/dev/null; do
     fi
     sleep 1
 done
+
 
 # Print a newline to move to the next line after the progress indicator
 echo
