@@ -8,7 +8,7 @@ set -euo pipefail
 echo
 echo "========================================="
 echo "📜 WhisperX Transcription Script (Paranoid Android & gh User Edition)"
-echo "Version 3.1.12"
+echo "Version 3.2.1"
 echo 
 echo "🔐 Mission Brief:"
 echo "  1. Verify input audio file exists (no ghosts allowed)."

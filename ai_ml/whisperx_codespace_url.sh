@@ -3,7 +3,7 @@
     set -euo pipefail
 
 echo "📜 WhisperX Transcription from URL (Paranoid Android & gh User Edition)"
-echo "Version 1.4.1"
+echo "Version 1.4.2"
 
     if [[ $# -lt 1 ]]; then
         echo "❌ Usage: $0 <url> [extra_args...]"
