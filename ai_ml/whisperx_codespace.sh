@@ -74,31 +74,6 @@ CSPACE_NAME=$(gh codespace list --json name,repository,state --jq '.[] | select(
 
 
 
-: '
-   echo "⇛  Select one from the available codespaces:"
-    CODESPACES=$(gh codespace list --json name,state | jq -r '.[] | .name')
-    if [ $? -ne 0 ]; then
-        echo "❌  Error listing codespaces. Make sure gh CLI is authenticated and codespaces are available." | lolcat
-        return 1
-    fi
-    if [ -z "$CODESPACES" ]; then
-        echo "No access to codespaces found. Either check your rights (scopes) relating to your codespaces for this account or do create a codespace first." | lolcat
-        return 1
-    fi
-    
-
-    #echo "Available Codespaces:"
-    select CSPACE_NAME in $CODESPACES ; do
-        if [ -n "$CSPACE_NAME" ]; then
-            #echo "Selected Codespace: $CSPACE_NAME" 
-            echo
-            break
-        else
-            echo "Invalid selection. Please try again." | lolcat
-        fi
-    done
-
-'    
     
 gh codespace view -c "$CSPACE_NAME" | lolcat
 echo 
