@@ -263,8 +263,9 @@ termux-notification -c " OK: ${filename_no_ext}.srt" --title "WhisperX " --vibra
 # if you BT bind your watch with your phone and use the audio sink of the watch then the below shall play on the watch:
 
 
-termux-tts-speak "Transcription has finished."
-
+#termux-tts-speak "Transcription has finished."
+# this sometimes hangs:
+termux-tts-speak  -l en -r 0.8 "Transcription has finished."
 
 echo "✅ Notifications sent" 
 echo

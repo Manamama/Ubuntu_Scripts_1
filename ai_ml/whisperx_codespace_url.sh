@@ -199,7 +199,9 @@ if [ -n "${TERMUX__HOME-}" ]; then
 
     fi
 
-    termux-tts-speak "Transcription from URL has  finished."
+#    termux-tts-speak "Transcription from URL has  finished."
+# this sometimes hangs:
+termux-tts-speak  -l en -r 0.8 "Transcription fom URL has finished."
 
     #This is for a watch that may be connected via BLE to the notifications shown by Termux API: 
     termux-notification -c " OK: ${filename_no_ext}.srt" --title "WhisperX " --vibrate 500,1000,200
