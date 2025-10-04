@@ -48,10 +48,13 @@ CSPACE_NAME=$(gh codespace list --json name,repository,state --jq '.[] | select(
     echo
     #echo -n "3️⃣  Determining the Codespace workspace path... : "
 
+: '
     # echo -n "✅ Codespace detected:"
 echo "$CSPACE_NAME" | lolcat
     echo "This codespace should have the right repository: https://github.com/Manamama/Ubuntu_Scripts_1 one. We are logging into it, by default. If the codespace is not the right one, change the order of codespaces or change the code to manually select the right codespace." 
 echo 
+'
+
 
 : '
 # Paranoia: Check HF_TOKEN if --diarize is used
