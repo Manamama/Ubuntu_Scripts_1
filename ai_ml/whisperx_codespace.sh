@@ -38,7 +38,7 @@ base_filename=$(basename "$file")
 filename_no_ext="${base_filename%.*}"
 file_dir=$(dirname "$file")
 
-echo "📥 Input File (shared paths resolved):"
+echo -n "📥 Input File (shared paths resolved): "
 echo "$file" | lolcat
 echo "💡 Tip: Add '--model large' or '--diarize' (needs HF_TOKEN env) or '--highlight_words True' (each word is then underlined for a later colorizing) for variants."
 echo -n "🔧 WhisperX Extra Args: "
@@ -56,9 +56,9 @@ echo "✅ Input file verified: '$file'"
 echo
 
 # ================= Step 2: Show file duration =================
-echo "⏳ [2/10] Extracting audio duration..."
+echo -n "⏳ [2/10] Extracting audio duration... :"
 if duration=$(mediainfo --Inform='Audio;%Duration/String2%' "$file" 2>/dev/null); then
-    echo -n "🗣️ Duration: "
+    #echo   
     echo "$duration" | lolcat
 else
     echo "⚠️ Could not extract duration (proceeding anyway)" 
@@ -77,8 +77,21 @@ CSPACE_NAME=$(gh codespace list --json name,repository,state --jq '.[] | select(
     
 gh codespace view -c "$CSPACE_NAME" | lolcat
 echo 
+
+# ================= Step 5: Upload to Codespace =================
+echo 0n "🔍 Resolving remote home directory... :"
+remote_home=$(gh codespace ssh -c "$CSPACE_NAME" "echo \$HOME" 2>/dev/null)
+if [[ -z "$remote_home" ]]; then
+    echo "❌ FATAL: Failed to resolve remote home directory" 
+    exit 1
+fi
+# echo -n "✅ Remote home: " 
+echo "'$remote_home'" | lolcat
+echo
+remote_path="$remote_home/Downloads/$base_filename"
+
 # ================= Step 4: Ensure remote Downloads directory =================
-echo "📁 [4/10] Ensuring remote Downloads directory..."
+echo "📁 Ensuring remote Downloads directory..."
 if ! gh codespace ssh -c "$CSPACE_NAME" "mkdir -p ~/Downloads" 2>/dev/null; then
     echo "❌ FATAL: Failed to create remote Downloads directory" 
     exit 1
@@ -86,19 +99,9 @@ fi
 echo "✅ Remote Downloads directory ready" 
 echo
 
-# ================= Step 5: Upload to Codespace =================
-echo "🔍 [5/10] Resolving remote home directory..."
-remote_home=$(gh codespace ssh -c "$CSPACE_NAME" "echo \$HOME" 2>/dev/null)
-if [[ -z "$remote_home" ]]; then
-    echo "❌ FATAL: Failed to resolve remote home directory" 
-    exit 1
-fi
-echo -n "✅ Remote home: " 
-echo "'$remote_home'" | lolcat
-echo
-remote_path="$remote_home/Downloads/$base_filename"
 
-echo "📤 [6/10] Checking the existence of the remote file: '$remote_path'..."
+
+echo "🔍 [6/10] Checking the existence of the remote file: '$remote_path'..."
 if gh codespace ssh -c "$CSPACE_NAME" "test -f '$remote_path'" 2>/dev/null; then
     echo "That remote file exists, so:"
     echo "🔎 Comparing the local file: '$file' with the remote one: '$remote_path'..."
@@ -107,22 +110,22 @@ if gh codespace ssh -c "$CSPACE_NAME" "test -f '$remote_path'" 2>/dev/null; then
 
     if [[ -n "$remote_hash" && "$local_hash" == "$remote_hash" ]]; then
         echo "✅ Skipped the upload, as the local file is identical to the remote one."
+        
     else
-        echo "⚠️ File exists but hashes differ → re-uploading."
+        echo "⚠️  File exists but hashes differ, so re-uploading."
         echo "📤 Uploading '$file' → '$remote_path'..."
-        if ! upload_output=$(time gh codespace cp -e -c "$CSPACE_NAME" "$file" "remote:$remote_path" 2>&1); then
-            echo "❌ FATAL: Upload failed: $upload_output"
-            exit 1
-        fi
+        #Remove: '-e'
+time gh codespace cp  -c "$CSPACE_NAME" "$file" "remote:$remote_path"
+        
         echo "✅ Uploaded: $remote_path"
     fi
 else
-    echo "⚠️ Remote file not found → uploading."
-    echo "📤 Uploading '$file' → '$remote_path'..."
-    if ! upload_output=$(time gh codespace cp -e -c "$CSPACE_NAME" "$file" "remote:$remote_path" 2>&1); then
-        echo "❌ FATAL: Upload failed: $upload_output"
-        exit 1
-    fi
+    echo -n "📤 Remote file not found, so uploading: "
+    echo " '$file' → '$remote_path'"
+    echo time gh codespace cp  -c "$CSPACE_NAME" "$file" "remote:$remote_path" 
+    
+    # `-e` somehow messes it up: 'scp: ambiguous target', so we remove it: 
+time gh codespace cp  -c "$CSPACE_NAME" "$file" "remote:$remote_path" 
     echo "✅ Uploaded: $remote_path"
 fi
 

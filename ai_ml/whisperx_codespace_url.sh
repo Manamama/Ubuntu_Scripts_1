@@ -158,7 +158,7 @@ echo
 
 #run_cmd="whisperx --compute_type float32 --model medium '$remote_audio' --output_dir ~/Downloads  --print_progress True $extra_args"
 
-   time gh codespace ssh -c "$CSPACE_NAME" HF_TOKEN=$HF_TOKEN "$run_cmd"
+   time gh codespace ssh -c "$CSPACE_NAME" HF_TOKEN=$HF_TOKEN "$run_cmd" | lolcat
 
 # ================= Step 6: Return only text =================
     echo "📜 Fetching transcription text: '$remote_srt'..."   
