@@ -67,8 +67,14 @@ echo
 
 
 gh auth status -a
+gh cs list
+
+CSPACE_NAME=$(gh codespace list --json name,repository,state --jq '.[] | select(.repository | contains("/Ubuntu_Scripts_1")) | .name')
 
 
+
+
+: '
    echo "⇛  Select one from the available codespaces:"
     CODESPACES=$(gh codespace list --json name,state | jq -r '.[] | .name')
     if [ $? -ne 0 ]; then
@@ -91,7 +97,8 @@ gh auth status -a
             echo "Invalid selection. Please try again." | lolcat
         fi
     done
-    
+
+'    
     
 gh codespace view -c "$CSPACE_NAME" | lolcat
 echo 

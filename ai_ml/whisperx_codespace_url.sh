@@ -32,10 +32,15 @@ echo
 
 
 gh auth status -a
+gh cs list
+
+CSPACE_NAME=$(gh codespace list --json name,repository,state --jq '.[] | select(.repository | contains("/Ubuntu_Scripts_1")) | .name')
 
 
+
+: '
    echo "⇛  Select one from the available codespaces:"
-    CODESPACES=$(gh codespace list --json name,state | jq -r '.[] | .name')
+    CODESPACES=$(gh codespace list --json name,repository | jq -r '.[] | .name')
     if [ $? -ne 0 ]; then
         echo "❌  Error listing codespaces. Make sure gh CLI is authenticated and codespaces are available." | lolcat
         return 1
@@ -44,7 +49,9 @@ gh auth status -a
         echo "No access to codespaces found. Either check your rights (scopes) relating to your codespaces for this account or do create a codespace first." | lolcat
         return 1
     fi
-    
+
+
+   
 
     #echo "Available Codespaces:"
     select CSPACE_NAME in $CODESPACES ; do
@@ -56,6 +63,8 @@ gh auth status -a
             echo "Invalid selection. Please try again." | lolcat
         fi
     done
+
+'
 
     echo "Codespace details:"
     gh codespace view -c "$CSPACE_NAME" | lolcat
