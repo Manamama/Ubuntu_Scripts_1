@@ -64,7 +64,7 @@ batch_size = 2
 compute_type = "float32"
 whisperx_model_size = "medium"  # Or "large-v3" or "base", "tiny", the latter needed on Android
 # See https://huggingface.co/openai/whisper-large-v3
-whisperx_model_size = "base"  
+#whisperx_model_size = "base"  
 
 # Load WhisperX model
 model = whisperx.load_model(whisperx_model_size, device, compute_type=compute_type)

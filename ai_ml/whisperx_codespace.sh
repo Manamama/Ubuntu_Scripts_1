@@ -47,7 +47,7 @@ echo "'$extra_args'" | lolcat
 echo
 
 # ================= Step 1: Check input file =================
-echo "🔍 [1/10] Verifying input file existence..."
+echo -n  "🔍  Verifying input file existence... :"
 if [[ ! -f "$file" ]]; then
     echo "❌ FATAL: Input file not found: '$file'" 
     exit 1
@@ -56,7 +56,7 @@ echo "✅ Input file verified: '$file'"
 echo
 
 # ================= Step 2: Show file duration =================
-echo -n "⏳ [2/10] Extracting audio duration... :"
+echo -n "⏳ Extracting audio duration... : "
 if duration=$(mediainfo --Inform='Audio;%Duration/String2%' "$file" 2>/dev/null); then
     #echo   
     echo "$duration" | lolcat
@@ -101,7 +101,7 @@ echo
 
 
 
-echo "🔍 [6/10] Checking the existence of the remote file: '$remote_path'..."
+echo "🔍 Checking the existence of the remote file: '$remote_path'..."
 if gh codespace ssh -c "$CSPACE_NAME" "test -f '$remote_path'" 2>/dev/null; then
     echo "That remote file exists, so:"
     echo "🔎 Comparing the local file: '$file' with the remote one: '$remote_path'..."
@@ -133,7 +133,7 @@ echo
 
 
 # ================= Step 7: Check and install WhisperX =================
-echo "🔍 [7/10] Checking for WhisperX in Codespace..."
+echo "🔍 Checking for WhisperX in Codespace..."
 if gh codespace ssh -c "$CSPACE_NAME" "command -v whisperx >/dev/null"; then
     echo "✅ WhisperX is installed on the remote server"
 else
@@ -151,7 +151,7 @@ fi
 if [[ "$extra_args" == *"--diarize"* ]]; then
     echo "🔍 Diarize flag detected — verifying if HF_TOKEN is active..."
     if gh codespace ssh -c "$CSPACE_NAME" "[[ -z \"\$HF_TOKEN\" ]]"; then
-        echo "⚠️ WARNING: HF_TOKEN not set remotely — diarize may fail. We shall use local HF_TOKEN then, if any." 
+        echo "⚠️  WARNING: HF_TOKEN not set on the remote machine, so the '— diarize' option may fail. We shall use local HF_TOKEN then, if any." 
     else
         echo "✅ HF_TOKEN detected remotely" 
     fi
@@ -159,7 +159,7 @@ fi
 echo
 
 # ================= Step 8: Run WhisperX in Codespace =================
-echo "🤖 [8/10] Running WhisperX in Codespace with defaults..."
+echo "🤖 Running WhisperX in Codespace with defaults..."
 
 # user may add the switches, for example this one: --highlight_words True
 run_cmd="whisperx --compute_type float32 --model medium '$remote_path' --output_dir '$remote_home/Downloads'  --print_progress True $extra_args"
@@ -194,7 +194,7 @@ echo
 remote_srt="$remote_home/Downloads/${filename_no_ext}.srt"
 remote_json="$remote_home/Downloads/${filename_no_ext}.json"
 
-echo "🔍 [9/10] Verifying remote output files..."
+echo "🔍 Verifying remote output files..."
 if ! check_output=$(gh codespace ssh -c "$CSPACE_NAME" "test -f '$remote_srt' && test -f '$remote_json' " 2>&1); then
     echo "❌ FATAL: Output files missing or empty: $check_output" 
     termux-notification -c " Fail!: '$base_filename'" --title "WhisperX " --vibrate 500,2000,200
@@ -205,7 +205,7 @@ echo "✅ Outputs verified: '$remote_srt' and '$remote_json' (non-empty)"
 echo
 
 # ================= Step 10: Download SRT and JSON back =================
-echo "⬇️ [10/10] Downloading results to Termux..."
+echo "⬇️ Downloading the results to Termux..."
 for f in "$remote_srt" "$remote_json"; do
     echo "🔍 Downloading $f..."
     if ! download_output=$(time gh codespace cp -e -c "$CSPACE_NAME" "remote:$f" "$file_dir/" 2>&1); then
