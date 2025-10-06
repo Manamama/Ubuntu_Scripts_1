@@ -168,7 +168,7 @@ for ip in "${CANDIDATE_IPS[@]}"; do
             chmod 664 "$LOG_FILE" 2>/dev/null || echo "❌ Failed to fix permissions for $LOG_FILE"
         fi
     else
-        echo "⚠️ Port 8022 closed on $ip, skipping"
+        echo "⚠️  Port 8022 closed on $ip, skipping"
     fi
 done
 
@@ -332,7 +332,7 @@ echo "----------------------------------------"
 printf "%-20s %-30s %-10s"
 
 echo
-echo "⚠️ Warning: even if well mounted now, do not use 'git' operations on a rclone mounted repo, as git lock file(s) are not removed and generally, 'git' starts to mess up the 'git' control files due to some mysterious yet cache delays, observer it via: watch file  '$(pwd)/.git/index.lock'  mechanism, if needed to avoid." 
+echo "⚠️  Warning: even if all is well mounted by now, do not use the 'git' operations on a rclone-mounted repository, as git lock file(s) are not being removed and generally the 'git' process starts to mess up with the 'git' control files due to some yet mysterious file cache delays, which may be observed via the 'watch file  $(pwd)/.git/index.lock'  command." 
 
 
 
