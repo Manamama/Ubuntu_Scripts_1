@@ -38,16 +38,16 @@ echo " to speed up."
 }
 
 
-whisperxme() {
-echo "version 2.0.4"
+whisperx_me() {
+echo "version 2.0.5"
     local file="$1"
     shift
     echo "Processing: \"$file\" $* ..."
-    time process_audio "$file" "$@"
+    process_audio "$file" "$@"
 }
 
 
-whisperxme_deb() {
+whisperx_me_deb() {
     local file_path="$1"
     local dir_name=$(dirname "$file_path")
     local external_sd_path="$HOME/storage/external_SD"

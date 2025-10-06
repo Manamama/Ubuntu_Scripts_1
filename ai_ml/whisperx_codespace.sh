@@ -67,6 +67,7 @@ echo
 
 
 gh auth status -a
+echo
 gh cs list
 
 CSPACE_NAME=$(gh codespace list --json name,repository,state --jq '.[] | select(.repository | contains("/Ubuntu_Scripts_1")) | .name')
@@ -79,7 +80,7 @@ gh codespace view -c "$CSPACE_NAME" | lolcat
 echo 
 
 # ================= Step 5: Upload to Codespace =================
-echo 0n "🔍 Resolving remote home directory... :"
+echo -n "🔍 Resolving remote home directory... :"
 remote_home=$(gh codespace ssh -c "$CSPACE_NAME" "echo \$HOME" 2>/dev/null)
 if [[ -z "$remote_home" ]]; then
     echo "❌ FATAL: Failed to resolve remote home directory" 
@@ -122,7 +123,7 @@ time gh codespace cp  -c "$CSPACE_NAME" "$file" "remote:$remote_path"
 else
     echo -n "📤 Remote file not found, so uploading: "
     echo " '$file' → '$remote_path'"
-    echo time gh codespace cp  -c "$CSPACE_NAME" "$file" "remote:$remote_path" 
+    #echo time gh codespace cp  -c "$CSPACE_NAME" "$file" "remote:$remote_path" 
     
     # `-e` somehow messes it up: 'scp: ambiguous target', so we remove it: 
 time gh codespace cp  -c "$CSPACE_NAME" "$file" "remote:$remote_path" 
@@ -158,6 +159,10 @@ if [[ "$extra_args" == *"--diarize"* ]]; then
 fi
 echo
 
+remote_srt="$remote_home/Downloads/${filename_no_ext}.srt"
+remote_json="$remote_home/Downloads/${filename_no_ext}.json"
+
+    
 # ================= Step 8: Run WhisperX in Codespace =================
 echo "🤖 Running WhisperX in Codespace with defaults..."
 
@@ -191,8 +196,7 @@ echo
 '
 
 # ================= Step 9: Verify remote output files =================
-remote_srt="$remote_home/Downloads/${filename_no_ext}.srt"
-remote_json="$remote_home/Downloads/${filename_no_ext}.json"
+
 
 echo "🔍 Verifying remote output files..."
 if ! check_output=$(gh codespace ssh -c "$CSPACE_NAME" "test -f '$remote_srt' && test -f '$remote_json' " 2>&1); then
@@ -205,13 +209,18 @@ echo "✅ Outputs verified: '$remote_srt' and '$remote_json' (non-empty)"
 echo
 
 # ================= Step 10: Download SRT and JSON back =================
-echo "⬇️ Downloading the results to Termux..."
+echo "⬇️  Downloading the results..."
 for f in "$remote_srt" "$remote_json"; do
-    echo "🔍 Downloading $f..."
-    if ! download_output=$(time gh codespace cp -e -c "$CSPACE_NAME" "remote:$f" "$file_dir/" 2>&1); then
+    echo "🔍 Downloading $f via: "
+    echo " time gh codespace cp -e -c "$CSPACE_NAME" "remote:$f" "$file_dir/"..."
+    #Removing '-e '
+    time gh codespace cp -e -c "$CSPACE_NAME" "remote:$f" "$file_dir/"
+    : '
+    if ! download_output=$(time gh codespace cp -c "$CSPACE_NAME" "remote:$f" "$file_dir/" 2>&1); then
         echo "❌ FATAL: Failed to download $f: $download_output" 
         exit 1
     fi
+    '
     #echo "$download_output" 
     echo "✅ Downloaded $f" 
 
