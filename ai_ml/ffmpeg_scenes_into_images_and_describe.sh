@@ -120,7 +120,7 @@ echo "$((END_TIME - START_TIME))s" | lolcat
 # -------------------------------
 # 1. Generate HTML Scene Browser
 # -------------------------------
-HTML_FILE="$OUTPUT_DIR/index.html"
+HTML_FILE="$OUTPUT_DIR/$BASENAME_ffmpeg_scenes_index.html"
 echo "Generating HTML scene browser at $HTML_FILE..."
 
 # Extract timestamps from showinfo.log
@@ -159,7 +159,7 @@ body { font-family: sans-serif; background: #111; color: #eee; }
 video { max-width: 80%; margin: 1em 0; display: block; }
 table { border-collapse: collapse; width: 100%; }
 td, th { border: 1px solid #444; padding: 0.5em; text-align: left; }
-img { max-width: 250px; cursor: pointer; }
+img { max-width: 450px; cursor: pointer; }
 </style>
 </head>
 <body>
