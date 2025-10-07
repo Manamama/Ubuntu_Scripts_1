@@ -8,7 +8,7 @@ set -euo pipefail
 echo
 echo "========================================="
 echo "📜 WhisperX Transcription Script (Paranoid Android & gh User Edition)"
-echo "Version 3.2.1"
+echo "Version 3.2.2"
 echo 
 echo "🔐 Mission Brief:"
 echo "  1. Verify input audio file exists (no ghosts allowed)."
@@ -115,8 +115,8 @@ if gh codespace ssh -c "$CSPACE_NAME" "test -f '$remote_path'" 2>/dev/null; then
     else
         echo "⚠️  File exists but hashes differ, so re-uploading."
         echo "📤 Uploading '$file' → '$remote_path'..."
-        #Remove: '-e'
-time gh codespace cp  -c "$CSPACE_NAME" "$file" "remote:$remote_path"
+        #Remove: '-e', but only in Ubuntu
+time gh codespace cp -e -c "$CSPACE_NAME" "$file" "remote:$remote_path"
         
         echo "✅ Uploaded: $remote_path"
     fi
@@ -125,8 +125,8 @@ else
     echo " '$file' → '$remote_path'"
     #echo time gh codespace cp  -c "$CSPACE_NAME" "$file" "remote:$remote_path" 
     
-    # `-e` somehow messes it up: 'scp: ambiguous target', so we remove it: 
-time gh codespace cp  -c "$CSPACE_NAME" "$file" "remote:$remote_path" 
+    # `-e` somehow messes it up: 'scp: ambiguous target', but only in Ubuntu, so we need remove it: 
+time gh codespace cp -e -c "$CSPACE_NAME" "$file" "remote:$remote_path" 
     echo "✅ Uploaded: $remote_path"
 fi
 
@@ -213,10 +213,10 @@ echo "⬇️  Downloading the results..."
 for f in "$remote_srt" "$remote_json"; do
     echo "🔍 Downloading $f via: "
     echo " time gh codespace cp -e -c "$CSPACE_NAME" "remote:$f" "$file_dir/"..."
-    #Removing '-e '
+    #You may need removing '-e ' for 'scp' but only in Ubuntu:
     time gh codespace cp -e -c "$CSPACE_NAME" "remote:$f" "$file_dir/"
     : '
-    if ! download_output=$(time gh codespace cp -c "$CSPACE_NAME" "remote:$f" "$file_dir/" 2>&1); then
+    if ! download_output=$(time gh codespace cp -e -c "$CSPACE_NAME" "remote:$f" "$file_dir/" 2>&1); then
         echo "❌ FATAL: Failed to download $f: $download_output" 
         exit 1
     fi
