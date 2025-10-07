@@ -1,5 +1,5 @@
 #First global variables:
-tool_name_and_version = "Emotion Detector for Media Files: using WhisperX for speech recognition and diarization (detection of the speakers), FunASR for emotion detection, Plotly for visualizing results. Current Version: 5.4.1 | Author: ManamaMa"
+tool_name_and_version = "Emotion Detector for Media Files: using WhisperX for speech recognition and diarization (detection of the speakers), FunASR for emotion detection, Plotly for visualizing results. Current Version: 5.4.2 | Author: ManamaMa"
 #Note to self : the extraction for the HTML rendering of the chunks in 'def extract_media_segments' may need fixing: use the SRT files, not the TSV files or check if .bak is same as the new TSV file.
 
 #Select the whisperx_model size here - "medium" runs relatively fast, but crashes Android. "small" does not crash Android, but may be too small. "large" or "large-v3" is best, but the slowest  
@@ -117,7 +117,7 @@ from urllib.parse import quote
 from pymediainfo import MediaInfo
 
 import mimetypes
-
+from whisperx.diarize import DiarizationPipeline
 
 
 
@@ -981,7 +981,7 @@ funasr ++model='iic/emotion2vec_base_finetuned' ++vad_model="fsmn-vad"   ++input
 
         output_file.write("</style>\n<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>\n</head>\n<body>\n")
         
-        #tool_name_and_version = "Emotion Detector v1.0"  # Update this line accordingly
+   
         output_file.write(f"{tool_name_and_version}\n")
         
         #print(f"{tool_name_and_version}")

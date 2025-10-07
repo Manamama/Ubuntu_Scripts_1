@@ -11,6 +11,8 @@ from urllib.parse import quote
 import subprocess
 import sys
 
+
+
 # Args parser
 parser = argparse.ArgumentParser(description="Simplified emotion detection using WhisperX and FunASR")
 parser.add_argument("media_path", type=str, help="Path to the media file or a URL to download")
