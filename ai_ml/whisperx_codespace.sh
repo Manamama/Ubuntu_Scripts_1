@@ -125,7 +125,7 @@ else
     echo " '$file' → '$remote_path'"
     #echo time gh codespace cp  -c "$CSPACE_NAME" "$file" "remote:$remote_path" 
     
-    # `-e` somehow messes it up: 'scp: ambiguous target', but only in Ubuntu, so we need remove '-e' or else upgrade openssh-client (which includes scp) on your Ubuntu system: 
+    # `-e` somehow messes it up: 'scp: ambiguous target', but only in Ubuntu, so we need remove '-e' or else upgrade openssh-client (which includes scp) on your Ubuntu system by git cloning etc. to ver. 10.* 
 time gh codespace cp -e -c "$CSPACE_NAME" "$file" "remote:$remote_path" 
     echo "✅ Uploaded: $remote_path"
 fi
