@@ -39,7 +39,8 @@ required_packages = [
     "funasr",
     "pydub",
     "onnx",
-    "onnxconverter_common"
+    "onnxconverter_common",
+    "nbformat"
 ]
 
 # Function to install packages
@@ -52,7 +53,7 @@ def install_packages(packages):
         except ImportError:
             # If not installed, install the package
             print(f"Installing {package}...")
-            subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "-U", package])
 
 # Install required packages
 install_packages(required_packages)
