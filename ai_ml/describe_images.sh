@@ -47,10 +47,10 @@ process_image() {
 
     # Run llama-mtmd-cli and extract description
     
-    prompt="Context (previous video frame): $story_context. \n\n Now, do describe the current image, which is the next frame of that video, in detail"
-    echo $prompt
-echo
-    #prompt="Describe the image in detail"
+    #prompt="Context (previous video frame): $story_context. \n\n Now, do describe the current image, which is the next frame of that video, in detail"
+    #echo $prompt
+#echo
+    prompt="Describe the image in detail"
 
     local description
 time description=$($command -m "$llm_model_path" --mmproj "$mmproj_model_path" --image "$image_path" -p  "$(printf '%s' "$prompt")" 2>/dev/null  | awk 'BEGIN{RS=""} /image decoded \(batch 1\/1\)/{getline; print; exit}')
