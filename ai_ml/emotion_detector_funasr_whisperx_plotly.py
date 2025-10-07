@@ -393,8 +393,8 @@ def whisperx_diarize(args, language_code):
         print("Error: Could not decode JSON from the alignment result file.")
         return  # Exit if there's an error in decoding    # Initialize diarization model with authentication token
 
-#Old:     diarize_model = whisperx.DiarizationPipeline(use_auth_token=YOUR_HF_TOKEN, device=device)
-diarize_model = whisperx.diarize.DiarizationPipeline(use_auth_token=YOUR_HF_TOKEN, device=device)
+    #Old:     diarize_model = whisperx.DiarizationPipeline(use_auth_token=YOUR_HF_TOKEN, device=device)
+    diarize_model = whisperx.diarize.DiarizationPipeline(use_auth_token=YOUR_HF_TOKEN, device=device)
 
 
     # add min/max number of speakers if known
