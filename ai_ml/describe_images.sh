@@ -11,7 +11,7 @@ model_name="MobileVLM-3B-Q5_K_M.gguf"
 
 mmproj_model_path="$location/MobileVLM-3B-mmproj-f16.gguf"
 
-
+#Better QA, about 190 secs, 3 mins, per scene, HP Pavillion, 4 hours processing of a 5 mins movie, at 0.35 Scene Threshold which results in 77 scenes, so 1 hour per 1 minute
 model_name="llava_multimodal/llava-v1.5-7b-Q4_K_multimodal.gguf"
 
 mmproj_model_path="$location/llava_multimodal/llava-v1.5-7b-mmproj-f16.gguf"
