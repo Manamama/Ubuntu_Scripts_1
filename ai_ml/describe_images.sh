@@ -15,14 +15,14 @@ mmproj_model_path="$location/MobileVLM-3B-mmproj-f16.gguf"
 model_name="llava_multimodal/llava-v1.5-7b-Q4_K_multimodal.gguf"
 
 mmproj_model_path="$location/llava_multimodal/llava-v1.5-7b-mmproj-f16.gguf"
-
+#Can you use llava-v1.5-7b-mmproj-f16.gguf with smaller Llama GGUF variants (e.g., 3B or 5B) without quality loss? No, not reliably. The mmproj is bespoke to LLaVA-v1.5-7B’s architecture—specifically its 7B Llama backbone with a hidden size of 4096 and a projector output dimension matched to that. Smaller Llama GGUF files (e.g., 3B or 5B) have different hidden sizes (typically 3200 or 3584), mismatched vocabulary embeddings, and altered layer norms. Forcing the mmproj onto a 3B GGUF (e.g., Llama-3-3B-Q4_K_M) causes dimension mismatches in llama.cpp’s multimodal pipeline—expect crashes or NaN outputs unless you re-quantize or pad the model, which risks breaking alignment.LLaVA-7B on VQAv2 scores 78% accuracy; a 3B variant drops to ~65%, even with the same mmproj, due to weaker language reasoning
 
 llm_model_path="$location/$model_name"
 
 
 
 # The threads is needed here, otherwise half threads available is used: 
-command="llama-mtmd-cli --chat-template deepseek --temp 0.1 --threads 8"
+command="llama-mtmd-cli --chat-template deepseek --temp 0.1 --threads 8 --prio -1"
 #Think of daemonize it, as server, for batch processing, as it takes 40 seconds to offload and onload to RAM and Swap. 
 story_context="None yet, that is first image in series..." 
 # --- IMAGE PROCESSING FUNCTION ---
