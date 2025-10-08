@@ -33,64 +33,62 @@ BASENAME=$(basename "$VIDEO_PATH" | sed 's/\.[^.]*$//')
 VIDEODIR=$(dirname "$VIDEO_PATH")
 OUTPUT_DIR="$VIDEODIR/${BASENAME}_scenes_${SCENE_THRESHOLD}"
 
-# Create output directory
-mkdir -p "$OUTPUT_DIR"
 
-echo -n "⌚ Source video duration: "
-if duration=$(mediainfo --Inform='Audio;%Duration/String2%' "$VIDEO_PATH" 2>/dev/null); then
-    
-    echo "$duration" | lolcat
+# Check if output directory exists and contains scene images
+if [ -d "$OUTPUT_DIR" ] && [ -n "$(find "$OUTPUT_DIR" -maxdepth 1 -type f -name 'scene_ffmpeg_*.png')" ]; then
+    echo "Output directory '$OUTPUT_DIR' already contains scene images. Skipping scene detection and processing."
+    scene_count=$(find "$OUTPUT_DIR" -maxdepth 1 -type f -name 'scene_ffmpeg_*.png' | wc -l)
+    echo -n "⚠️  We have found 📸 the images, so we are skipping recreating them ..."
+   
 else
-    echo "⚠️ Could not extract duration (proceeding anyway)" 
-fi
-echo 
 
+    # Create output directory
+    mkdir -p "$OUTPUT_DIR"
 
-PROGRESS_LOG="$OUTPUT_DIR/ffmpeg_progress.log"
-
-# Create the progress log file beforehand to prevent errors
-touch "$PROGRESS_LOG"
-
-echo "Starting FFmpeg scene detection... (This may take a while)"
-echo "Progress will be shown below:"
-
-# Run FFmpeg with scene detection, saving PNGs at native resolution
-START_TIME=$(date +%s)
-ffmpeg -nostats -i "$VIDEO_PATH"   -vf "select='gt(scene,$SCENE_THRESHOLD)',showinfo" -fps_mode passthrough -f image2 "$OUTPUT_DIR/scene_ffmpeg_%03d.png"  -progress "$PROGRESS_LOG" 2> "$OUTPUT_DIR/showinfo.log" &
-
-FFMPEG_PID=$!
-
-# Monitor progress
-while kill -0 $FFMPEG_PID 2>/dev/null; do
-    if [ -s "$PROGRESS_LOG" ]; then
-        tail -n 12 "$PROGRESS_LOG" | grep -E 'frame=|speed=' | tr '\n' ' ' | tr -s ' ' | sed 's/speed= /speed=/g' | xargs -I {} echo -e "\r{}"
+    echo -n "⌚ Source video duration: "
+    if duration=$(mediainfo --Inform='Audio;%Duration/String2%' "$VIDEO_PATH" 2>/dev/null); then
+        
+        echo "$duration" | lolcat
+    else
+        echo "⚠️ Could not extract duration (proceeding anyway)" 
     fi
-    sleep 1
-done
+    echo 
 
 
+    PROGRESS_LOG="$OUTPUT_DIR/ffmpeg_progress.log"
+
+    # Create the progress log file beforehand to prevent errors
+    touch "$PROGRESS_LOG"
+
+    echo "Starting FFmpeg scene detection... (This may take a while)"
+    echo "Progress will be shown below:"
+
+    # Run FFmpeg with scene detection, saving PNGs at native resolution
+    START_TIME=$(date +%s)
+    ffmpeg -nostats -i "$VIDEO_PATH"   -vf "select='gt(scene,$SCENE_THRESHOLD)',showinfo" -fps_mode passthrough -f image2 "$OUTPUT_DIR/scene_ffmpeg_%03d.png"  -progress "$PROGRESS_LOG" 2> "$OUTPUT_DIR/showinfo.log" &
+
+    FFMPEG_PID=$!
+
+    # Monitor progress
+    while kill -0 $FFMPEG_PID 2>/dev/null; do
+        if [ -s "$PROGRESS_LOG" ]; then
+            tail -n 12 "$PROGRESS_LOG" | grep -E 'frame=|speed=' | tr '\n' ' ' | tr -s ' ' | sed 's/speed= /speed=/g' | xargs -I {} echo -e "\r{}"
+        fi
+        sleep 1
+    done
+
+fi
 
 # Count the number of generated scene images
 scene_count=$(find "$OUTPUT_DIR" -type f -name 'scene_ffmpeg_*.png' | wc -l)
 
-echo -n  "📸 Number of scene images created: "
+echo -n  "📸 Number of scene images found or created: "
 echo "$scene_count" | lolcat
 
 echo -n "At the output directory: " 
 echo "$OUTPUT_DIR" | lolcat
 
 
-# --- Integration: Describe Generated Scene Images ---
-echo
-echo "--- Starting automatic description for generated scenes ---"
-DESCRIBE_SCRIPT_PATH="$SCRIPT_DIR/describe_images.sh"
-if [ -f "$DESCRIBE_SCRIPT_PATH" ]; then
-    bash "$DESCRIBE_SCRIPT_PATH" "$OUTPUT_DIR"
-    echo "--- Finished automatic description ---"
-else
-    echo "Warning: Description script not found at $DESCRIBE_SCRIPT_PATH"
-fi
-echo 
 
 
 # -------------------------------
@@ -108,19 +106,39 @@ echo "Sped-up video created."
 
 echo
 
+# Open output directory
+echo "Opening output..."
+open "$SPEEDUP_VIDEO"
+# open "$OUTPUT_DIR"
+
+# --- Integration: Describe Generated Scene Images ---
+echo
+echo "--- Starting automatic description for generated scenes ---"
+DESCRIBE_SCRIPT_PATH="$SCRIPT_DIR/describe_images.sh"
+if [ -f "$DESCRIBE_SCRIPT_PATH" ]; then
+    bash "$DESCRIBE_SCRIPT_PATH" "$OUTPUT_DIR"
+    echo "--- Finished automatic description ---"
+else
+    echo "Warning: Description script not found at $DESCRIBE_SCRIPT_PATH"
+fi
+echo 
+
+
 END_TIME=$(date +%s)
 
-echo "FFmpeg processing finished."
+echo "Video processing finished."
 
 # Print processing time
 echo -n "Processing time: "
-echo "$((END_TIME - START_TIME))s" | lolcat
+echo "$((END_TIME - START_TIME)) s" | lolcat
 
 
 # -------------------------------
 # 1. Generate HTML Scene Browser
 # -------------------------------
-HTML_FILE="$OUTPUT_DIR/$BASENAME_ffmpeg_scenes_index.html"
+
+#echo OUTPUT_DIR: $OUTPUT_DIR, BASENAME: $BASENAME
+HTML_FILE="$OUTPUT_DIR/${BASENAME}_ffmpeg_scenes_index.html"
 echo "Generating HTML scene browser at $HTML_FILE..."
 
 # Extract timestamps from showinfo.log
@@ -191,7 +209,7 @@ for i in "${!IMG_LIST[@]}"; do
     description=$(exiftool -s3 -Description "$img")
 
     # Write table row
-    echo "<tr>
+echo "<tr>
 <td><img src=\"$(basename "$img")\" onclick=\"document.getElementById('mainVideo').currentTime=$ts; document.getElementById('mainVideo').play();\"></td>
 <td>$ts: $duration</td>
 <td>$description</td>

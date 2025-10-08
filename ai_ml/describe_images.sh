@@ -5,10 +5,25 @@
 
 # --- CONFIGURATION ---
 location="/media/zezen/HP_P7_Data/Temp/AI_models"
-model_name="MobileVLM-3B-Q5_K_M"
-llm_model_path="$location/MobileVLM-3B-Q5_K_M.gguf"
+
+
+model_name="MobileVLM-3B-Q5_K_M.gguf"
+
 mmproj_model_path="$location/MobileVLM-3B-mmproj-f16.gguf"
-command="llama-mtmd-cli --chat-template deepseek --temp 0.1"
+
+
+model_name="llava_multimodal/llava-v1.5-7b-Q4_K_multimodal.gguf"
+
+mmproj_model_path="$location/llava_multimodal/llava-v1.5-7b-mmproj-f16.gguf"
+
+
+llm_model_path="$location/$model_name"
+
+
+
+# The threads is needed here, otherwise half threads available is used: 
+command="llama-mtmd-cli --chat-template deepseek --temp 0.1 --threads 8"
+#Think of daemonize it, as server, for batch processing, as it takes 40 seconds to offload and onload to RAM and Swap. 
 story_context="None yet, that is first image in series..." 
 # --- IMAGE PROCESSING FUNCTION ---
 # Takes one argument: the path to the image to process.
@@ -51,7 +66,7 @@ process_image() {
     #echo $prompt
 #echo
     prompt="Describe the image in detail"
-
+echo $command -m "$llm_model_path" --mmproj "$mmproj_model_path" --image "$image_path" -p  "$(printf '%s' "$prompt")"
     local description
 time description=$($command -m "$llm_model_path" --mmproj "$mmproj_model_path" --image "$image_path" -p  "$(printf '%s' "$prompt")" 2>/dev/null  | awk 'BEGIN{RS=""} /image decoded \(batch 1\/1\)/{getline; print; exit}')
 
@@ -113,7 +128,7 @@ if [ ! -f "$llm_model_path" ] || [ ! -f "$mmproj_model_path" ]; then
     echo "Error: Global check failed. Model file ($llm_model_path) or mmproj file ($mmproj_model_path) not found."
     exit 1
 fi
-echo "Describe image with a VLM, version 4.2.0"
+echo "Describe image with a VLM, version 4.2.1, better mmproj GGUF"
 #Check if the model is righ: 
 #llama-gguf "$mmproj_model_path"
 
