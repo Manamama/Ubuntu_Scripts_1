@@ -107,8 +107,8 @@ sentence_count=$(awk '''BEGIN {RS="[.!?]"; count=0} {count+=NF} END {print count
     echo -n "Sentences: "
     echo "$sentence_count" | lolcat
 
-    echo -n "Tokens: "
-    echo  $(ttok < "$in_file") | lolcat 
+    #echo -n "Tokens: "
+    #echo  $(ttok < "$in_file") | lolcat 
 
     #echo
 }
