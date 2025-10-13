@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+#See: origin	https://github.com/qiuqiangkong/audioset_tagging_cnn , heavily modified. Uses two .py files that shoud be in the same folder, for imports : pytorch_utils.py and models.py and maybe more, q.v.  
 import os
 import sys
 import numpy as np
@@ -71,7 +72,7 @@ def get_duration_and_fps(video_path):
                 duration = float(audio_stream.get('duration', None))
 
         duration_str = str(datetime.timedelta(seconds=int(duration))) if duration else "?"
-        print(f"Eventogrammer, version 4.9")
+        print(f"Eventogrammer, version 4.9.1")
         print(f"🗃️  Input file duration: \033[1;34m{duration_str}\033[0m")
         if fps:
             print(f"🗃️  Input video FPS (avg): \033[1;34m{fps:.3f}\033[0m")
