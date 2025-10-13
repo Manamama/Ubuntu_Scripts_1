@@ -17,7 +17,6 @@ import subprocess
 import shutil
 import moviepy
 import warnings
-import platform
 print(f"Using moviepy version: {moviepy.__version__}")
 from moviepy import ImageClip, CompositeVideoClip, AudioFileClip, ColorClip
 import json
@@ -112,20 +111,22 @@ def audio_tagging(args):
                   hop_size=hop_size, mel_bins=mel_bins, fmin=fmin, fmax=fmax, 
                   classes_num=classes_num)
     
-    try:
-        checkpoint = torch.load(checkpoint_path, map_location=device)
-        model.load_state_dict(checkpoint['model'])
-    except Exception as e:
-        print(f"\033[1;31mError loading model checkpoint: {e}\033[0m")
-        return
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+    model.load_state_dict(checkpoint['model'])
 
     if device.type == 'cuda':
         model.to(device)
         print(f'GPU number: {torch.cuda.device_count()}')
         model = torch.nn.DataParallel(model)
+        if hasattr(torch, 'compile'):
+            model = torch.compile(model)
+    else:
+        print('Using CPU.')
+        if hasattr(torch, 'compile'):
+            model = torch.compile(model)
 
+    # Load audio using torchaudio
     waveform, sr = torchaudio.load(audio_path)
-    print(f"Loaded waveform shape: {waveform.shape}, sample rate: {sr}")
     if sr != sample_rate:
         waveform = torchaudio.transforms.Resample(orig_freq=sr, new_freq=sample_rate)(waveform)
     waveform = waveform.mean(dim=0, keepdim=True)  # Convert to mono
@@ -134,11 +135,7 @@ def audio_tagging(args):
 
     with torch.no_grad():
         model.eval()
-        try:
-            batch_output_dict = model(waveform, None)
-        except Exception as e:
-            print(f"\033[1;31mError during model inference: {e}\033[0m")
-            return
+        batch_output_dict = model(waveform, None)
 
     clipwise_output = batch_output_dict['clipwise_output'].data.cpu().numpy()[0]
     sorted_indexes = np.argsort(clipwise_output)[::-1]
@@ -190,20 +187,19 @@ def sound_event_detection(args):
                   hop_size=hop_size, mel_bins=mel_bins, fmin=fmin, fmax=fmax, 
                   classes_num=classes_num)
     
-    try:
-        checkpoint = torch.load(checkpoint_path, map_location=device)
-        model.load_state_dict(checkpoint['model'])
-    except Exception as e:
-        print(f"\033[1;31mError loading model checkpoint: {e}\033[0m")
-        return
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+    model.load_state_dict(checkpoint['model'])
 
     if device.type == 'cuda':
         model.to(device)
         print(f'GPU number: {torch.cuda.device_count()}')
-
+        model = torch.nn.DataParallel(model)
+        if hasattr(torch, 'compile'):
+            model = torch.compile(model)
     else:
         print('Using CPU.')
-
+        if hasattr(torch, 'compile'):
+            model = torch.compile(model)
 
     duration, video_fps, video_width, video_height = get_duration_and_fps(audio_path)
     if duration is None:
@@ -254,7 +250,7 @@ def sound_event_detection(args):
     waveform = waveform.squeeze(0).numpy()  # Convert to numpy for STFT
     print(f"Processed waveform shape: {waveform.shape}")
 
-    chunk_duration = 600  # 10 minutes
+    chunk_duration = 600 # 10 mins
     chunk_samples = int(chunk_duration * sample_rate)
     framewise_outputs = []
     
@@ -418,7 +414,6 @@ def sound_event_detection(args):
         )
     print(f"🎹 Saved the video with the eventogram with a marker to: \033[1;34m{output_video_path}\033[1;0m")
     print(f"")
-
     if is_video:
         print("🎬  The ⇛ source media does contain a video stream, so overlaying the source media with the eventogram…")
         root, ext = os.path.splitext(output_video_path)
@@ -473,16 +468,13 @@ def sound_event_detection(args):
             return
         
         if temp_video_path and os.path.exists(temp_video_path):
-            try:
-                os.remove(temp_video_path)
-                print(f"Deleted temporary CFR video: \033[1;34m{temp_video_path}\033[1;0m")
-            except Exception as e:
-                print(f"\033[1;33mWarning: Failed to delete temporary CFR video {temp_video_path}: {e}\033[0m")
+            os.remove(temp_video_path)
+            print(f"Deleted temporary CFR video: \033[1;34m{temp_video_path}\033[1;0m")
     else:
         print("🎧 Source is audio-only — the eventogram video is the final output.")
 
 if __name__ == '__main__':
-    print(f"Eventogrammer, version 4.9.9, see the original here: https://github.com/qiuqiangkong/audioset_tagging_cnn")
+    print(f"Eventogrammer, version 4.9.8, see the original here: https://github.com/qiuqiangkong/audioset_tagging_cnn")
     print(f"")
 
     parser = argparse.ArgumentParser(description='Audio tagging and Sound event detection.')
