@@ -256,7 +256,7 @@ def sound_event_detection(args):
     waveform = waveform.squeeze(0).numpy()  # Convert to numpy for STFT
     print(f"Processed waveform shape: {waveform.shape}")
 
-    chunk_duration = 600  # 10 minutes
+    chunk_duration = 180  # 3 minutes
     chunk_samples = int(chunk_duration * sample_rate)
     framewise_outputs = []
     
