@@ -39,7 +39,9 @@ def is_video_file(audio_path):
             capture_output=True, text=True, check=True
         )
         streams = json.loads(result.stdout).get('streams', [])
-        return any(stream['codec_type'] == 'video' for stream in streams)
+        #The new line checks if a stream is codec_type='video' and ensures its codec_name is not 'mjpeg' (JPEG) or 'png' (common for cover art in audio files). This excludes static image streams
+        
+        return any(stream['codec_type'] == 'video' and stream.get('codec_name') not in ['mjpeg', 'png'] for stream in streams)
     except subprocess.CalledProcessError:
         return False
     except Exception:
