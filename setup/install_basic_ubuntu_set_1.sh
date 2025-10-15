@@ -302,7 +302,8 @@ install_ai_tools() {
 
 # CPU only: 
 	python -m pip install --user -U whisperx pydub numpy torch torchvision torchaudio tensorflow-cpu jax jaxlib protobuf --extra-index-url https://download.pytorch.org/whl/cpu
- python -m pip install --user openai-whisper -U 
+# python -m pip install --user openai-whisper -U 
+ pip install "huggingface_hub[cli]" 
  pip install -U whisperx  
  pip install -U ipython
   pip install -U docling
@@ -706,7 +707,10 @@ replit_adapt() {
 
 	# 2️⃣ AI/ML tools (user-space)
 	python -m ensurepip
-	python -m pip install --user -U whisperx numpy torch torchvision torchaudio pip install "huggingface_hub[cli]" tensorflow-cpu jax jaxlib protobuf --extra-index-url https://download.pytorch.org/whl/cpu
+	pip install tensorflow-cpu jax jaxlib protobuf --extra-index-url https://download.pytorch.org/whl/cpu
+
+	python -m pip install --user -U whisperx numpy torch torchvision torchaudio 
+	pip install "huggingface_hub[cli]" 
 
 	# 3️⃣ Node.js (skip NVM, assume latest Node already present)
 	echo "ℹ️ Using Node.js provided by Replit: $(node -v), npm: $(npm -v)"
@@ -756,7 +760,7 @@ display_system_info() {
 
 echo
 echo "📌 Starting Ubuntu setup..."
-echo "Version 2.8.7"
+echo "Version 2.8.8"
 
 # Check for marker file to prevent re-execution
 
