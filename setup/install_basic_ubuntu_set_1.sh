@@ -710,7 +710,28 @@ replit_adapt() {
 wget https://ffmpeg.org/releases/ffmpeg-7.1.1.tar.xz
 tar xvf ffmpeg-7.1.1.tar.xz
 cd ffmpeg-7.1.1
-bash ./configure
+#bash ./configure
+./configure \
+  --prefix=/usr/local \
+  --bindir=/usr/local/bin \
+  --enable-shared \
+  --enable-gpl \
+  --enable-nonfree \
+  --enable-libass \
+  --enable-libfdk-aac \
+  --enable-libfreetype \
+  --enable-libmp3lame \
+  --enable-libopus \
+  --enable-libvorbis \
+  --enable-libvpx \
+  --enable-libx264 \
+  --enable-libx265 \
+  --enable-libwebp \
+  --enable-gnutls \
+  --enable-x86asm \
+  --extra-cflags="-I/usr/local/include" \
+  --extra-ldflags="-L/usr/local/lib" \
+  --extra-libs="-lpthread -lm"
 sudo make install
 ' 
 
