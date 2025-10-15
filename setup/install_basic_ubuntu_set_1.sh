@@ -710,6 +710,8 @@ replit_adapt() {
 wget https://ffmpeg.org/releases/ffmpeg-7.1.1.tar.xz
 tar xvf ffmpeg-7.1.1.tar.xz
 cd ffmpeg-7.1.1
+bash ./configure
+sudo make install
 ' 
 
 	# 2️⃣ AI/ML tools (user-space)
