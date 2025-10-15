@@ -377,7 +377,7 @@ install_system_tools() {
 
 	# Core dev tools
 	sudo apt-get install -y pciutils build-essential cmake curl  adb fastboot neofetch geoip-bin ranger mc baobab firefox python3-pip ncdu mediainfo xdg-utils xvfb ffmpeg
-sudo apt install -y libcurl4-openssl-dev meson libtre-dev libomp-dev libssl-dev	 
+sudo apt install -y libcurl4-openssl-dev meson libtre-dev libomp-dev libssl-dev	 nasm
 sudo apt install -y bison flex 
  sudo apt-get install -y npm
 	sudo npm install -g neofetch
@@ -704,6 +704,13 @@ replit_adapt() {
 
 	# 1️⃣ Core utilities (user-space install)
 	pip install --user ffmpeg aria2 youtube-dl
+	#You may however need to do this on older systems:
+	: '
+	cd ~/Downloads
+wget https://ffmpeg.org/releases/ffmpeg-7.1.1.tar.xz
+tar xvf ffmpeg-7.1.1.tar.xz
+cd ffmpeg-7.1.1
+' 
 
 	# 2️⃣ AI/ML tools (user-space)
 	python -m ensurepip
