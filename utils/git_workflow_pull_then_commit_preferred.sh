@@ -6,8 +6,8 @@
 # It maintains a complete, auditable history with merge commits.
 # Untracked files are generally safe as Git operations primarily affect tracked files.
 
-# Assume <branch> is set, e.g., main or current branch name
-BRANCH="main"
+echo The git sync script does not assume <branch> is set, e.g., main or current branch name, as if wrong branches, then the script fails
+#BRANCH="main"
 
 
 git status
