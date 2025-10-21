@@ -380,7 +380,7 @@ if [[ -f "$input_path" ]]; then
 
 
 # Ensure the models are present before running the main logic
-ensure_models_are_present
+#ensure_models_are_present
 
 
 
