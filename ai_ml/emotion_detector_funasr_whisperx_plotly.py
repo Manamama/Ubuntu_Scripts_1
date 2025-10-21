@@ -1,5 +1,5 @@
 #First global variables:
-tool_name_and_version = "Emotion Detector for Media Files: using WhisperX for speech recognition and diarization (detection of the speakers), FunASR for emotion detection, Plotly for visualizing results. Current Version: 5.4.2 | Author: ManamaMa"
+tool_name_and_version = "Emotion Detector for Media Files: using WhisperX for speech recognition and diarization (detection of the speakers), FunASR for emotion detection, Plotly for visualizing results. Current Version: 5.4.3 | Author: ManamaMa"
 #Note to self : the extraction for the HTML rendering of the chunks in 'def extract_media_segments' may need fixing: use the SRT files, not the TSV files or check if .bak is same as the new TSV file.
 
 #Select the whisperx_model size here - "medium" runs relatively fast, but crashes Android. "small" does not crash Android, but may be too small. "large" or "large-v3" is best, but the slowest  
@@ -951,6 +951,9 @@ funasr ++model='iic/emotion2vec_base_finetuned' ++vad_model="fsmn-vad"   ++input
     # Or offline - load the model using the universal cache directory in one line
 
     model = AutoModel(model=str(Path.home() / ".cache" / "modelscope" / "hub" / "iic" / "emotion2vec_base_finetuned"), device=device, disable_update=True)
+
+    #Download it, if needed:
+    model = AutoModel(model=str(Path.home() / ".cache" / "modelscope" / "hub" / "iic" / "emotion2vec_plus_large"), device=device, disable_update=False)
 
         
     # Load the model and generate results
