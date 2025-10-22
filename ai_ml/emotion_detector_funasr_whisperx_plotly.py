@@ -38,10 +38,12 @@ required_packages = [
     "plotly",
     "funasr",
     "pydub",
-    "onnx",
-    "onnxconverter_common",
     "nbformat"
 ]
+
+
+#These seem not needed:   "onnx", "onnxconverter_common",
+
 
 # Function to install packages
 def install_packages(packages):
@@ -55,8 +57,7 @@ def install_packages(packages):
             print(f"Installing {package}...")
             subprocess.check_call([sys.executable, "-m", "pip", "install", "-U", package])
 
-# Install required packages
-install_packages(required_packages)
+
 
 # Additional commands for system packages (requires sudo)
 def install_system_packages():
@@ -64,7 +65,7 @@ def install_system_packages():
     #subprocess.check_call(["sudo", "apt", "install", "-y", "libmediainfo0v5", "mediainfo", "ffmpeg"])
 
 # Call the function to install system packages
-install_system_packages()
+#install_system_packages()
 
 
 
@@ -109,16 +110,7 @@ import subprocess
 
 import argparse
 
-from dataclasses import dataclass
-import csv
-import shutil
-from pathlib import Path
 
-from urllib.parse import quote
-from pymediainfo import MediaInfo
-
-import mimetypes
-from whisperx.diarize import DiarizationPipeline
 
 
 
@@ -152,7 +144,21 @@ def rainbow_text(text):
     print()  # New line after the text
 
 
+print("Here we start ...")
+rainbow_text(tool_name_and_version)
+# Install required packages
+install_packages(required_packages)
 
+from dataclasses import dataclass
+import csv
+import shutil
+from pathlib import Path
+
+from urllib.parse import quote
+from pymediainfo import MediaInfo
+
+import mimetypes
+from whisperx.diarize import DiarizationPipeline
 
 
  
@@ -953,7 +959,7 @@ funasr ++model='iic/emotion2vec_base_finetuned' ++vad_model="fsmn-vad"   ++input
     model = AutoModel(model=str(Path.home() / ".cache" / "modelscope" / "hub" / "iic" / "emotion2vec_base_finetuned"), device=device, disable_update=True)
 
     #Download it, if needed:
-    model = AutoModel(model=str(Path.home() / ".cache" / "modelscope" / "hub" / "iic" / "emotion2vec_plus_large"), device=device, disable_update=False)
+    #model = AutoModel(model=str(Path.home() / ".cache" / "modelscope" / "hub" / "iic" / "emotion2vec_plus_large"), device=device, disable_update=False)
 
         
     # Load the model and generate results
@@ -1514,8 +1520,7 @@ def process_stage(pass_name):
 
 if __name__ == "__main__":
 
-    print("Here we start ...")
-    rainbow_text(tool_name_and_version)
+    
 
     #rainbow_text(tool_name_and_version)
     # See also https://github.com/ddlBoJack/emotion2vec
