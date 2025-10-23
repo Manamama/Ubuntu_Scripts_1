@@ -1,5 +1,5 @@
 #First global variables:
-tool_name_and_version = "Emotion Detector for Media Files: using WhisperX for speech recognition and diarization (detection of the speakers), FunASR for emotion detection, Plotly for visualizing results. Current Version: 5.4.3 | Author: ManamaMa"
+tool_name_and_version = "Emotion Detector for Media Files: using WhisperX for speech recognition and diarization (detection of the speakers), FunASR for emotion detection, Plotly for visualizing results. Current Version: 5.4.6 | Author: ManamaMa"
 #Note to self : the extraction for the HTML rendering of the chunks in 'def extract_media_segments' may need fixing: use the SRT files, not the TSV files or check if .bak is same as the new TSV file.
 
 #Select the whisperx_model size here - "medium" runs relatively fast, but crashes Android. "small" does not crash Android, but may be too small. "large" or "large-v3" is best, but the slowest  
@@ -31,7 +31,6 @@ required_packages = [
     "playsound==1.2.2",
     "numpy",
     "whisperx",
-    "pyannote.audio",
     "moviepy",
     "srt",
     "pymediainfo",
@@ -43,7 +42,7 @@ required_packages = [
 
 
 #These seem not needed:   "onnx", "onnxconverter_common",
-
+#You may need to force reinstall whisperx if some problems: pip install -U whisperx --force-reinstall
 
 # Function to install packages
 def install_packages(packages):
@@ -89,7 +88,7 @@ sudo apt install libmediainfo0v5 mediainfo ffmpeg
 pip install -U moviepy
 
 #Also these: 
-pip install srt pymediainfo plotly funasr  playsound==1.2.2  pydub onnx onnxconverter_common
+pip install srt pymediainfo plotly funasr  playsound==1.2.2  pydub  
 
 # The translate-shell package (optional), from : https://www.soimort.org/translate-shell/  , via wget https://www.soimort.org/translate-shell/trans and move it to a folder in your $PATH. Use this to update: 
 # wget https://www.soimort.org/translate-shell/trans -O trans && chmod +x trans && sudo mv trans $(which trans)   
