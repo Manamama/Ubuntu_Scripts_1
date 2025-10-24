@@ -315,9 +315,10 @@ echo
     echo "You can start it via: 'ssh codespace@localhost -p 3222' but here we are starting it via 'gh codespace ssh -c "$CSPACE_NAME"', not relying on the forwarded ports, just in case."
     echo "FYI: by default, Codespaces automatically stops after ~30 minutes of inactivity and gets deleted after 30 days of not logging in again."
     
-    echo "👉  Starting an SSH session to Codespace $CSPACE_NAME... :"
+    echo "👉  Starting an SSH session to Codespace $CSPACE_NAME with X11 forwarding '-XY'... :"
     echo 
-    gh codespace ssh -c "$CSPACE_NAME"
+    gh codespace ssh -c "$CSPACE_NAME" -- -XY
+    # Once you’re in, $DISPLAY becomes something like localhost:10.0, which tunnels GUI rendering over the SSH connection and uses your local X server as the “monitor.” So Chrome or any GUI app inside the Codespace will draw directly on your machine’s desktop. The GitHub Codespaces port redirection layer handles the networking for you automatically.
     
     #This errors unduly if control C etc: 
 : '

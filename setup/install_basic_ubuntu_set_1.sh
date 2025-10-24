@@ -514,6 +514,7 @@ sudo apt-get install -y google-chrome-stable
 
 echo "Google Chrome installation completed."
 echo "If Google Chrome crashes, try: ' google-chrome   --disable-gpu  --disable-software-rasterizer  --disable-features=CanvasOopRasterization   --disable-features=UseSkiaRenderer   --js-flags="--no-opt" '  or  'dbus-launch --exit-with-session google-chrome https://www.example.com' or redirect port to local machine". Or try 'firefox-esr' instead. 
+echo "Or: gh codespace ssh -- -XY" 
 
 
 
