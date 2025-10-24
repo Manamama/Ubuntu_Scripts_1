@@ -303,20 +303,17 @@ install_ai_tools() {
 # CPU only: 
 	python -m pip install --user -U whisperx pydub numpy torch torchvision torchaudio tensorflow-cpu jax jaxlib protobuf --extra-index-url https://download.pytorch.org/whl/cpu
 # python -m pip install --user openai-whisper -U 
- pip install "huggingface_hub[cli]" 
- pip install -U whisperx  
- pip install -U ipython
-  pip install -U docling
+ pip install -U --user "huggingface_hub[cli]"  docling ipython
 
  echo "Installing funasr and related (better be from git clone) ..." 
  #cd ~/Downloads/GitHub
  #git clone https://github.com/modelscope/FunASR
  #pip install -U  --user FunASR/ 
 # Or: 
- pip install git+https://github.com/modelscope/FunASR.git
+ pip install --user git+https://github.com/modelscope/FunASR.git
  #Not: 
  #pip install -U funasr
- pip install -U pydub plotly pysound moviepy
+ pip install --user -U pydub plotly pysound moviepy
  #pip install -U nemo_toolkit lhotse jiwer webdataset datasets ipython
  #echo "If it fails, that is 'funasr' does not run, do force it:"
  #echo "pip install -U  --user FunASR/ --force-reinstall"
@@ -422,7 +419,7 @@ sudo apt-get install libcudnn8 libcudnn8-dev
 	install_deb_local gotop_3.0.0_linux_amd64.deb
 
 	# youtube-dl
-	python -m pip install -U yt-dlp youtube-dl
+	pip install --user -U yt-dlp youtube-dl
 
 	# PeakPerf setup
 	mkdir -p ~/Downloads/GitHub
@@ -737,7 +734,7 @@ sudo make install
 
 	# 2️⃣ AI/ML tools (user-space)
 	python -m ensurepip
-	pip install tensorflow-cpu jax jaxlib protobuf --extra-index-url https://download.pytorch.org/whl/cpu
+	pip install tensorflow-cpu jax jaxlib protobuf --user --extra-index-url https://download.pytorch.org/whl/cpu
 
 	python -m pip install --user -U whisperx numpy torch torchvision torchaudio 
 	pip install "huggingface_hub[cli]" 
@@ -790,7 +787,7 @@ display_system_info() {
 
 echo
 echo "📌 Starting Ubuntu setup..."
-echo "Version 2.8.8"
+echo "Version 2.8.9"
 
 # Check for marker file to prevent re-execution
 
