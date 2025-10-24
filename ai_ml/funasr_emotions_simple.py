@@ -14,13 +14,13 @@ import sys
 
 
 # Args parser
-parser = argparse.ArgumentParser(description="Simplified emotion detection using WhisperX and FunASR")
+parser = argparse.ArgumentParser(description="Simplified emotion detection, using WhisperX and FunASR")
 parser.add_argument("media_path", type=str, help="Path to the media file or a URL to download")
 parser.add_argument("--language", type=str, default="", help="Language code (default: autodetect)")
 args = parser.parse_args()
 #Simplified version of: emotion_detector_funasr_whisperx_plotly.py, prepared for GitHub Codespace
-print(f"Emotions detector via Whisperx (voice activity detection, chunking, transcription) and FunASR, version 6.2.2")
-print("Still the best pipeline in 2025, see https://grok.com/c/734642ab-c01a-4661-8780-dfe09f041d46 or ./Archive folder why so")
+print(f"Emotions detector via Whisperx (voice activity detection, chunking, transcription) and FunASR, version 6.2.3")
+print("Still the best pipeline in 2025, see https://grok.com/c/734642ab-c01a-4661-8780-dfe09f041d46 or ./Archive folder why so. It uses: .cache/modelscope/hub/models/iic/emotion2vec_plus_large model")
 
 
 # Setup paths and handle URL downloading
