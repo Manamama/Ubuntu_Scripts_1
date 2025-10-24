@@ -417,6 +417,8 @@ sudo apt-get install libcudnn8 libcudnn8-dev
 	#for good measure:
 	sudo DEBIAN_FRONTEND=noninteractive dpkg -i gotop_3.0.0_linux_amd64.deb
 	install_deb_local gotop_3.0.0_linux_amd64.deb
+	#Let us remove any crap just in case: 
+	sudo rm -rf /usr/lib/python3.12/EXTERNALLY-MANAGED 
 
 	# youtube-dl
 	pip install --user -U yt-dlp youtube-dl
