@@ -39,7 +39,8 @@ echo " to speed up."
 
 
 whisperx_me() {
-echo "version 2.0.5"
+echo "version 2.0.6"
+echo "You may need to upgrade or force reinstall whisperx first: pip install -U whisperx --extra-index-url https://download.pytorch.org/whl/cpu "
     local file="$1"
     shift
     echo "Processing: \"$file\" $* ..."
