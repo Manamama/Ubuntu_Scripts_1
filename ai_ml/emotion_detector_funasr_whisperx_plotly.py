@@ -1,5 +1,5 @@
 #First global variables:
-tool_name_and_version = "Emotion Detector for Media Files: using WhisperX for speech recognition and diarization (detection of the speakers), FunASR for emotion detection, Plotly for visualizing results. Current Version: 5.4.6 | Author: ManamaMa"
+tool_name_and_version = "Emotion Detector for Media Files. Current Version: 5.4.7 | Author: ManamaMa"
 #Note to self : the extraction for the HTML rendering of the chunks in 'def extract_media_segments' may need fixing: use the SRT files, not the TSV files or check if .bak is same as the new TSV file.
 
 #Select the whisperx_model size here - "medium" runs relatively fast, but crashes Android. "small" does not crash Android, but may be too small. "large" or "large-v3" is best, but the slowest  
@@ -9,6 +9,7 @@ device = "cpu"
 batch_size = 2  # Adjust based on available resources
 compute_type = "float32"  # Adjust based on available resources
 disable_update=False # Disable update of the funasr models. But then they must be downloaded at least once, so set to : False at start. 
+funasr_model_name="iic/emotion2vec_plus_large"
 
 #Divisor for the share of the CPU cores to use, e.g. "2" meanas that 4 of the 8 CPU cores shall be available 
 num_cores_divisor=2
@@ -145,6 +146,7 @@ def rainbow_text(text):
 
 print("Here we start ...")
 rainbow_text(tool_name_and_version)
+print("We shall be using WhisperX for speech recognition and diarization (detection of the speakers), FunASR for emotion detection, Plotly for visualizing the results.")
 # Install required packages
 install_packages(required_packages)
 
@@ -838,7 +840,7 @@ def read_srt_file(srt_path_local):
         
         
 
-def display_result_temp_html(stage_suffix, language_code):
+def display_result_temp_html(stage_suffix, language_code, funasr_model_name):
 
 
     print()
@@ -913,7 +915,7 @@ from modelscope.utils.constant import Tasks
 
 inference_pipeline = pipeline(
     task=Tasks.emotion_recognition,
-    model="iic/emotion2vec_base_finetuned", # Alternative: iic/emotion2vec_plus_seed, iic/emotion2vec_plus_base, iic/emotion2vec_plus_large and iic/emotion2vec_base_finetuned
+    model="iic/emotion2vec_plus_large", # Alternatives: iic/emotion2vec_plus_seed, iic/emotion2vec_plus_base, iic/emotion2vec_plus_large and iic/emotion2vec_base_finetuned
     model_revision="master")
 
 rec_result = inference_pipeline('https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav', output_dir="./outputs", granularity="utterance", extract_embedding=False)
@@ -929,7 +931,7 @@ print(rec_result)
     
 from funasr import AutoModel
 
-model = AutoModel(model="iic/emotion2vec_base_finetuned", disable_update=disable_update) # Alternative: iic/emotion2vec_plus_seed, iic/emotion2vec_plus_base, iic/emotion2vec_plus_large and iic/emotion2vec_base_finetuned
+model = AutoModel(model=funasr_model_name, disable_update=disable_update) # Alternative: iic/emotion2vec_plus_seed, iic/emotion2vec_plus_base, iic/emotion2vec_plus_large and iic/emotion2vec_base_finetuned
 
 wav_file = f"{model.model_path}/example/test.wav"
 rec_result = model.generate(wav_file, output_dir="./outputs", granularity="utterance", extract_embedding=False)
@@ -991,10 +993,13 @@ funasr ++model='iic/emotion2vec_base_finetuned' ++vad_model="fsmn-vad"   ++input
         output_file.write("</style>\n<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>\n</head>\n<body>\n")
         
    
-        output_file.write(f"{tool_name_and_version}\n")
+        
         
         #print(f"{tool_name_and_version}")
-        output_file.write(f'<h1>Emotion Scores Visualization, for Stage: {stage_suffix}, of the file: <a href="../{media_path.name}"> {media_path.name} </a> </h1>\n')
+        output_file.write(f'<h1>Emotion Scores Visualization, Stage: {stage_suffix}</h1>\n')
+        output_file.write(f"{tool_name_and_version}</p>\n")
+        output_file.write(f'Statistics: Emotion model used: {funasr_model_name}, file being analyzed: <a href="../{media_path.name}"> {media_path.name} </a></p>\n')
+
         output_file.write(f"(An interactive Plotly graph is about to appear below, which takes time, as over 3 MB may need to be downloaded from  <a href='https://cdn.plot.ly/plotly-latest.min.js'>cdn.plot.ly</a>, so do wait... \n")
         output_file.write(f"Tip: use the <strong><a href='https://gofullpage.com/'>GoFullPage</strong></a> extension to capture this page with the video previews as images, which thumbnails shall be missed by the standard printing to PDF or saving this page).\n")
 
@@ -1463,7 +1468,7 @@ def process_stage(pass_name):
         if pass_name == "transcription":
             language_code = whisperx_transcribe(args)  # Call transcription function
             extract_media_segments(pass_name) # Do the media chunking for that stage
-            display_result_temp_html(pass_name, language_code)  # Display transcription results - optional, just to keep the users happy that they see smth interim
+            display_result_temp_html(pass_name, language_code, funasr_model_name)  # Display transcription results - optional, just to keep the users happy that they see smth interim
 
         elif pass_name == "alignment":
             
@@ -1484,9 +1489,9 @@ def process_stage(pass_name):
 
             whisperx_align(args, language_code)
             #extract_media_segments(pass_name) # Do the media chunking for that stage
-            #display_result_temp_html(pass_name, language_code)  # Display transcription results - optional, just to keep the users happy that they see smth interim
+            #display_result_temp_html(pass_name, language_code, funasr_model_name)  # Display transcription results - optional, just to keep the users happy that they see smth interim
             if args.no_diarize:
-                display_result_temp_html(pass_name, language_code)  # Display transcription results
+                display_result_temp_html(pass_name, language_code, funasr_model_name)  # Display transcription results
                 
         elif pass_name == "diarization":
             #If an argument is `--no_diarize`, do skip it - add it some time ... 
@@ -1507,7 +1512,7 @@ def process_stage(pass_name):
             whisperx_diarize(args, language_code) # Uses alignment file, hard coded
             extract_media_segments(pass_name) # Do the media chunking for that stage
  
-            display_result_temp_html(pass_name, language_code)  # Display diarization results
+            display_result_temp_html(pass_name, language_code, funasr_model_name)  # Display diarization results
             
         update_tracker(tracker_file, "whisperx_" + pass_name)
 
@@ -1839,7 +1844,7 @@ print(media_path.resolve())
     '''    
 #   If diarization got broken for some reason mid-stream, so the interim chunked media files are there but no HTML yet, do run these by hand, removing the comments:
     if statuses.get("whisperx_diarization_display") != "completed":
-        display_result_temp_html('diarization', language_code)  # Display diarization results
+        display_result_temp_html('diarization', language_code, funasr_model_name)  # Display diarization results
         update_tracker(tracker_file, "whisperx_diarization_display")
                 # Path to the audio file
     '''
