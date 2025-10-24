@@ -295,7 +295,7 @@ install_ai_tools() {
 	npm install -g rust-just
 
 	echo "🧠 Installing AI/ML tools..."
-	python -m ensurepip
+	#python -m ensurepip
 
  #Huge with CUDA:
  #python -m pip install --user -U whisperx numpy torch torchvision torchaudio tensorflow jax jaxlib protobuf 
