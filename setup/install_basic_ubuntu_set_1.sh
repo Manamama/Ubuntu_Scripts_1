@@ -733,7 +733,7 @@ sudo make install
 ' 
 
 	# 2️⃣ AI/ML tools (user-space)
-	python -m ensurepip
+	#python -m ensurepip
 	pip install tensorflow-cpu jax jaxlib protobuf --user --extra-index-url https://download.pytorch.org/whl/cpu
 
 	python -m pip install --user -U whisperx numpy torch torchvision torchaudio 
